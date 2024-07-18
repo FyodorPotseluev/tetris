@@ -1,0 +1,24 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+consts	rotation_demo.c	/^enum consts {$/;"	g	file:
+copy_callback	rotation_demo.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+delay	rotation_demo.c	/^    delay           = 2,$/;"	e	enum:consts	file:
+hide_callback	rotation_demo.c	/^void hide_callback(void *piece, int len, int x, int y)$/;"	f
+init_callback	rotation_demo.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+main	rotation_demo.c	/^int main()$/;"	f
+matrix_	rotation_demo.c	/^void matrix_($/;"	f
+matrix_callback	rotation_demo.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
+num_of_turnes	rotation_demo.c	/^    num_of_turnes   = 4,$/;"	e	enum:consts	file:
+piece_	rotation_demo.c	/^void piece_(piece_callback callback, void *piece, int len)$/;"	f
+piece_callback	rotation_demo.c	/^typedef void (*piece_callback)(void*, int, int, int);$/;"	t	file:
+print_callback	rotation_demo.c	/^void print_callback(void *piece, int len, int x, int y)$/;"	f
+print_frame	rotation_demo.c	/^void print_frame()$/;"	f
+reverse_rows_callback	rotation_demo.c	/^void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+reversion	rotation_demo.c	/^int reversion(int num, int arr_len)$/;"	f
+rotate	rotation_demo.c	/^void rotate(void *piece, int len)$/;"	f
+size	rotation_demo.c	/^    size            = 3$/;"	e	enum:consts	file:
+transpose_callback	rotation_demo.c	/^void transpose_callback(void *dst, void *src, int len, int x, int y)$/;"	f
