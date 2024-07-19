@@ -4,21 +4,45 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+arr_copy	building_demo.c	/^void arr_copy(int (*dst)[piece_len], int (*src)[piece_len])$/;"	f
+consts	building_demo.c	/^enum consts {$/;"	g	file:
 consts	rotation_demo.c	/^enum consts {$/;"	g	file:
 copy_callback	rotation_demo.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+delay	building_demo.c	/^    delay               = 333333,   \/* 1\/3 of a second *\/$/;"	e	enum:consts	file:
 delay	rotation_demo.c	/^    delay           = 2,$/;"	e	enum:consts	file:
+field_absorbes_piece	building_demo.c	/^void field_absorbes_piece(int (*field)[field_width], figure *piece)$/;"	f
+field_height	building_demo.c	/^    field_height        = 20,$/;"	e	enum:consts	file:
+field_width	building_demo.c	/^    field_width         = 10,$/;"	e	enum:consts	file:
+figure	building_demo.c	/^} figure;$/;"	t	typeref:struct:tag_figure	file:
+form	building_demo.c	/^    int form[piece_len][piece_len];$/;"	m	struct:tag_figure	file:
+hide	building_demo.c	/^typedef enum piece_action { hide, print } piece_action;$/;"	e	enum:piece_action	file:
 hide_callback	rotation_demo.c	/^void hide_callback(void *piece, int len, int x, int y)$/;"	f
 init_callback	rotation_demo.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+initial_piece_shift	building_demo.c	/^    initial_piece_shift = 4$/;"	e	enum:consts	file:
+main	building_demo.c	/^int main()$/;"	f
 main	rotation_demo.c	/^int main()$/;"	f
 matrix_	rotation_demo.c	/^void matrix_($/;"	f
 matrix_callback	rotation_demo.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
 num_of_turnes	rotation_demo.c	/^    num_of_turnes   = 4,$/;"	e	enum:consts	file:
+piece_	building_demo.c	/^void piece_(piece_action action, figure *piece, int init_x, int init_y)$/;"	f
 piece_	rotation_demo.c	/^void piece_(piece_callback callback, void *piece, int len)$/;"	f
+piece_action	building_demo.c	/^typedef enum piece_action { hide, print } piece_action;$/;"	g	file:
+piece_action	building_demo.c	/^typedef enum piece_action { hide, print } piece_action;$/;"	t	typeref:enum:piece_action	file:
 piece_callback	rotation_demo.c	/^typedef void (*piece_callback)(void*, int, int, int);$/;"	t	file:
+piece_falls	building_demo.c	/^void piece_falls($/;"	f
+piece_has_fallen	building_demo.c	/^bool piece_has_fallen(int (*field)[field_width], figure *piece)$/;"	f
+piece_len	building_demo.c	/^    piece_len           = 4,$/;"	e	enum:consts	file:
+piece_spawn	building_demo.c	/^void piece_spawn(figure *piece, int init_x, int init_y)$/;"	f
+print	building_demo.c	/^typedef enum piece_action { hide, print } piece_action;$/;"	e	enum:piece_action	file:
 print_callback	rotation_demo.c	/^void print_callback(void *piece, int len, int x, int y)$/;"	f
+print_field	building_demo.c	/^void print_field(int (*field)[field_width], int init_x, int init_y)$/;"	f
 print_frame	rotation_demo.c	/^void print_frame()$/;"	f
 reverse_rows_callback	rotation_demo.c	/^void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 reversion	rotation_demo.c	/^int reversion(int num, int arr_len)$/;"	f
 rotate	rotation_demo.c	/^void rotate(void *piece, int len)$/;"	f
 size	rotation_demo.c	/^    size            = 3$/;"	e	enum:consts	file:
+tag_figure	building_demo.c	/^typedef struct tag_figure {$/;"	s	file:
 transpose_callback	rotation_demo.c	/^void transpose_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+truncate_piece	building_demo.c	/^void truncate_piece(figure *piece)$/;"	f
+x_shift	building_demo.c	/^    int y_decline, x_shift;$/;"	m	struct:tag_figure	file:
+y_decline	building_demo.c	/^    int y_decline, x_shift;$/;"	m	struct:tag_figure	file:
