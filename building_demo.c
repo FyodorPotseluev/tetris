@@ -127,6 +127,12 @@ void piece_spawn(figure *piece)
     refresh();
 }
 
+void reset_piece_properties(figure *piece)
+{
+    piece->y_decline = 0;
+    piece->x_shift = initial_piece_shift;
+}
+
 void field_absorbes_piece(int (*field)[field_width], figure *piece)
 {
     int x, y;
@@ -303,6 +309,15 @@ void move_(move_direction direction, figure *piece, int (*field)[field_width])
     piece_(print, piece);
 }
 
+void piece_fall_step(figure *piece)
+{
+    piece_(hide, piece);
+    piece->y_decline++;
+    piece_(print, piece);
+    curs_set(0);
+    refresh();
+}
+
 void process_key(int key_pressed, int (*field)[field_width], figure *piece)
 {
     switch (key_pressed) {
@@ -311,6 +326,11 @@ void process_key(int key_pressed, int (*field)[field_width], figure *piece)
             break;
         case KEY_RIGHT:
             move_(right, piece, field);
+            break;
+        /* hard drop */
+        case ' ':
+            while (!piece_has_fallen(field, piece))
+                piece_fall_step(piece);
     }
 }
 
@@ -323,7 +343,7 @@ void process_input(int (*field)[field_width], figure *piece)
         timeout(delay);
         time_start(&tv1, &tz);
         key_pressed = getch();
-        if (key_pressed == ERR)
+        if ((key_pressed == ERR) || (key_pressed == KEY_DOWN))
             break;
         process_key(key_pressed, field, piece);
         /* new delay value calculation */
@@ -341,15 +361,10 @@ void piece_falls(int (*field)[field_width], figure *piece)
         process_input(field, piece);
         if (piece_has_fallen(field, piece)) {
             field_absorbes_piece(field, piece);
-            piece->y_decline = 0;
-            piece->x_shift = initial_piece_shift;
+            reset_piece_properties(piece);
             break;
         }
-        piece_(hide, piece);
-        piece->y_decline++;
-        piece_(print, piece);
-        curs_set(0);
-        refresh();
+        piece_fall_step(piece);
     }
 }
 
