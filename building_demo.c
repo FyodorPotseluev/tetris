@@ -14,11 +14,13 @@ enum consts {
     initial_piece_shift = 4
 };
 
-typedef enum tag_piece_action { hide, print } piece_action;
+typedef enum tag_piece_action {
+    hide, print, hide_ghost, print_ghost
+} piece_action;
 typedef enum tag_move_direction { left = 1, right } move_direction;
 
 typedef struct tag_figure {
-    int form[piece_size][piece_size];
+    bool form[piece_size][piece_size];
     int init_x, init_y;
     int x_shift, y_decline;
 } figure;
@@ -42,7 +44,7 @@ int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)
     return dtv.tv_sec*1000 + dtv.tv_usec/1000;
 }
 
-void arr_copy(int (*dst)[piece_size], int (*src)[piece_size])
+void arr_copy(bool (*dst)[piece_size], bool (*src)[piece_size])
 {
     int x, y;
     for (y=0; y < piece_size; y++) {
@@ -51,7 +53,7 @@ void arr_copy(int (*dst)[piece_size], int (*src)[piece_size])
     }
 }
 
-void print_field(int (*field)[field_width], int init_x, int init_y)
+void print_field(bool (*field)[field_width], int init_x, int init_y)
 {
     int y, x;
     int curr_y = init_y;
@@ -73,11 +75,20 @@ void take_(piece_action action)
 {
     switch (action) {
         case hide:
+        case hide_ghost:
             addstr("0 ");
             break;
         case print:
             addstr("1 ");
+            break;
+        case print_ghost:
+            addstr(". ");
     }
+}
+
+int ghost_y(figure *piece, int ghost_decline, int y)
+{
+    return piece->init_y + ghost_decline + y;
 }
 
 int curr_y(figure *piece, int y)
@@ -90,13 +101,16 @@ int curr_x(figure *piece, int x)
     return piece->init_x + piece->x_shift*2 + x*2;
 }
 
-void piece_(piece_action action, figure *piece)
+void piece_(piece_action action, figure *piece, int *ghost_decline)
 {
     int x, y;
     for (y=0; y < piece_size; y++) {
         for (x=0; x < piece_size; x++) {
             if (piece->form[y][x] == 1) {
-                move(curr_y(piece, y), curr_x(piece, x));
+                if (action == hide_ghost)
+                    move(ghost_y(piece, *ghost_decline, y), curr_x(piece, x));
+                else
+                    move(curr_y(piece, y), curr_x(piece, x));
                 take_(action);
             }
         }
@@ -119,39 +133,13 @@ void truncate_piece(figure *piece)
     }
 }
 
-void piece_spawn(figure *piece)
-{
-    truncate_piece(piece);
-    piece_(print, piece);
-    curs_set(0);
-    refresh();
-}
-
-void reset_piece_properties(figure *piece)
-{
-    piece->y_decline = 0;
-    piece->x_shift = initial_piece_shift;
-}
-
-void field_absorbes_piece(int (*field)[field_width], figure *piece)
-{
-    int x, y;
-    /* `piece` pixels become `field` pixels */
-    for (y=0; y < piece_size; y++) {
-        for (x=0; x < piece_size; x++) {
-            if (piece->form[y][x] == 1)
-                field[y + piece->y_decline][x + piece->x_shift] = 1;
-        }
-    }
-}
-
 bool field_has_ended(figure *piece, int y)
 {
     return (y + piece->y_decline + 1 == field_height) ? true : false;
 }
 
 bool lower_field_pixel_is_occupied(
-    int (*field)[field_width], figure *piece, int x, int y
+    bool (*field)[field_width], figure *piece, int x, int y
 )
 {
     if (field[y + piece->y_decline + 1][x + piece->x_shift] ==1)
@@ -160,7 +148,7 @@ bool lower_field_pixel_is_occupied(
         return false;
 }
 
-bool piece_has_fallen(int (*field)[field_width], figure *piece)
+bool piece_has_fallen(bool (*field)[field_width], figure *piece)
 {
     int x, y;
     /* fall_checks: looking for every lowest pixel in each column */
@@ -177,6 +165,41 @@ bool piece_has_fallen(int (*field)[field_width], figure *piece)
     return false;
 }
 
+void cast_ghost(bool (*field)[field_width], figure piece, int *ghost_decline)
+{
+    while (!piece_has_fallen(field, &piece))
+        piece.y_decline++;
+    piece_(print_ghost, &piece, NULL);
+    *ghost_decline = piece.y_decline;
+}
+
+void piece_spawn(bool (*field)[field_width], figure *piece, int *ghost_decline)
+{
+    truncate_piece(piece);
+    cast_ghost(field, *piece, ghost_decline);
+    piece_(print, piece, NULL);
+    curs_set(0);
+    refresh();
+}
+
+void reset_piece_properties(figure *piece)
+{
+    piece->y_decline = 0;
+    piece->x_shift = initial_piece_shift;
+}
+
+void field_absorbes_piece(bool (*field)[field_width], figure *piece)
+{
+    int x, y;
+    /* `piece` pixels become `field` pixels */
+    for (y=0; y < piece_size; y++) {
+        for (x=0; x < piece_size; x++) {
+            if (piece->form[y][x] == 1)
+                field[y + piece->y_decline][x + piece->x_shift] = 1;
+        }
+    }
+}
+
 bool out_of_right_boundary(figure *piece)
 {
     return (piece->x_shift > field_width - piece_size) ? true : false;
@@ -187,13 +210,13 @@ bool out_of_left_boundary(figure *piece)
     return (piece->x_shift < 0) ? true : false;
 }
 
-bool cell_occupied_by_(int (*field)[field_width], int x, int y, figure *piece)
+bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)
 {
     return (field[y+piece->y_decline][x+piece->x_shift] == 1) ? true : false;
 }
 
 bool undo_piece_shift_condition(
-    int (*field)[field_width], int x, int y, figure *piece
+    bool (*field)[field_width], int x, int y, figure *piece
 )
 {
     if (field) {
@@ -270,7 +293,7 @@ bool set_init_condition_for_x_cycle(
 }
 
 void prevent_crossing(
-    move_direction direction, int (*field)[field_width], figure *piece
+    move_direction direction, bool (*field)[field_width], figure *piece
 )
 {
     int x, y;
@@ -291,41 +314,49 @@ void prevent_crossing(
     }
 }
 
-void move_(move_direction direction, figure *piece, int (*field)[field_width])
+void move_(
+    move_direction direction, figure *piece,
+    bool (*field)[field_width], int *ghost_decline)
 {
     switch (direction) {
         case left:
-            piece_(hide, piece);
+            piece_(hide_ghost, piece, ghost_decline);
+            piece_(hide, piece, NULL);
             piece->x_shift--;
             break;
         case right:
-            piece_(hide, piece);
+            piece_(hide_ghost, piece, ghost_decline);
+            piece_(hide, piece, NULL);
             piece->x_shift++;
     }
     /* prevention of crossing the field boundary */
     prevent_crossing(0, NULL, piece);
     /* prevention of crossing already occupied side pixel */
     prevent_crossing(direction, field, piece);
-    piece_(print, piece);
+    cast_ghost(field, *piece, ghost_decline);
+    piece_(print, piece, NULL);
 }
 
 void piece_fall_step(figure *piece)
 {
-    piece_(hide, piece);
+    piece_(hide, piece, NULL);
     piece->y_decline++;
-    piece_(print, piece);
+    piece_(print, piece, NULL);
     curs_set(0);
     refresh();
 }
 
-void process_key(int key_pressed, int (*field)[field_width], figure *piece)
+void process_key(
+    int key_pressed, bool (*field)[field_width],
+    figure *piece, int *ghost_decline
+)
 {
     switch (key_pressed) {
         case KEY_LEFT:
-            move_(left, piece, field);
+            move_(left, piece, field, ghost_decline);
             break;
         case KEY_RIGHT:
-            move_(right, piece, field);
+            move_(right, piece, field, ghost_decline);
             break;
         /* hard drop */
         case ' ':
@@ -334,7 +365,9 @@ void process_key(int key_pressed, int (*field)[field_width], figure *piece)
     }
 }
 
-void process_input(int (*field)[field_width], figure *piece)
+void process_input(
+    bool (*field)[field_width], figure *piece, int *ghost_decline
+)
 {
     struct timeval tv1, tv2;
     struct timezone tz;
@@ -345,7 +378,7 @@ void process_input(int (*field)[field_width], figure *piece)
         key_pressed = getch();
         if ((key_pressed == ERR) || (key_pressed == KEY_DOWN))
             break;
-        process_key(key_pressed, field, piece);
+        process_key(key_pressed, field, piece, ghost_decline);
         /* new delay value calculation */
         delay -= time_stop(&tv1, &tv2, &tz);
         if (delay < 0)
@@ -355,10 +388,10 @@ void process_input(int (*field)[field_width], figure *piece)
     }
 }
 
-void piece_falls(int (*field)[field_width], figure *piece)
+void piece_falls(bool (*field)[field_width], figure *piece, int *ghost_decline)
 {
     for (;;) {
-        process_input(field, piece);
+        process_input(field, piece, ghost_decline);
         if (piece_has_fallen(field, piece)) {
             field_absorbes_piece(field, piece);
             reset_piece_properties(piece);
@@ -385,7 +418,7 @@ int main()
     noecho();
     keypad(stdscr, 1);
 
-    int field[field_height][field_width] = {
+    bool field[field_height][field_width] = {
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -408,24 +441,24 @@ int main()
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
     };
     figure piece;
-    int arr[piece_size][piece_size] = {
-        { 0, 1, 0 },
-        { 0, 1, 1 },
-        { 0, 1, 0 },
+    bool arr[piece_size][piece_size] = {
+        { 0, 0, 0, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 0, 0, 0 },
     };
     arr_copy(piece.form, arr);
     piece.y_decline = 0;
     piece.x_shift = initial_piece_shift;
-    int row, col;
+    int ghost_decline, row, col;
 
     getmaxyx(stdscr, row, col);
     piece.init_x = get_init_x(col);
     piece.init_y = get_init_y(row);
     print_field(field, piece.init_x, piece.init_y);
     for (;;) {
-        piece_spawn(&piece);
-        piece_falls(field, &piece);
-        print_field(field, piece.init_x, piece.init_y);
+        piece_spawn(field, &piece, &ghost_decline);
+        piece_falls(field, &piece, &ghost_decline);
     }
 
     endwin();
