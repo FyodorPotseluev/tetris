@@ -1,5 +1,6 @@
 /* building_demo.c */
 
+#include "rotation_demo.h"
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 #include <unistd.h>
 
 enum consts {
-    init_delay          = 333,          /* 1/3 of a second */
+    init_delay          = 666,          /* 1/3 of a second */
     field_height        = 20,
     field_width         = 10,
     piece_size          = 4,
@@ -358,6 +359,16 @@ void process_key(
         case KEY_RIGHT:
             move_(right, piece, field, ghost_decline);
             break;
+        /* rotate */
+        case KEY_UP:
+            piece_(hide_ghost, piece, ghost_decline);
+            piece_(hide, piece, NULL);
+            rotate(piece->form, piece_size);
+            /* prevention of crossing the field boundary */
+            prevent_crossing(0, NULL, piece);
+            cast_ghost(field, *piece, ghost_decline);
+            piece_(print, piece, NULL);
+            break;
         /* hard drop */
         case ' ':
             while (!piece_has_fallen(field, piece))
@@ -443,9 +454,9 @@ int main()
     figure piece;
     bool arr[piece_size][piece_size] = {
         { 0, 0, 0, 0 },
-        { 0, 1, 1, 0 },
-        { 0, 1, 1, 0 },
         { 0, 0, 0, 0 },
+        { 1, 1, 1, 1 },
+        { 0, 0, 0, 0 }
     };
     arr_copy(piece.form, arr);
     piece.y_decline = 0;
