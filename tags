@@ -20,16 +20,15 @@ field_height	building_demo.c	/^    field_height        = 20,$/;"	e	enum:consts	f
 field_width	building_demo.c	/^    field_width         = 10,$/;"	e	enum:consts	file:
 figure	building_demo.c	/^} figure;$/;"	t	typeref:struct:tag_figure	file:
 form	building_demo.c	/^    bool form[piece_size][piece_size];$/;"	m	struct:tag_figure	file:
-get_init_x	building_demo.c	/^int get_init_x(int col)$/;"	f
-get_init_y	building_demo.c	/^int get_init_y(int row)$/;"	f
-ghost_y	building_demo.c	/^int ghost_y(figure *piece, int ghost_decline, int y)$/;"	f
-hide	building_demo.c	/^    hide, print, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-hide_ghost	building_demo.c	/^    hide, print, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+ghost_y	building_demo.c	/^int ghost_y(int ghost_decline, int y)$/;"	f
+handle_rotation	building_demo.c	/^void handle_rotation($/;"	f
+hide_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+hide_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 init_callback	rotation_demo.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 init_delay	building_demo.c	/^    init_delay          = 666,          \/* 1\/3 of a second *\/$/;"	e	enum:consts	file:
-init_x	building_demo.c	/^    int init_x, init_y;$/;"	m	struct:tag_figure	file:
-init_y	building_demo.c	/^    int init_x, init_y;$/;"	m	struct:tag_figure	file:
 initial_piece_shift	building_demo.c	/^    initial_piece_shift = 4$/;"	e	enum:consts	file:
+initialize_init_x	building_demo.c	/^void initialize_init_x(int *init_x, bool *initialized)$/;"	f
+initialize_init_y	building_demo.c	/^void initialize_init_y(int *init_y, bool *initialized)$/;"	f
 left	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction	file:
 lower_field_pixel_is_occupied	building_demo.c	/^bool lower_field_pixel_is_occupied($/;"	f
 main	building_demo.c	/^int main()$/;"	f
@@ -48,10 +47,10 @@ piece_falls	building_demo.c	/^void piece_falls(bool (*field)[field_width], figur
 piece_has_fallen	building_demo.c	/^bool piece_has_fallen(bool (*field)[field_width], figure *piece)$/;"	f
 piece_size	building_demo.c	/^    piece_size          = 4,$/;"	e	enum:consts	file:
 piece_spawn	building_demo.c	/^void piece_spawn(bool (*field)[field_width], figure *piece, int *ghost_decline)$/;"	f
-prevent_crossing	building_demo.c	/^void prevent_crossing($/;"	f
-print	building_demo.c	/^    hide, print, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-print_field	building_demo.c	/^void print_field(bool (*field)[field_width], int init_x, int init_y)$/;"	f
-print_ghost	building_demo.c	/^    hide, print, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+prevent_crossing	building_demo.c	/^bool prevent_crossing($/;"	f
+print_field	building_demo.c	/^void print_field(bool (*field)[field_width])$/;"	f
+print_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+print_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 process_input	building_demo.c	/^void process_input($/;"	f
 process_key	building_demo.c	/^void process_key($/;"	f
 reset_piece_properties	building_demo.c	/^void reset_piece_properties(figure *piece)$/;"	f
