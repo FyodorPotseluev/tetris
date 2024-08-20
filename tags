@@ -5,8 +5,9 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 ROTATION_DEMO_H_INCLUDED	rotation_demo.h	4;"	d
-arr_copy	building_demo.c	/^void arr_copy(bool (*dst)[piece_size], bool (*src)[piece_size])$/;"	f
-cast_ghost	building_demo.c	/^void cast_ghost(bool (*field)[field_width], figure piece, int *ghost_decline)$/;"	f
+big	building_demo.c	/^        bool big[big_piece_size][big_piece_size];$/;"	m	union:tag_figure::tag_form	file:
+big_piece_size	building_demo.c	/^    big_piece_size      = 4,$/;"	e	enum:consts	file:
+cast_ghost	building_demo.c	/^void cast_ghost($/;"	f
 cell_occupied_by_	building_demo.c	/^bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)$/;"	f
 consts	building_demo.c	/^enum consts {$/;"	g	file:
 consts	rotation_demo.c	/^enum consts {$/;"	g	file:
@@ -19,13 +20,20 @@ field_has_ended	building_demo.c	/^bool field_has_ended(figure *piece, int y)$/;"
 field_height	building_demo.c	/^    field_height        = 20,$/;"	e	enum:consts	file:
 field_width	building_demo.c	/^    field_width         = 10,$/;"	e	enum:consts	file:
 figure	building_demo.c	/^} figure;$/;"	t	typeref:struct:tag_figure	file:
-form	building_demo.c	/^    bool form[piece_size][piece_size];$/;"	m	struct:tag_figure	file:
+form	building_demo.c	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form	file:
+ghost_decline	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:
 ghost_y	building_demo.c	/^int ghost_y(int ghost_decline, int y)$/;"	f
-handle_rotation	building_demo.c	/^void handle_rotation($/;"	f
+handle_i_piece	building_demo.c	/^void handle_i_piece(figure *piece)$/;"	f
+handle_rotation	building_demo.c	/^void handle_rotation(bool (*field)[field_width], figure *piece)$/;"	f
 hide_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 hide_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+horizontal_1	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
+horizontal_2	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
+i_form	building_demo.c	/^    bool i_form;$/;"	m	struct:tag_figure	file:
 init_callback	rotation_demo.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-init_delay	building_demo.c	/^    init_delay          = 666,          \/* 1\/3 of a second *\/$/;"	e	enum:consts	file:
+init_delay	building_demo.c	/^    init_delay          = 666,          \/* 2\/3 of a second *\/$/;"	e	enum:consts	file:
+init_field	building_demo.c	/^void init_field(bool (*field)[field_width])$/;"	f
+init_set_of_pieces	building_demo.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
 initial_piece_shift	building_demo.c	/^    initial_piece_shift = 4$/;"	e	enum:consts	file:
 initialize_init_x	building_demo.c	/^void initialize_init_x(int *init_x, bool *initialized)$/;"	f
 initialize_init_y	building_demo.c	/^void initialize_init_y(int *init_y, bool *initialized)$/;"	f
@@ -36,24 +44,27 @@ matrix_	rotation_demo.c	/^void matrix_($/;"	f
 matrix_callback	rotation_demo.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
 move_	building_demo.c	/^void move_($/;"	f
 move_direction	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	t	typeref:enum:tag_move_direction	file:
+next_orientation	building_demo.c	/^void next_orientation(figure *piece)$/;"	f
+num_of_pieces	building_demo.c	/^    num_of_pieces       = 7,$/;"	e	enum:consts	file:
 num_of_turnes	rotation_demo.c	/^    num_of_turnes   = 4,$/;"	e	enum:consts	file:
+orientation	building_demo.c	/^    position orientation;$/;"	m	struct:tag_figure	file:
+orientation_count	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
 out_of_left_boundary	building_demo.c	/^bool out_of_left_boundary(figure *piece)$/;"	f
 out_of_right_boundary	building_demo.c	/^bool out_of_right_boundary(figure *piece)$/;"	f
-piece_	building_demo.c	/^void piece_(piece_action action, figure *piece, int *ghost_decline)$/;"	f
+piece_	building_demo.c	/^void piece_(piece_action action, figure *piece)$/;"	f
 piece_action	building_demo.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
 piece_callback	rotation_demo.c	/^typedef void (*piece_callback)(void*, int, int, int);$/;"	t	file:
 piece_fall_step	building_demo.c	/^void piece_fall_step(figure *piece)$/;"	f
-piece_falls	building_demo.c	/^void piece_falls(bool (*field)[field_width], figure *piece, int *ghost_decline)$/;"	f
+piece_falls	building_demo.c	/^void piece_falls(bool (*field)[field_width], figure *piece)$/;"	f
 piece_has_fallen	building_demo.c	/^bool piece_has_fallen(bool (*field)[field_width], figure *piece)$/;"	f
-piece_size	building_demo.c	/^    piece_size          = 4,$/;"	e	enum:consts	file:
-piece_spawn	building_demo.c	/^void piece_spawn(bool (*field)[field_width], figure *piece, int *ghost_decline)$/;"	f
+piece_spawn	building_demo.c	/^void piece_spawn(bool (*field)[field_width], figure *piece)$/;"	f
+position	building_demo.c	/^} position;$/;"	t	typeref:enum:tag_position	file:
 prevent_crossing	building_demo.c	/^bool prevent_crossing($/;"	f
 print_field	building_demo.c	/^void print_field(bool (*field)[field_width])$/;"	f
 print_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 print_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-process_input	building_demo.c	/^void process_input($/;"	f
+process_input	building_demo.c	/^void process_input(bool (*field)[field_width], figure *piece)$/;"	f
 process_key	building_demo.c	/^void process_key($/;"	f
-reset_piece_properties	building_demo.c	/^void reset_piece_properties(figure *piece)$/;"	f
 reverse_rows_callback	rotation_demo.c	/^void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 reversion	rotation_demo.c	/^int reversion(int num, int arr_len)$/;"	f
 right	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction	file:
@@ -61,15 +72,22 @@ rotate	rotation_demo.c	/^void rotate(void *piece, int len)$/;"	f
 set_cond_not_to_cross_field_boundary	building_demo.c	/^bool set_cond_not_to_cross_field_boundary($/;"	f
 set_cond_not_to_cross_occupied_side_pixel	building_demo.c	/^bool set_cond_not_to_cross_occupied_side_pixel($/;"	f
 set_init_condition_for_x_cycle	building_demo.c	/^bool set_init_condition_for_x_cycle($/;"	f
+size	building_demo.c	/^    unsigned char size;$/;"	m	struct:tag_figure	file:
 size	rotation_demo.c	/^    size            = 3$/;"	e	enum:consts	file:
+small	building_demo.c	/^        bool small[small_piece_size][small_piece_size];$/;"	m	union:tag_figure::tag_form	file:
+small_piece_size	building_demo.c	/^    small_piece_size    = 3,$/;"	e	enum:consts	file:
 tag_figure	building_demo.c	/^typedef struct tag_figure {$/;"	s	file:
+tag_form	building_demo.c	/^    union tag_form {$/;"	u	struct:tag_figure	file:
 tag_move_direction	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	g	file:
 tag_piece_action	building_demo.c	/^typedef enum tag_piece_action {$/;"	g	file:
+tag_position	building_demo.c	/^typedef enum tag_position {$/;"	g	file:
 take_	building_demo.c	/^void take_(piece_action action)$/;"	f
 time_start	building_demo.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
 time_stop	building_demo.c	/^int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)$/;"	f
 transpose_callback	rotation_demo.c	/^void transpose_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 truncate_piece	building_demo.c	/^void truncate_piece(figure *piece)$/;"	f
 undo_piece_shift_condition	building_demo.c	/^bool undo_piece_shift_condition($/;"	f
-x_shift	building_demo.c	/^    int x_shift, y_decline;$/;"	m	struct:tag_figure	file:
-y_decline	building_demo.c	/^    int x_shift, y_decline;$/;"	m	struct:tag_figure	file:
+vertical_1	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
+vertical_2	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
+x_shift	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:
+y_decline	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:

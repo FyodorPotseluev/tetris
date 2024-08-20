@@ -4,14 +4,17 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
 
 enum consts {
-    init_delay          = 666,          /* 1/3 of a second */
+    init_delay          = 666,          /* 2/3 of a second */
     field_height        = 20,
     field_width         = 10,
-    piece_size          = 4,
+    num_of_pieces       = 7,
+    small_piece_size    = 3,
+    big_piece_size      = 4,
     initial_piece_shift = 4
 };
 
@@ -19,10 +22,19 @@ typedef enum tag_piece_action {
     hide_piece, print_piece, hide_ghost, print_ghost
 } piece_action;
 typedef enum tag_move_direction { left = 1, right } move_direction;
+typedef enum tag_position {
+    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count
+} position;
 
 typedef struct tag_figure {
-    bool form[piece_size][piece_size];
-    int x_shift, y_decline;
+    unsigned char size;
+    union tag_form {
+        bool small[small_piece_size][small_piece_size];
+        bool big[big_piece_size][big_piece_size];
+    } form;
+    signed char x_shift, y_decline, ghost_decline;
+    bool i_form;
+    position orientation;
 } figure;
 
 void time_start(struct timeval *tv1, struct timezone *tz)
@@ -44,6 +56,7 @@ int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)
     return dtv.tv_sec*1000 + dtv.tv_usec/1000;
 }
 
+/*
 void arr_copy(bool (*dst)[piece_size], bool (*src)[piece_size])
 {
     int x, y;
@@ -51,7 +64,7 @@ void arr_copy(bool (*dst)[piece_size], bool (*src)[piece_size])
         for (x=0; x < piece_size; x++)
             dst[y][x] = src[y][x];
     }
-}
+} */
 
 void initialize_init_x(int *init_x, bool *initialized)
 {
@@ -136,14 +149,17 @@ int curr_x(figure *piece, int x)
     return init_x + piece->x_shift*2 + x*2;
 }
 
-void piece_(piece_action action, figure *piece, int *ghost_decline)
+void piece_(piece_action action, figure *piece)
 {
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     int x, y;
-    for (y=0; y < piece_size; y++) {
-        for (x=0; x < piece_size; x++) {
-            if (piece->form[y][x] == 1) {
+    for (y=0; y < piece->size; y++) {
+        for (x=0; x < piece->size; x++) {
+            if (arr[y][x] == 1) {
                 if (action == hide_ghost)
-                    move(ghost_y(*ghost_decline, y), curr_x(piece, x));
+                    move(ghost_y(piece->ghost_decline, y), curr_x(piece, x));
                 else
                     move(curr_y(piece, y), curr_x(piece, x));
                 take_(action);
@@ -154,12 +170,15 @@ void piece_(piece_action action, figure *piece, int *ghost_decline)
 
 void truncate_piece(figure *piece)
 {
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     int x, y;
     /* checking if the piece's upmost row is empty */
     while (true) {
-        for (y=0; y < piece_size; y++) {
-            for (x=0; x < piece_size; x++) {
-                if (piece->form[y][x] == 1)
+        for (y=0; y < piece->size; y++) {
+            for (x=0; x < piece->size; x++) {
+                if (arr[y][x] == 1)
                     return;
             }
             /* if so - correcting the initial piece's 'y' coordinate */
@@ -185,11 +204,14 @@ bool lower_field_pixel_is_occupied(
 
 bool piece_has_fallen(bool (*field)[field_width], figure *piece)
 {
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     int x, y;
     /* fall_checks: looking for every lowest pixel in each column */
-    for (y=piece_size-1; y >= 0; y--) {
-        for (x=0; x < piece_size; x++) {
-            if (piece->form[y][x] == 1) {
+    for (y=piece->size-1; y >= 0; y--) {
+        for (x=0; x < piece->size; x++) {
+            if (arr[y][x] == 1) {
                 if (lower_field_pixel_is_occupied(field, piece, x, y))
                     return true;
                 if (field_has_ended(piece, y))
@@ -200,36 +222,35 @@ bool piece_has_fallen(bool (*field)[field_width], figure *piece)
     return false;
 }
 
-void cast_ghost(bool (*field)[field_width], figure piece, int *ghost_decline)
+void cast_ghost(
+    bool (*field)[field_width], figure piece, signed char *ghost_decline
+)
 {
     while (!piece_has_fallen(field, &piece))
         piece.y_decline++;
-    piece_(print_ghost, &piece, NULL);
+    piece_(print_ghost, &piece);
     *ghost_decline = piece.y_decline;
 }
 
-void piece_spawn(bool (*field)[field_width], figure *piece, int *ghost_decline)
+void piece_spawn(bool (*field)[field_width], figure *piece)
 {
     truncate_piece(piece);
-    cast_ghost(field, *piece, ghost_decline);
-    piece_(print_piece, piece, NULL);
+    cast_ghost(field, *piece, &piece->ghost_decline);
+    piece_(print_piece, piece);
     curs_set(0);
     refresh();
 }
 
-void reset_piece_properties(figure *piece)
-{
-    piece->y_decline = 0;
-    piece->x_shift = initial_piece_shift;
-}
-
 void field_absorbes_piece(bool (*field)[field_width], figure *piece)
 {
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     int x, y;
     /* `piece` pixels become `field` pixels */
-    for (y=0; y < piece_size; y++) {
-        for (x=0; x < piece_size; x++) {
-            if (piece->form[y][x] == 1)
+    for (y=0; y < piece->size; y++) {
+        for (x=0; x < piece->size; x++) {
+            if (arr[y][x] == 1)
                 field[y + piece->y_decline][x + piece->x_shift] = 1;
         }
     }
@@ -237,7 +258,7 @@ void field_absorbes_piece(bool (*field)[field_width], figure *piece)
 
 bool out_of_right_boundary(figure *piece)
 {
-    return (piece->x_shift > field_width - piece_size) ? true : false;
+    return (piece->x_shift > field_width - piece->size) ? true : false;
 }
 
 bool out_of_left_boundary(figure *piece)
@@ -254,14 +275,17 @@ bool undo_piece_shift_condition(
     bool (*field)[field_width], int x, int y, figure *piece
 )
 {
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     if (field) {
-        if (piece->form[y][x]==1 && cell_occupied_by_(field, x, y, piece))
+        if (arr[y][x]==1 && cell_occupied_by_(field, x, y, piece))
             return true;
         else
             return false;
     } else {
         /* condition for crossing the field boundary */
-        if (piece->form[y][x]==1)
+        if (arr[y][x]==1)
             return true;
         else
             return false;
@@ -282,7 +306,7 @@ bool set_cond_not_to_cross_field_boundary(
     else
     if (out_of_right_boundary(piece)) {
         /* loop back */
-        *start_x = piece_size-1;
+        *start_x = piece->size-1;
         *end_x   = field_width - piece->x_shift - 1;
         *incr_x  = -1;
         return true;
@@ -292,19 +316,20 @@ bool set_cond_not_to_cross_field_boundary(
 }
 
 bool set_cond_not_to_cross_occupied_side_pixel(
-    move_direction direction, int *start_x, int *end_x, int *incr_x
+    move_direction direction, figure *piece,
+    int *start_x, int *end_x, int *incr_x
 )
 {
     switch (direction) {
         case left:
             /* loop forward */
             *start_x = 0;
-            *end_x   = piece_size;
+            *end_x   = piece->size;
             *incr_x  = 1;
             return true;
         case right:
             /* loop back */
-            *start_x = piece_size - 1;
+            *start_x = piece->size - 1;
             *end_x   = -1;
             *incr_x  = -1;
             return true;
@@ -319,7 +344,7 @@ bool set_init_condition_for_x_cycle(
 {
     if (direction)
         return set_cond_not_to_cross_occupied_side_pixel(
-            direction, start_x, end_x, incr_x
+            direction, piece, start_x, end_x, incr_x
         );
     else
         return set_cond_not_to_cross_field_boundary(
@@ -341,7 +366,7 @@ bool prevent_crossing(
     {
         return false;
     }
-    for (y=0; y < piece_size; y++) {
+    for (y=0; y < piece->size; y++) {
         for (x=start_x; x != end_x; x+=incr_x) {
             if (undo_piece_shift_condition(field, x, y, piece)) {
                 *dx = incr_x;
@@ -353,19 +378,18 @@ bool prevent_crossing(
 }
 
 void move_(
-    move_direction direction, bool (*field)[field_width],
-    figure *piece, int *ghost_decline
+    move_direction direction, bool (*field)[field_width], figure *piece
 )
 {
     switch (direction) {
         case left:
-            piece_(hide_ghost, piece, ghost_decline);
-            piece_(hide_piece, piece, NULL);
+            piece_(hide_ghost, piece);
+            piece_(hide_piece, piece);
             piece->x_shift--;
             break;
         case right:
-            piece_(hide_ghost, piece, ghost_decline);
-            piece_(hide_piece, piece, NULL);
+            piece_(hide_ghost, piece);
+            piece_(hide_piece, piece);
             piece->x_shift++;
     }
     int dx = 0;
@@ -374,48 +398,67 @@ void move_(
     /* prevention of crossing already occupied side pixel */
     prevent_crossing(direction, field, piece, &dx, NULL);
     piece->x_shift += dx;
-    cast_ghost(field, *piece, ghost_decline);
-    piece_(print_piece, piece, NULL);
+    cast_ghost(field, *piece, &piece->ghost_decline);
+    piece_(print_piece, piece);
 }
 
 void piece_fall_step(figure *piece)
 {
-    piece_(hide_piece, piece, NULL);
+    piece_(hide_piece, piece);
     piece->y_decline++;
-    piece_(print_piece, piece, NULL);
+    piece_(print_piece, piece);
     curs_set(0);
     refresh();
 }
 
-void handle_rotation(
-    bool (*field)[field_width], figure *piece, int *ghost_decline
-)
+void next_orientation(figure *piece)
 {
-    piece_(hide_ghost, piece, ghost_decline);
-    piece_(hide_piece, piece, NULL);
-    rotate(piece->form, piece_size);
+    /* traversing a list of enumerated values cyclically (after the last
+    value, we get the 1st value again) */
+    piece->orientation = (piece->orientation + 1) % orientation_count;
+}
+
+void handle_i_piece(figure *piece)
+{
+    /* after the rotation of the I piece, we need that both of it vertical
+    incarnations were at the same column */
+    if (piece->i_form) {
+        if (piece->orientation == vertical_1) piece->x_shift--;
+        else
+        if (piece->orientation == vertical_2) piece->x_shift++;
+        next_orientation(piece);
+    }
+}
+
+void handle_rotation(bool (*field)[field_width], figure *piece)
+{
+    piece_(hide_ghost, piece);
+    piece_(hide_piece, piece);
+    handle_i_piece(piece);
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    rotate(piece->form.small, piece->size);
     /* prevention of crossing the field boundary */
     /* prevent_crossing(0, NULL, piece); */
     /* handle_rotation_conflicts(); */
-    cast_ghost(field, *piece, ghost_decline);
-    piece_(print_piece, piece, NULL);
+    cast_ghost(field, *piece, &piece->ghost_decline);
+    piece_(print_piece, piece);
 }
 
 void process_key(
-    int key_pressed, bool (*field)[field_width],
-    figure *piece, int *ghost_decline, bool *hard_drop
+    int key_pressed, bool (*field)[field_width], figure *piece, bool *hard_drop
 )
 {
     switch (key_pressed) {
         case KEY_LEFT:
-            move_(left, field, piece, ghost_decline);
+            move_(left, field, piece);
             break;
         case KEY_RIGHT:
-            move_(right, field, piece, ghost_decline);
+            move_(right, field, piece);
             break;
         /* rotate */
         case KEY_UP:
-            handle_rotation(field, piece, ghost_decline);
+            handle_rotation(field, piece);
             break;
         /* hard drop */
         case ' ':
@@ -425,9 +468,7 @@ void process_key(
     }
 }
 
-void process_input(
-    bool (*field)[field_width], figure *piece, int *ghost_decline
-)
+void process_input(bool (*field)[field_width], figure *piece)
 {
     struct timeval tv1, tv2;
     struct timezone tz;
@@ -439,7 +480,7 @@ void process_input(
         key_pressed = getch();
         if ((key_pressed == ERR) || (key_pressed == KEY_DOWN))
             break;
-        process_key(key_pressed, field, piece, ghost_decline, &hard_drop);
+        process_key(key_pressed, field, piece, &hard_drop);
         if (hard_drop)
             break;
         /* new delay value calculation */
@@ -451,66 +492,153 @@ void process_input(
     }
 }
 
-void piece_falls(bool (*field)[field_width], figure *piece, int *ghost_decline)
+void piece_falls(bool (*field)[field_width], figure *piece)
 {
     for (;;) {
-        process_input(field, piece, ghost_decline);
+        process_input(field, piece);
         if (piece_has_fallen(field, piece)) {
             field_absorbes_piece(field, piece);
-            reset_piece_properties(piece);
             break;
         }
         piece_fall_step(piece);
     }
 }
 
+void init_set_of_pieces(figure *set_of_pieces)
+{
+    int i = 0;
+    figure I_piece = {
+        .size = big_piece_size,
+        .form.big = {
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 1, 1, 1, 1 },
+            { 0, 0, 0, 0 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = true,
+        .orientation = horizontal_1
+    };
+    memcpy(&set_of_pieces[i], &I_piece, sizeof(figure));
+    i++;
+    figure O_piece = {
+        .size = big_piece_size,
+        .form.big = {
+            { 0, 0, 0, 0 },
+            { 0, 1, 1, 0 },
+            { 0, 1, 1, 0 },
+            { 0, 0, 0, 0 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &O_piece, sizeof(figure));
+    i++;
+    figure T_piece = {
+        .size = small_piece_size,
+        .form.small = {
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 1, 0 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &T_piece, sizeof(figure));
+    i++;
+    figure S_piece = {
+        .size = small_piece_size,
+        .form.small = {
+            { 0, 0, 0 },
+            { 0, 1, 1 },
+            { 1, 1, 0 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &S_piece, sizeof(figure));
+    i++;
+    figure Z_piece = {
+        .size = small_piece_size,
+        .form.small = {
+            { 0, 0, 0 },
+            { 1, 1, 0 },
+            { 0, 1, 1 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &Z_piece, sizeof(figure));
+    i++;
+    figure J_piece = {
+        .size = small_piece_size,
+        .form.small = {
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 0, 1 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &J_piece, sizeof(figure));
+    i++;
+    figure L_piece = {
+        .size = small_piece_size,
+        .form.small = {
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 1, 0, 0 }
+        },
+        .x_shift = initial_piece_shift,
+        .y_decline = 0, .ghost_decline = 0,
+        .i_form = false
+    };
+    memcpy(&set_of_pieces[i], &L_piece, sizeof(figure));
+}
+
+void init_field(bool (*field)[field_width])
+{
+    int x, y;
+    for (y=0; y < field_height; y++) {
+        for (x=0; x < field_width; x++) {
+            field[y][x] = 0;
+        }
+    }
+}
+
 int main()
 {
+    /* ncurses */
     initscr();
     cbreak();
     noecho();
     keypad(stdscr, 1);
 
-    bool field[field_height][field_width] = {
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-    };
-    figure piece;
-    bool arr[piece_size][piece_size] = {
-        { 0, 0, 0, 0 },
-        { 0, 0, 0, 0 },
-        { 1, 1, 1, 1 },
-        { 0, 0, 0, 0 }
-    };
-    arr_copy(piece.form, arr);
-    piece.y_decline = 0;
-    piece.x_shift = initial_piece_shift;
-    int ghost_decline;
+    /* debug */
+    /* mvprintw(0, 0, "Sizeof figure is %ld bytes.", sizeof(figure)); */
 
+    /* variables */
+    bool field[field_height][field_width];
+    init_field(field);
+    figure set_of_pieces[num_of_pieces];
+    init_set_of_pieces(set_of_pieces);
+    figure piece;
+
+    /* MAIN */
     print_field(field);
     for (;;) {
-        piece_spawn(field, &piece, &ghost_decline);
-        piece_falls(field, &piece, &ghost_decline);
+        piece = set_of_pieces[0];
+        piece_spawn(field, &piece);
+        piece_falls(field, &piece);
     }
 
+    /* ncurses */
     endwin();
     return 0;
 }
