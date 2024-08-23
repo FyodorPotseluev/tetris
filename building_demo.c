@@ -21,6 +21,7 @@ enum consts {
 typedef enum tag_piece_action {
     hide_piece, print_piece, hide_ghost, print_ghost
 } piece_action;
+typedef enum tag_crossing_action { prevention, signal } crossing_action;
 typedef enum tag_move_direction { left = 1, right } move_direction;
 typedef enum tag_position {
     horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count
@@ -271,28 +272,49 @@ bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)
     return (field[y+piece->y_decline][x+piece->x_shift] == 1) ? true : false;
 }
 
-bool undo_piece_shift_condition(
-    bool (*field)[field_width], int x, int y, figure *piece
-)
+bool out_of_bottom_field_boundary(figure *piece)
 {
-    /* `piece->form.small` and `piece->form.big` share the same address,
-    so we handle both scenarios here */
-    bool (*arr)[piece->size] = piece->form.small;
-    if (field) {
-        if (arr[y][x]==1 && cell_occupied_by_(field, x, y, piece))
-            return true;
-        else
-            return false;
-    } else {
-        /* condition for crossing the field boundary */
-        if (arr[y][x]==1)
-            return true;
-        else
-            return false;
-    }
+    return (piece->y_decline > field_height - piece->size) ? true : false;
 }
 
-bool set_cond_not_to_cross_field_boundary(
+bool out_of_top_field_boundary(figure *piece)
+{
+    return (piece->y_decline < 0) ? true : false;
+}
+
+bool horizontal_orientation(figure *piece)
+{
+    if (
+        (piece->orientation == horizontal_1) ||
+        (piece->orientation == horizontal_2)
+    )
+        return true;
+    else
+        return false;
+}
+
+bool vertical_orientation(figure *piece)
+{
+    if (
+        (piece->orientation == vertical_1) ||
+        (piece->orientation == vertical_2)
+    )
+        return true;
+    else
+        return false;
+}
+
+bool special_i_piece_bottom_top_case(figure *piece)
+{
+    return ((piece->i_form) && vertical_orientation(piece)) ? true : false;
+}
+
+bool special_i_piece_side_case(figure *piece)
+{
+    return ((piece->i_form) && horizontal_orientation(piece)) ? true : false;
+}
+
+bool set_x_cycle_bound_cond(
     figure *piece, int *start_x, int *end_x, int *incr_x
 )
 {
@@ -315,7 +337,80 @@ bool set_cond_not_to_cross_field_boundary(
         return false;
 }
 
-bool set_cond_not_to_cross_occupied_side_pixel(
+bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)
+{
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
+    int x, y;
+    int start_x, end_x, incr_x;
+    if (!set_x_cycle_bound_cond(piece, &start_x, &end_x, &incr_x))
+        return false;
+    for (y=0; y < piece->size; y++) {
+        for (x=start_x; x != end_x; x+=incr_x) {
+            if (arr[y][x] == 1) {
+                if (action == signal)
+                    return true;
+                *dx += incr_x;
+                if (special_i_piece_side_case(piece))
+                    continue;
+                else
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool set_y_cycle_cond(figure *piece, int *start_y, int *end_y, int *incr_y)
+{
+    if (out_of_top_field_boundary(piece)) {
+        /* loop forward */
+        *start_y = 0;
+        *end_y   = -piece->y_decline;
+        *incr_y  = 1;
+        return true;
+    }
+    else
+    if (out_of_bottom_field_boundary(piece)) {
+        /* loop back */
+        *start_y = piece->size-1;
+        *end_y   = field_height - piece->y_decline - 1;
+        *incr_y  = -1;
+        return true;
+    }
+    else
+        return false;
+}
+
+bool bottom_top_boundaries_crossing_(
+    crossing_action action, figure *piece, int *dy
+)
+{
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
+    int x, y;
+    int start_y, end_y, incr_y;
+    if (!set_y_cycle_cond(piece, &start_y, &end_y, &incr_y))
+        return false;
+    for (y=start_y; y != end_y; y+=incr_y) {
+        for (x=0; x < piece->size; x++) {
+            if (arr[y][x] == 1) {
+                if (action == signal)
+                    return true;
+                *dy += incr_y;
+                if (special_i_piece_bottom_top_case(piece))
+                    continue;
+                else
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool set_x_cycle_pixel_cond(
     move_direction direction, figure *piece,
     int *start_x, int *end_x, int *incr_x
 )
@@ -337,66 +432,42 @@ bool set_cond_not_to_cross_occupied_side_pixel(
     return true;
 }
 
-bool set_init_condition_for_x_cycle(
-    move_direction direction, figure *piece,
-    int *start_x, int *end_x, int *incr_x
+void side_pixels_crossing_prevention(
+    move_direction direction, bool (*field)[field_width], figure *piece, int *dx
 )
 {
-    if (direction)
-        return set_cond_not_to_cross_occupied_side_pixel(
-            direction, piece, start_x, end_x, incr_x
-        );
-    else
-        return set_cond_not_to_cross_field_boundary(
-            piece, start_x, end_x, incr_x
-        );
-}
-
-bool prevent_crossing(
-    move_direction direction, bool (*field)[field_width],
-    figure *piece, int *dx, int *dy
-)
-{
-    (void)dy;
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    bool (*arr)[piece->size] = piece->form.small;
     int x, y;
     int start_x, end_x, incr_x;
-    if (!set_init_condition_for_x_cycle(
-        direction, piece, &start_x, &end_x, &incr_x
-    ))
-    {
-        return false;
-    }
+    set_x_cycle_pixel_cond(direction, piece, &start_x, &end_x, &incr_x);
     for (y=0; y < piece->size; y++) {
         for (x=start_x; x != end_x; x+=incr_x) {
-            if (undo_piece_shift_condition(field, x, y, piece)) {
-                *dx = incr_x;
-                return true;
+            if ((arr[y][x] == 1) && (cell_occupied_by_(field, x, y, piece))) {
+                *dx += incr_x;
+                return;
             }
         }
     }
-    return false;
 }
 
 void move_(
     move_direction direction, bool (*field)[field_width], figure *piece
 )
 {
+    piece_(hide_ghost, piece);
+    piece_(hide_piece, piece);
     switch (direction) {
         case left:
-            piece_(hide_ghost, piece);
-            piece_(hide_piece, piece);
             piece->x_shift--;
             break;
         case right:
-            piece_(hide_ghost, piece);
-            piece_(hide_piece, piece);
             piece->x_shift++;
     }
     int dx = 0;
-    /* prevention of crossing the field boundary */
-    prevent_crossing(0, NULL, piece, &dx, NULL);
-    /* prevention of crossing already occupied side pixel */
-    prevent_crossing(direction, field, piece, &dx, NULL);
+    side_boundaries_crossing_(prevention, piece, &dx);
+    side_pixels_crossing_prevention(direction, field, piece, &dx);
     piece->x_shift += dx;
     cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
@@ -438,8 +509,11 @@ void handle_rotation(bool (*field)[field_width], figure *piece)
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     rotate(piece->form.small, piece->size);
-    /* prevention of crossing the field boundary */
-    /* prevent_crossing(0, NULL, piece); */
+    int dx = 0, dy = 0;
+    side_boundaries_crossing_(prevention, piece, &dx);
+    bottom_top_boundaries_crossing_(prevention, piece, &dy);
+    piece->x_shift += dx;
+    piece->y_decline += dy;
     /* handle_rotation_conflicts(); */
     cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
@@ -629,11 +703,12 @@ int main()
     figure set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     figure piece;
+    int curr_piece;
 
     /* MAIN */
     print_field(field);
-    for (;;) {
-        piece = set_of_pieces[0];
+    for (curr_piece=0;;curr_piece++) {
+        piece = set_of_pieces[curr_piece];
         piece_spawn(field, &piece);
         piece_falls(field, &piece);
     }
