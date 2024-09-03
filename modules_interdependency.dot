@@ -1,0 +1,22 @@
+digraph codeviz {
+    splines=true
+    sep="+15,15"
+    overlap=scalexy
+
+    node [shape=Mrecord, fontsize=12]
+
+    node [fillcolor="#ccccff", style=filled] "./include/conflict_resolution.h" [label = "./include/conflict_resolution.h"]
+    node [fillcolor="#ccccff", style=filled] "./include/constants.h"           [label = "./include/constants.h"]
+    node [fillcolor="#ccccff", style=filled] "./include/rotation.h"            [label = "./include/rotation.h"]
+    node [fillcolor="#ff9999", style=filled] "./src/conflict_resolution.c"     [label = "./src/conflict_resolution.c"]
+    node [fillcolor="#ff9999", style=filled] "./src/rotation.c"                [label = "./src/rotation.c"]
+    node [fillcolor="#ff9999", style=filled] "./src/tetris.c"                  [label = "./src/tetris.c"]
+
+    "./include/conflict_resolution.h" -> "./include/constants.h"
+    "./src/conflict_resolution.c"     -> "./include/conflict_resolution.h"
+    "./src/rotation.c"                -> "./include/rotation.h"
+    "./src/rotation.c"                -> "./include/constants.h"
+    "./src/tetris.c"                  -> "./include/conflict_resolution.h"
+    "./src/tetris.c"                  -> "./include/constants.h"
+    "./src/tetris.c"                  -> "./include/rotation.h"
+}

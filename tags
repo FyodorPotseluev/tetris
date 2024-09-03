@@ -4,101 +4,147 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-ROTATION_DEMO_H_INCLUDED	rotation_demo.h	4;"	d
-big	building_demo.c	/^        bool big[big_piece_size][big_piece_size];$/;"	m	union:tag_figure::tag_form	file:
-big_piece_size	building_demo.c	/^    big_piece_size      = 4,$/;"	e	enum:consts	file:
-bottom_top_boundaries_crossing_	building_demo.c	/^bool bottom_top_boundaries_crossing_($/;"	f
-cast_ghost	building_demo.c	/^void cast_ghost($/;"	f
-cell_occupied_by_	building_demo.c	/^bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)$/;"	f
-consts	building_demo.c	/^enum consts {$/;"	g	file:
-consts	rotation_demo.c	/^enum consts {$/;"	g	file:
-copy_callback	rotation_demo.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-crossing_action	building_demo.c	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	t	typeref:enum:tag_crossing_action	file:
-curr_x	building_demo.c	/^int curr_x(figure *piece, int x)$/;"	f
-curr_y	building_demo.c	/^int curr_y(figure *piece, int y)$/;"	f
-delay	rotation_demo.c	/^    delay           = 2,$/;"	e	enum:consts	file:
-field_absorbes_piece	building_demo.c	/^void field_absorbes_piece(bool (*field)[field_width], figure *piece)$/;"	f
-field_has_ended	building_demo.c	/^bool field_has_ended(figure *piece, int y)$/;"	f
-field_height	building_demo.c	/^    field_height        = 20,$/;"	e	enum:consts	file:
-field_width	building_demo.c	/^    field_width         = 10,$/;"	e	enum:consts	file:
-figure	building_demo.c	/^} figure;$/;"	t	typeref:struct:tag_figure	file:
-form	building_demo.c	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form	file:
-ghost_decline	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:
-ghost_y	building_demo.c	/^int ghost_y(int ghost_decline, int y)$/;"	f
-handle_i_piece	building_demo.c	/^void handle_i_piece(figure *piece)$/;"	f
-handle_rotation	building_demo.c	/^void handle_rotation(bool (*field)[field_width], figure *piece)$/;"	f
-hide_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-hide_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-horizontal_1	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
-horizontal_2	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
-horizontal_orientation	building_demo.c	/^bool horizontal_orientation(figure *piece)$/;"	f
-i_form	building_demo.c	/^    bool i_form;$/;"	m	struct:tag_figure	file:
-init_callback	rotation_demo.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-init_delay	building_demo.c	/^    init_delay          = 666,          \/* 2\/3 of a second *\/$/;"	e	enum:consts	file:
-init_field	building_demo.c	/^void init_field(bool (*field)[field_width])$/;"	f
-init_set_of_pieces	building_demo.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
-initial_piece_shift	building_demo.c	/^    initial_piece_shift = 4$/;"	e	enum:consts	file:
-initialize_init_x	building_demo.c	/^void initialize_init_x(int *init_x, bool *initialized)$/;"	f
-initialize_init_y	building_demo.c	/^void initialize_init_y(int *init_y, bool *initialized)$/;"	f
-left	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction	file:
-lower_field_pixel_is_occupied	building_demo.c	/^bool lower_field_pixel_is_occupied($/;"	f
-main	building_demo.c	/^int main()$/;"	f
-matrix_	rotation_demo.c	/^void matrix_($/;"	f
-matrix_callback	rotation_demo.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
-move_	building_demo.c	/^void move_($/;"	f
-move_direction	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	t	typeref:enum:tag_move_direction	file:
-next_orientation	building_demo.c	/^void next_orientation(figure *piece)$/;"	f
-num_of_pieces	building_demo.c	/^    num_of_pieces       = 7,$/;"	e	enum:consts	file:
-num_of_turnes	rotation_demo.c	/^    num_of_turnes   = 4,$/;"	e	enum:consts	file:
-orientation	building_demo.c	/^    position orientation;$/;"	m	struct:tag_figure	file:
-orientation_count	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
-out_of_bottom_field_boundary	building_demo.c	/^bool out_of_bottom_field_boundary(figure *piece)$/;"	f
-out_of_left_boundary	building_demo.c	/^bool out_of_left_boundary(figure *piece)$/;"	f
-out_of_right_boundary	building_demo.c	/^bool out_of_right_boundary(figure *piece)$/;"	f
-out_of_top_field_boundary	building_demo.c	/^bool out_of_top_field_boundary(figure *piece)$/;"	f
-piece_	building_demo.c	/^void piece_(piece_action action, figure *piece)$/;"	f
-piece_action	building_demo.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
-piece_callback	rotation_demo.c	/^typedef void (*piece_callback)(void*, int, int, int);$/;"	t	file:
-piece_fall_step	building_demo.c	/^void piece_fall_step(figure *piece)$/;"	f
-piece_falls	building_demo.c	/^void piece_falls(bool (*field)[field_width], figure *piece)$/;"	f
-piece_has_fallen	building_demo.c	/^bool piece_has_fallen(bool (*field)[field_width], figure *piece)$/;"	f
-piece_spawn	building_demo.c	/^void piece_spawn(bool (*field)[field_width], figure *piece)$/;"	f
-position	building_demo.c	/^} position;$/;"	t	typeref:enum:tag_position	file:
-prevention	building_demo.c	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	e	enum:tag_crossing_action	file:
-print_field	building_demo.c	/^void print_field(bool (*field)[field_width])$/;"	f
-print_ghost	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-print_piece	building_demo.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
-process_input	building_demo.c	/^void process_input(bool (*field)[field_width], figure *piece)$/;"	f
-process_key	building_demo.c	/^void process_key($/;"	f
-reverse_rows_callback	rotation_demo.c	/^void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-reversion	rotation_demo.c	/^int reversion(int num, int arr_len)$/;"	f
-right	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction	file:
-rotate	rotation_demo.c	/^void rotate(void *piece, int len)$/;"	f
-set_x_cycle_bound_cond	building_demo.c	/^bool set_x_cycle_bound_cond($/;"	f
-set_x_cycle_pixel_cond	building_demo.c	/^bool set_x_cycle_pixel_cond($/;"	f
-set_y_cycle_cond	building_demo.c	/^bool set_y_cycle_cond(figure *piece, int *start_y, int *end_y, int *incr_y)$/;"	f
-side_boundaries_crossing_	building_demo.c	/^bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)$/;"	f
-side_pixels_crossing_prevention	building_demo.c	/^void side_pixels_crossing_prevention($/;"	f
-signal	building_demo.c	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	e	enum:tag_crossing_action	file:
-size	building_demo.c	/^    unsigned char size;$/;"	m	struct:tag_figure	file:
-size	rotation_demo.c	/^    size            = 3$/;"	e	enum:consts	file:
-small	building_demo.c	/^        bool small[small_piece_size][small_piece_size];$/;"	m	union:tag_figure::tag_form	file:
-small_piece_size	building_demo.c	/^    small_piece_size    = 3,$/;"	e	enum:consts	file:
-special_i_piece_bottom_top_case	building_demo.c	/^bool special_i_piece_bottom_top_case(figure *piece)$/;"	f
-special_i_piece_side_case	building_demo.c	/^bool special_i_piece_side_case(figure *piece)$/;"	f
-tag_crossing_action	building_demo.c	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	g	file:
-tag_figure	building_demo.c	/^typedef struct tag_figure {$/;"	s	file:
-tag_form	building_demo.c	/^    union tag_form {$/;"	u	struct:tag_figure	file:
-tag_move_direction	building_demo.c	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	g	file:
-tag_piece_action	building_demo.c	/^typedef enum tag_piece_action {$/;"	g	file:
-tag_position	building_demo.c	/^typedef enum tag_position {$/;"	g	file:
-take_	building_demo.c	/^void take_(piece_action action)$/;"	f
-time_start	building_demo.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
-time_stop	building_demo.c	/^int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)$/;"	f
-transpose_callback	rotation_demo.c	/^void transpose_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-truncate_piece	building_demo.c	/^void truncate_piece(figure *piece)$/;"	f
-vertical_1	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
-vertical_2	building_demo.c	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position	file:
-vertical_orientation	building_demo.c	/^bool vertical_orientation(figure *piece)$/;"	f
-x_shift	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:
-y_decline	building_demo.c	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure	file:
+BIN_DIR	Makefile	/^BIN_DIR := $(BUILD_DIR)\/bin$/;"	m
+BUILD_DIR	Makefile	/^BUILD_DIR := .\/build$/;"	m
+BUILD_DIRS	Makefile	/^BUILD_DIRS := $(OBJ_DIR) $(BIN_DIR)$/;"	m
+CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g -O0 -Iinclude$/;"	m
+CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
+CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
+EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
+INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
+MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	/^MAKE_FUNCTION_MATRIX_COPY(small)$/;"	f
+MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	6;"	d	file:
+OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o, $(SRCMODULES))$/;"	m
+OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
+PROJECT	Makefile	/^PROJECT := tetris$/;"	m
+ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
+SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
+SRC_DIR	Makefile	/^SRC_DIR := .\/src$/;"	m
+apply_backup	src/conflict_resolution.c	/^void apply_backup(void *src, figure *piece, int dx, int dy)$/;"	f
+big	include/constants.h	/^        bool big[big_piece_size][big_piece_size];$/;"	m	union:tag_figure::tag_form
+big_piece_size	include/constants.h	/^    big_piece_size      = 4,$/;"	e	enum:constants
+bottom_center_conflict	src/conflict_resolution.c	/^bool bottom_center_conflict($/;"	f
+bottom_left_corner_conflict	src/conflict_resolution.c	/^bool bottom_left_corner_conflict($/;"	f
+bottom_right_corner_conflict	src/conflict_resolution.c	/^bool bottom_right_corner_conflict($/;"	f
+bottom_top_boundaries_crossing_	src/conflict_resolution.c	/^bool bottom_top_boundaries_crossing_($/;"	f
+cast_ghost	src/tetris.c	/^void cast_ghost($/;"	f
+cell_occupied_by_	src/conflict_resolution.c	/^bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)$/;"	f
+constants	include/constants.h	/^enum constants {$/;"	g
+copy_callback	src/rotation.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	t	typeref:enum:tag_crossing_action
+curr_x	src/tetris.c	/^int curr_x(figure *piece, int x)$/;"	f
+curr_y	src/tetris.c	/^int curr_y(figure *piece, int y)$/;"	f
+field_absorbes_piece	src/tetris.c	/^void field_absorbes_piece(bool (*field)[field_width], figure *piece)$/;"	f
+field_has_ended	src/tetris.c	/^bool field_has_ended(figure *piece, int y)$/;"	f
+field_height	include/constants.h	/^    field_height        = 20,$/;"	e	enum:constants
+field_width	include/constants.h	/^    field_width         = 10,$/;"	e	enum:constants
+figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
+form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
+ghost_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
+ghost_y	src/tetris.c	/^int ghost_y(int ghost_decline, int y)$/;"	f
+handle_bottom_center_conflict	src/conflict_resolution.c	/^void handle_bottom_center_conflict($/;"	f
+handle_i_piece	src/conflict_resolution.c	/^void handle_i_piece(figure *piece, int *dx)$/;"	f
+handle_left_center_conflict	src/conflict_resolution.c	/^void handle_left_center_conflict($/;"	f
+handle_right_center_conflict	src/conflict_resolution.c	/^void handle_right_center_conflict($/;"	f
+handle_rotation	src/tetris.c	/^void handle_rotation(bool (*field)[field_width], figure *piece)$/;"	f
+handle_rotation_conflicts	src/conflict_resolution.c	/^void handle_rotation_conflicts(bool (*field)[field_width], figure *piece)$/;"	f
+handle_top_center_conflict	src/conflict_resolution.c	/^void handle_top_center_conflict($/;"	f
+hide_ghost	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+hide_piece	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+horizontal_1	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
+horizontal_1_long_side_border_conflict	src/conflict_resolution.c	/^bool horizontal_1_long_side_border_conflict($/;"	f
+horizontal_1_long_side_center_conflict	src/conflict_resolution.c	/^bool horizontal_1_long_side_center_conflict($/;"	f
+horizontal_1_short_side_conflict	src/conflict_resolution.c	/^bool horizontal_1_short_side_conflict($/;"	f
+horizontal_2	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
+horizontal_2_long_side_border_conflict	src/conflict_resolution.c	/^bool horizontal_2_long_side_border_conflict($/;"	f
+horizontal_2_long_side_center_conflict	src/conflict_resolution.c	/^bool horizontal_2_long_side_center_conflict($/;"	f
+horizontal_2_short_side_conflict	src/conflict_resolution.c	/^bool horizontal_2_short_side_conflict($/;"	f
+horizontal_orientation	src/conflict_resolution.c	/^bool horizontal_orientation(figure *piece)$/;"	f
+i_form	include/constants.h	/^    bool i_form;$/;"	m	struct:tag_figure
+i_form_piece_rotation_conflicts_handling	src/conflict_resolution.c	/^void i_form_piece_rotation_conflicts_handling($/;"	f
+i_piece_horizontal_1_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_horizontal_1_rotation_conflict_handling($/;"	f
+i_piece_horizontal_2_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_horizontal_2_rotation_conflict_handling($/;"	f
+i_piece_vertical_1_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_1_rotation_conflict_handling($/;"	f
+i_piece_vertical_2_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_2_rotation_conflict_handling($/;"	f
+init_callback	src/rotation.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+init_delay	include/constants.h	/^    init_delay          = 100000,          \/* 100 seconds *\/$/;"	e	enum:constants
+init_field	src/tetris.c	/^void init_field(bool (*field)[field_width])$/;"	f
+init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
+initial_piece_shift	include/constants.h	/^    initial_piece_shift = 4$/;"	e	enum:constants
+initialize_init_x	src/tetris.c	/^void initialize_init_x(int *init_x, bool *initialized)$/;"	f
+initialize_init_y	src/tetris.c	/^void initialize_init_y(int *init_y, bool *initialized)$/;"	f
+left	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
+left_center_conflict	src/conflict_resolution.c	/^bool left_center_conflict($/;"	f
+lower_field_pixel_is_occupied	src/tetris.c	/^bool lower_field_pixel_is_occupied($/;"	f
+main	src/tetris.c	/^int main()$/;"	f
+make_backup	src/conflict_resolution.c	/^void make_backup(void *dst, figure *piece)$/;"	f
+matrix_	src/rotation.c	/^void matrix_($/;"	f
+matrix_callback	src/rotation.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
+move_	src/tetris.c	/^void move_($/;"	f
+move_direction	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	t	typeref:enum:tag_move_direction
+next_orientation	src/conflict_resolution.c	/^void next_orientation(figure *piece)$/;"	f
+num_of_pieces	include/constants.h	/^    num_of_pieces       = 7,$/;"	e	enum:constants
+o_piece	src/conflict_resolution.c	/^bool o_piece(figure *piece)$/;"	f
+orientation	include/constants.h	/^    position orientation;$/;"	m	struct:tag_figure
+orientation_count	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
+out_of_bottom_field_boundary	src/conflict_resolution.c	/^bool out_of_bottom_field_boundary(figure *piece)$/;"	f
+out_of_left_boundary	src/conflict_resolution.c	/^bool out_of_left_boundary(figure *piece)$/;"	f
+out_of_right_boundary	src/conflict_resolution.c	/^bool out_of_right_boundary(figure *piece)$/;"	f
+out_of_top_field_boundary	src/conflict_resolution.c	/^bool out_of_top_field_boundary(figure *piece)$/;"	f
+piece_	src/tetris.c	/^void piece_(piece_action action, figure *piece)$/;"	f
+piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
+piece_fall_step	src/tetris.c	/^void piece_fall_step(figure *piece)$/;"	f
+piece_falls	src/tetris.c	/^void piece_falls(bool (*field)[field_width], figure *piece, bool *exit)$/;"	f
+piece_field_pixel_crossing_conflict	src/conflict_resolution.c	/^bool piece_field_pixel_crossing_conflict($/;"	f
+piece_has_fallen	src/tetris.c	/^bool piece_has_fallen(bool (*field)[field_width], figure *piece)$/;"	f
+piece_spawn	src/tetris.c	/^void piece_spawn(bool (*field)[field_width], figure *piece)$/;"	f
+position	include/constants.h	/^} position;$/;"	t	typeref:enum:tag_position
+prevention	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	e	enum:tag_crossing_action
+print_field	src/tetris.c	/^void print_field(bool (*field)[field_width])$/;"	f
+print_ghost	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+print_piece	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+process_input	src/tetris.c	/^void process_input(bool (*field)[field_width], figure *piece, bool *exit)$/;"	f
+process_key	src/tetris.c	/^void process_key($/;"	f
+regular_piece_rotation_conflicts_handling	src/conflict_resolution.c	/^void regular_piece_rotation_conflicts_handling($/;"	f
+reverse_rows_callback	src/rotation.c	/^void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+reversion	src/rotation.c	/^int reversion(int num, int arr_len)$/;"	f
+right	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
+right_center_conflict	src/conflict_resolution.c	/^bool right_center_conflict($/;"	f
+rotate	src/rotation.c	/^void rotate(void *piece, int len)$/;"	f
+set_x_cycle_bound_cond	src/conflict_resolution.c	/^bool set_x_cycle_bound_cond($/;"	f
+set_x_cycle_pixel_cond	src/conflict_resolution.c	/^bool set_x_cycle_pixel_cond($/;"	f
+set_y_cycle_cond	src/conflict_resolution.c	/^bool set_y_cycle_cond(figure *piece, int *start_y, int *end_y, int *incr_y)$/;"	f
+side_boundaries_crossing_	src/conflict_resolution.c	/^bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)$/;"	f
+side_pixels_crossing_prevention	src/conflict_resolution.c	/^void side_pixels_crossing_prevention($/;"	f
+signal	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	e	enum:tag_crossing_action
+size	include/constants.h	/^    unsigned char size;$/;"	m	struct:tag_figure
+small	include/constants.h	/^        bool small[small_piece_size][small_piece_size];$/;"	m	union:tag_figure::tag_form
+small_piece_size	include/constants.h	/^    small_piece_size    = 3,$/;"	e	enum:constants
+special_i_piece_bottom_top_case	src/conflict_resolution.c	/^bool special_i_piece_bottom_top_case(figure *piece)$/;"	f
+special_i_piece_side_case	src/conflict_resolution.c	/^bool special_i_piece_side_case(figure *piece)$/;"	f
+tag_crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	g
+tag_figure	include/constants.h	/^typedef struct tag_figure {$/;"	s
+tag_form	include/constants.h	/^    union tag_form {$/;"	u	struct:tag_figure
+tag_move_direction	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	g
+tag_piece_action	src/tetris.c	/^typedef enum tag_piece_action {$/;"	g	file:
+tag_position	include/constants.h	/^typedef enum tag_position {$/;"	g
+take_	src/tetris.c	/^void take_(piece_action action)$/;"	f
+time_start	src/tetris.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
+time_stop	src/tetris.c	/^int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)$/;"	f
+top_center_conflict	src/conflict_resolution.c	/^bool top_center_conflict($/;"	f
+top_left_corner_conflict	src/conflict_resolution.c	/^bool top_left_corner_conflict($/;"	f
+top_right_corner_conflict	src/conflict_resolution.c	/^bool top_right_corner_conflict($/;"	f
+transpose_callback	src/rotation.c	/^void transpose_callback(void *dst, void *src, int len, int x, int y)$/;"	f
+truncate_piece	src/tetris.c	/^void truncate_piece(figure *piece)$/;"	f
+vertical_1	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
+vertical_1_long_side_border_conflict	src/conflict_resolution.c	/^bool vertical_1_long_side_border_conflict($/;"	f
+vertical_1_long_side_center_conflict	src/conflict_resolution.c	/^bool vertical_1_long_side_center_conflict($/;"	f
+vertical_1_short_side_conflict	src/conflict_resolution.c	/^bool vertical_1_short_side_conflict($/;"	f
+vertical_2	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
+vertical_2_long_side_border_conflict	src/conflict_resolution.c	/^bool vertical_2_long_side_border_conflict($/;"	f
+vertical_2_long_side_center_conflict	src/conflict_resolution.c	/^bool vertical_2_long_side_center_conflict($/;"	f
+vertical_2_short_side_conflict	src/conflict_resolution.c	/^bool vertical_2_short_side_conflict($/;"	f
+vertical_orientation	src/conflict_resolution.c	/^bool vertical_orientation(figure *piece)$/;"	f
+x_shift	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
+y_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
