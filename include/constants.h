@@ -8,7 +8,7 @@
 enum constants {
     /* the delay value - the time in milliseconds it takes for a piece to fall
     by one pixel */
-    init_delay          = 100000,          /* 100 seconds */
+    init_delay          = 333,          /* 1/3 of a second */
     /* game field size in pixels */
     field_height        = 20,
     field_width         = 10,

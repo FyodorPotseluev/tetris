@@ -41,6 +41,7 @@ field_height	include/constants.h	/^    field_height        = 20,$/;"	e	enum:cons
 field_width	include/constants.h	/^    field_width         = 10,$/;"	e	enum:constants
 figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
+get_random_piece	src/tetris.c	/^figure get_random_piece(const figure *set_of_pieces)$/;"	f
 ghost_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
 ghost_y	src/tetris.c	/^int ghost_y(int ghost_decline, int y)$/;"	f
 handle_bottom_center_conflict	src/conflict_resolution.c	/^void handle_bottom_center_conflict($/;"	f
@@ -68,7 +69,7 @@ i_piece_horizontal_2_rotation_conflict_handling	src/conflict_resolution.c	/^void
 i_piece_vertical_1_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_1_rotation_conflict_handling($/;"	f
 i_piece_vertical_2_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_2_rotation_conflict_handling($/;"	f
 init_callback	src/rotation.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-init_delay	include/constants.h	/^    init_delay          = 100000,          \/* 100 seconds *\/$/;"	e	enum:constants
+init_delay	include/constants.h	/^    init_delay          = 333,          \/* 1\/3 of a second *\/$/;"	e	enum:constants
 init_field	src/tetris.c	/^void init_field(bool (*field)[field_width])$/;"	f
 init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
 initial_piece_shift	include/constants.h	/^    initial_piece_shift = 4$/;"	e	enum:constants

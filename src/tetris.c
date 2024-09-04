@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 typedef enum tag_piece_action {
@@ -440,6 +441,12 @@ void init_field(bool (*field)[field_width])
     }
 }
 
+figure get_random_piece(const figure *set_of_pieces)
+{
+    int i = (int)(((double)num_of_pieces) * rand() / (RAND_MAX+1.0));
+    return set_of_pieces[i];
+}
+
 int main()
 {
     /* ncurses */
@@ -454,18 +461,23 @@ int main()
     init_field(field);
     figure set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
-    figure piece;
-    int test_arr[] = { 2, 2, 5, 5 };
+    figure piece, next_piece;
+    /* int test_arr[] = { 2, 2, 5, 5 }; */
 
     /* MAIN */
+    srand(time(NULL));
     print_field(field);
-    int i = 0;
+    /* int i = 0; */
+    next_piece = get_random_piece(set_of_pieces);
     bool exit = false;
     while (!exit) {
-        piece = set_of_pieces[test_arr[i]];
+        /* piece = set_of_pieces[test_arr[i]]; */
+        piece = next_piece;
+        next_piece = get_random_piece(set_of_pieces);
+        /* print_next_piece(); */
         piece_spawn(field, &piece);
         piece_falls(field, &piece, &exit);
-        i++;
+        /* i++; */
     }
 
     /* ncurses */
