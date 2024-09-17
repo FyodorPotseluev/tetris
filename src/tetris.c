@@ -2,6 +2,7 @@
 
 #include "conflict_resolution.h"
 #include "constants.h"
+#include "frontend.h"
 #include "rotation.h"
 #include <ncurses.h>
 #include <stdlib.h>
@@ -13,6 +14,10 @@
 typedef enum tag_piece_action {
     hide_piece, print_piece, hide_ghost, print_ghost
 } piece_action;
+
+typedef enum tag_type_of_cell {
+    empty, occupied, ghost
+} type_of_cell;
 
 void time_start(struct timeval *tv1, struct timezone *tz)
 {
@@ -39,7 +44,7 @@ void initialize_init_x(int *init_x, bool *initialized)
         int row, col;
         (void)row;
         getmaxyx(stdscr, row, col);
-        *init_x = (col - field_width*2) / 2 - 1;
+        *init_x = (col - field_width * cell_width) / 2 - 1;
         *initialized = true;
     }
 }
@@ -50,54 +55,79 @@ void initialize_init_y(int *init_y, bool *initialized)
         int row, col;
         (void)col;
         getmaxyx(stdscr, row, col);
-        *init_y = row - field_height - 1;
+        *init_y = row - field_height * cell_height - 1;
         *initialized = true;
+    }
+}
+
+void print_cell_(type_of_cell type, int x, int y)
+{
+    int i;
+    for (i=0; i < cell_height; i++, y++) {
+        move(y, x);
+        switch (type) {
+            case empty:
+                addstr(EMPTY_CELL_ROW);
+                break;
+            case occupied:
+                addstr(OCCUPIED_CELL_ROW);
+                break;
+            case ghost:
+                addstr(GHOST_CELL_ROW);
+        }
     }
 }
 
 void print_field(bool (*field)[field_width])
 {
-    int y, x;
     static int init_x, init_y;
-    static bool initialized_x, initialized_y;
-    initialize_init_x(&init_x, &initialized_x);
-    initialize_init_y(&init_y, &initialized_y);
-    int curr_y = init_y;
-    for (y=0; y < field_height; y++) {
-        move(curr_y, init_x);
+    static bool initialized_init_x, initialized_init_y;
+    int x, y, curr_x, curr_y;
+    initialize_init_x(&init_x, &initialized_init_x);
+    initialize_init_y(&init_y, &initialized_init_y);
+    for (
+        y=0, curr_x = init_x, curr_y = init_y;
+        y < field_height;
+        y++, curr_x = init_x, curr_y += cell_height
+    )
+    {
+        move(curr_y, curr_x);
         for (x=0; x < field_width; x++) {
             if (field[y][x] == 0)
-                addstr("0 ");
+                print_cell_(empty, curr_x, curr_y);
+                /* addstr("0 "); */
             else
-                addstr("1 ");
+                print_cell_(occupied, curr_x, curr_y);
+                /* addstr("1 "); */
+            curr_x += cell_width;
+            move(curr_y, curr_x);
         }
-        curr_y++;
     }
     curs_set(0);
     refresh();
 }
 
-void take_(piece_action action)
+void take_(piece_action action, int x, int y)
 {
     switch (action) {
         case hide_piece:
         case hide_ghost:
-            addstr("0 ");
+            print_cell_(empty, x, y);
             break;
         case print_piece:
-            addstr("1 ");
+            print_cell_(occupied, x, y);
             break;
         case print_ghost:
-            addstr(". ");
+            print_cell_(ghost, x, y);
     }
 }
 
-int ghost_y(int ghost_decline, int y)
+int ghost_y(figure *piece, int y)
 {
     static int init_y;
     static bool initialized;
     initialize_init_y(&init_y, &initialized);
-    return init_y + ghost_decline + y;
+    return init_y + (piece->ghost_decline + y) * cell_height;
 }
 
 int curr_y(figure *piece, int y)
@@ -105,7 +135,7 @@ int curr_y(figure *piece, int y)
     static int init_y;
     static bool initialized;
     initialize_init_y(&init_y, &initialized);
-    return init_y + piece->y_decline + y;
+    return init_y + (piece->y_decline + y) * cell_height;
 }
 
 int curr_x(figure *piece, int x)
@@ -113,7 +143,7 @@ int curr_x(figure *piece, int x)
     static int init_x;
     static bool initialized;
     initialize_init_x(&init_x, &initialized);
-    return init_x + piece->x_shift*2 + x*2;
+    return init_x + (piece->x_shift + x) * cell_width;
 }
 
 void piece_(piece_action action, figure *piece)
@@ -126,10 +156,9 @@ void piece_(piece_action action, figure *piece)
         for (x=0; x < piece->size; x++) {
             if (matrix[y][x] == 1) {
                 if (action == hide_ghost)
-                    move(ghost_y(piece->ghost_decline, y), curr_x(piece, x));
+                    take_(action, curr_x(piece, x), ghost_y(piece, y));
                 else
-                    move(curr_y(piece, y), curr_x(piece, x));
-                take_(action);
+                    take_(action, curr_x(piece, x), curr_y(piece, y));
             }
         }
     }
@@ -159,7 +188,7 @@ bool field_has_ended(figure *piece, int y)
     return (y + piece->y_decline + 1 == field_height) ? true : false;
 }
 
-bool lower_field_pixel_is_occupied(
+bool lower_field_cell_is_occupied(
     bool (*field)[field_width], figure *piece, int x, int y
 )
 {
@@ -175,11 +204,11 @@ bool piece_has_fallen(bool (*field)[field_width], figure *piece)
     so we handle both scenarios here */
     bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
-    /* fall_checks: looking for every lowest pixel in each column */
+    /* fall_checks: looking for every lowest cell in each column */
     for (y=piece->size-1; y >= 0; y--) {
         for (x=0; x < piece->size; x++) {
             if (matrix[y][x] == 1) {
-                if (lower_field_pixel_is_occupied(field, piece, x, y))
+                if (lower_field_cell_is_occupied(field, piece, x, y))
                     return true;
                 if (field_has_ended(piece, y))
                     return true;
@@ -214,7 +243,7 @@ void field_absorbes_piece(bool (*field)[field_width], figure *piece)
     so we handle both scenarios here */
     bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
-    /* `piece` pixels become `field` pixels */
+    /* `piece` cells become `field` cells */
     for (y=0; y < piece->size; y++) {
         for (x=0; x < piece->size; x++) {
             if (matrix[y][x] == 1)
@@ -237,7 +266,7 @@ void move_(
             piece->x_shift++;
     }
     side_boundaries_crossing_(prevention, piece, NULL);
-    side_pixels_crossing_prevention(direction, field, piece);
+    side_cells_crossing_prevention(direction, field, piece);
     cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
 }
@@ -253,12 +282,14 @@ void piece_fall_step(figure *piece)
 
 void handle_rotation(bool (*field)[field_width], figure *piece)
 {
+    bool backup_matrix[piece->size][piece->size];
+    make_backup(backup_matrix, piece);
     piece_(hide_ghost, piece);
     piece_(hide_piece, piece);
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     rotate(piece->form.small, piece->size);
-    handle_rotation_conflicts(field, piece);
+    handle_rotation_conflicts(field, piece, backup_matrix);
     cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
 }
@@ -462,7 +493,7 @@ int main()
     figure set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     figure piece, next_piece;
-    /* int test_arr[] = { 2, 2, 5, 5 }; */
+    /* int test_arr[] = { 5, 5, 1, 1, 1 }; */
 
     /* MAIN */
     srand(time(NULL));

@@ -1,10 +1,11 @@
 /* conflict_resolution.c */
 
 #include "conflict_resolution.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-#define MAKE_FUNCTION_MATRIX_COPY(SIZE) \
-    void SIZE ## _matrix_copy( \
+#define MAKE_FUNCTION_MATRIX_COPY(FUNNAME, SIZE) \
+    void FUNNAME( \
         bool (*dst)[SIZE ## _piece_size], \
         const bool (*src)[SIZE ## _piece_size] \
     ) \
@@ -16,34 +17,9 @@
         } \
     }
 
-MAKE_FUNCTION_MATRIX_COPY(small)
+MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)
 
-MAKE_FUNCTION_MATRIX_COPY(big)
-
-void prev_orientation(figure *piece)
-{
-    /* traversing a list of enumerated values cyclically in reverse order
-    (after the 1st value, we get the last value) */
-    piece->orientation = piece->orientation - 1;
-    if (piece->orientation < 0)
-        piece->orientation = piece->orientation + orientation_count;
-}
-
-void apply_backup(void *src, figure *piece, int dx, int dy)
-{
-    bool (*backup_matrix)[piece->size] = src;
-    switch (piece->size) {
-        case small_piece_size:
-            small_matrix_copy(piece->form.small, backup_matrix);
-            break;
-        case big_piece_size:
-            big_matrix_copy(piece->form.big, backup_matrix);
-    }
-    piece->x_shift -= dx;
-    piece->y_decline -= dy;
-    if (piece->i_form)
-        prev_orientation(piece);
-}
+MAKE_FUNCTION_MATRIX_COPY(big_matrix_copy, big)
 
 void make_backup(void *dst, figure *piece)
 {
@@ -54,7 +30,46 @@ void make_backup(void *dst, figure *piece)
             break;
         case big_piece_size:
             big_matrix_copy(backup_matrix, piece->form.big);
+            break;
+        default:
+            fprintf(
+                stderr, "make_backup function: incorrect piece size %d\n",
+                piece->size
+            );
+            exit(1);
     }
+}
+
+void prev_orientation(figure *piece)
+{
+    /* traversing a list of enumerated values cyclically in reverse order
+    (after the 1st value, we get the last value) */
+    piece->orientation = piece->orientation - 1;
+    if (piece->orientation < 0)
+        piece->orientation = piece->orientation + orientation_count;
+}
+
+void apply_backup(figure *piece, void *src, int dx, int dy)
+{
+    bool (*backup_matrix)[piece->size] = src;
+    switch (piece->size) {
+        case small_piece_size:
+            small_matrix_copy(piece->form.small, backup_matrix);
+            break;
+        case big_piece_size:
+            big_matrix_copy(piece->form.big, backup_matrix);
+            break;
+        default:
+            fprintf(
+                stderr, "make_backup function: incorrect piece size %d\n",
+                piece->size
+            );
+            exit(1);
+    }
+    piece->x_shift -= dx;
+    piece->y_decline -= dy;
+    if (piece->i_form)
+        prev_orientation(piece);
 }
 
 bool o_piece(figure *piece)
@@ -338,7 +353,7 @@ bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)
     return (field[y+piece->y_decline][x+piece->x_shift] == 1) ? true : false;
 }
 
-bool piece_field_pixel_crossing_conflict(
+bool piece_field_cell_crossing_conflict(
     bool (*field)[field_width], figure *piece
 )
 {
@@ -569,13 +584,13 @@ void handle_top_center_conflict(
         . . .    . 1 .
 
         - center + corner conflict:
-            -- if the conflicting pixels are in the same row/column:
+            -- if the conflicting cells are in the same row/column:
 
         1 2 2    . X X    |
         1 1 1 => . 1 .    V move as it were just a center conflict
         . . .    . 1 .
 
-            -- if the conflicting pixels are in the opposite rows/columns:
+            -- if the conflicting cells are in the opposite rows/columns:
 
         1 . 2    . 1 X
         1 1 1 => . 1 .    <- move toward the only empty row/column
@@ -617,7 +632,7 @@ void regular_piece_rotation_conflicts_handling(
     }
 }
 
-bool set_x_cycle_pixel_cond(
+bool set_x_cycle_cell_cond(
     move_direction direction, figure *piece,
     int *start_x, int *end_x, int *incr_x
 )
@@ -639,7 +654,7 @@ bool set_x_cycle_pixel_cond(
     return true;
 }
 
-void side_pixels_crossing_prevention(
+void side_cells_crossing_prevention(
     move_direction direction, bool (*field)[field_width], figure *piece
 )
 {
@@ -648,7 +663,7 @@ void side_pixels_crossing_prevention(
     bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
     int start_x, end_x, incr_x;
-    set_x_cycle_pixel_cond(direction, piece, &start_x, &end_x, &incr_x);
+    set_x_cycle_cell_cond(direction, piece, &start_x, &end_x, &incr_x);
     for (y=0; y < piece->size; y++) {
         for (x=start_x; x != end_x; x+=incr_x) {
             if ((matrix[y][x] == 1) && (cell_occupied_by_(field, x, y, piece)))
@@ -839,20 +854,21 @@ void handle_i_piece(figure *piece, int *dx)
     }
 }
 
-void handle_rotation_conflicts(bool (*field)[field_width], figure *piece)
+void handle_rotation_conflicts(
+    bool (*field)[field_width], figure *piece, void *backup
+)
 {
+    bool (*backup_matrix)[piece->size] = backup;
     int dx = 0, dy = 0;
-    bool backup_matrix[piece->size][piece->size];
     if (o_piece(piece))
         return;
-    make_backup(backup_matrix, piece);
     handle_i_piece(piece, &dx);
     /* prevent any boundaries crossing conflicts
-    and then look whether we have a piece/field pixel crossing conflict now */
+    and then look whether we have a piece/field cell crossing conflict now */
     if (side_boundaries_crossing_(prevention, piece, &dx))
-        goto piece_field_pixel_crossing_check;
+        goto piece_field_cell_crossing_check;
     if (bottom_top_boundaries_crossing_(prevention, piece, &dy))
-        goto piece_field_pixel_crossing_check;
+        goto piece_field_cell_crossing_check;
     if (piece->i_form)
         i_form_piece_rotation_conflicts_handling(field, piece, &dx, &dy);
     else
@@ -860,14 +876,14 @@ void handle_rotation_conflicts(bool (*field)[field_width], figure *piece)
     /* if after all our efforts we still have conflicts - restore the initial
     piece space orientation and its `x_shift` and `y_decline` */
     if (side_boundaries_crossing_(signal, piece, NULL)) {
-        apply_backup(backup_matrix, piece, dx, dy);
+        apply_backup(piece, backup_matrix, dx, dy);
         return;
     }
     if (bottom_top_boundaries_crossing_(signal, piece, NULL)) {
-        apply_backup(backup_matrix, piece, dx, dy);
+        apply_backup(piece, backup_matrix, dx, dy);
         return;
     }
-    piece_field_pixel_crossing_check:
-    if (piece_field_pixel_crossing_conflict(field, piece))
-        apply_backup(backup_matrix, piece, dx, dy);
+    piece_field_cell_crossing_check:
+    if (piece_field_cell_crossing_conflict(field, piece))
+        apply_backup(piece, backup_matrix, dx, dy);
 }

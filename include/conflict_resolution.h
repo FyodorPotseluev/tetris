@@ -22,11 +22,11 @@ RECEIVES:
 RETURNES:
     - the boolean value indicating whether a side boundary crossing took place. */
 
-void side_pixels_crossing_prevention(
+void side_cells_crossing_prevention(
     move_direction direction, bool (*field)[field_width], figure *piece
 );
 /*
-    Prevents a piece from crossing already occupied side field pixels by
+    Prevents a piece from crossing already occupied side field cells by
 changing the `piece->x_shift` value.
 RECEIVES:
     - `direction` the direction in which the piece was just moved;
@@ -36,12 +36,29 @@ RECEIVES:
 RETURNES:
     --- */
 
-void handle_rotation_conflicts(bool (*field)[field_width], figure *piece);
+void make_backup(void *dst, figure *piece);
 /*
-    Prevents conflicts (crossing the field borders or already occupied field pixels) after a rotation of a piece. In some cases, if a conflict is too deep, it rolls the rotation back.
+    Copies to the `dst` argument the current state of the `piece->form` matrix. It can be used later to restore the initial `piece->form` state.
+RECEIVES:
+    - `dst` untyped pointer to the matrix to store the current state of the `piece->form` matrix;
+    - `piece` the pointer to the structure containing the current piece properties.
+RETURNES:
+    ---
+ERROR HANDLING:
+    - the `len` can't be different from `small_piece_size` and `big_piece_size`
+values. If it does, an error message is printed with the current `len` value and
+the program terminates. */
+
+
+void handle_rotation_conflicts(
+    bool (*field)[field_width], figure *piece, void *backup
+);
+/*
+    Prevents conflicts (crossing the field borders or already occupied field cells) after a rotation of a piece. In some cases, if a conflict is too deep, it rolls the rotation back.
 RECEIVES:
     - `field` the pointer to the matrix describing the current field state;
-    - `piece` the pointer to the structure containing the current piece properties.
+    - `piece` the pointer to the structure containing the current piece properties;
+    - `backup` untyped pointer to the matrix containing the state of the piece before the rotation. It's used for rolling the rotation back in case we couldn't resolve the conflict.
 RETURNES:
     --- */
 

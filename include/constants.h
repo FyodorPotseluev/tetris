@@ -7,14 +7,14 @@
 
 enum constants {
     /* the delay value - the time in milliseconds it takes for a piece to fall
-    by one pixel */
+    by one cell */
     init_delay          = 333,          /* 1/3 of a second */
-    /* game field size in pixels */
+    /* game field size in cells */
     field_height        = 20,
     field_width         = 10,
     /* the number of pieces available in the game */
     num_of_pieces       = 7,
-    /* possible piece sizes in pixels */
+    /* possible piece sizes in cells */
     small_piece_size    = 3,
     big_piece_size      = 4,
     /* initial piece shift to the left border of the field when it spawns */
@@ -29,7 +29,7 @@ typedef enum tag_position {
 typedef struct tag_figure {
     /* piece size */
     unsigned char size;
-    /* pixel order in the piece */
+    /* cell order in the piece */
     union tag_form {
         bool small[small_piece_size][small_piece_size];
         bool big[big_piece_size][big_piece_size];
