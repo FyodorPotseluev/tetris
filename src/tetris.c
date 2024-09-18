@@ -19,6 +19,10 @@ typedef enum tag_type_of_cell {
     empty, occupied, ghost
 } type_of_cell;
 
+typedef enum tag_boundary_side {
+    bottom, top, left_side, right_side
+} boundary_side;
+
 void time_start(struct timeval *tv1, struct timezone *tz)
 {
     gettimeofday(tv1, tz);
@@ -84,16 +88,58 @@ void print_cell_(type_of_cell type, int x, int y)
     }
 }
 
+void print_bottom_top_boundary()
+{
+    int i;
+    for (i=0; i < field_width*cell_width + 2*side_boundary_width; i++)
+        addstr(BOTTOM_TOP_BOUNDARY);
+}
+
+void print_side_boundary(int x, int y)
+{
+    int i;
+    for (i=0; i < cell_height; i++, y++) {
+        move(y, x);
+        addstr(SIDE_BOUNDARY);
+    }
+}
+
+void print_field_boundary(boundary_side side, int *screen_x, int *screen_y)
+{
+    switch (side) {
+        case top:
+            move(get_init_y()-1, get_init_x()-1);
+            print_bottom_top_boundary();
+            break;
+        case bottom:
+            move(get_init_y()+field_height*cell_height, get_init_x()-1);
+            print_bottom_top_boundary();
+            break;
+        case left_side:
+            print_side_boundary(*screen_x, *screen_y);
+            *screen_x += side_boundary_width;
+            break;
+        case right_side:
+            print_side_boundary(*screen_x, *screen_y);
+    }
+}
+
+int init_screen_x()
+{
+    return get_init_x() - side_boundary_width;
+}
+
 void print_field(bool (*field)[field_width])
 {
     int field_x, field_y, screen_x, screen_y;
+    print_field_boundary(top, NULL, NULL);
     for (
-        field_y = 0, screen_x = get_init_x(), screen_y = get_init_y();
+        field_y = 0, screen_x = init_screen_x(), screen_y = get_init_y();
         field_y < field_height;
-        field_y++, screen_x = get_init_x(), screen_y += cell_height
+        field_y++, screen_x = init_screen_x(), screen_y += cell_height
     )
     {
-        move(screen_y, screen_x);
+        print_field_boundary(left_side, &screen_x, &screen_y);
         for (field_x=0; field_x < field_width; field_x++) {
             if (field[field_y][field_x] == 0)
                 print_cell_(empty, screen_x, screen_y);
@@ -102,7 +148,9 @@ void print_field(bool (*field)[field_width])
             screen_x += cell_width;
             move(screen_y, screen_x);
         }
+        print_field_boundary(right_side, &screen_x, &screen_y);
     }
+    print_field_boundary(bottom, NULL, NULL);
     curs_set(0);
     refresh();
 }
@@ -482,7 +530,7 @@ int game_info_x()
 void print_labels()
 {
     mvprintw(game_info_y(score_label_row), game_info_x(), "SCORE");
-    mvprintw(game_info_y(next_label_row), game_info_x(), "NEXT");
+    mvprintw(game_info_y(next_label_row)+cell_height-1, game_info_x(), "NEXT");
     curs_set(0);
     refresh();
 }
