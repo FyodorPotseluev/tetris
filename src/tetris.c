@@ -38,26 +38,32 @@ int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)
     return dtv.tv_sec*1000 + dtv.tv_usec/1000;
 }
 
-void initialize_init_x(int *init_x, bool *initialized)
+int get_init_x()
 {
-    if (!*initialized) {
+    static int init_x;
+    static bool initialized;
+    if (!initialized) {
         int row, col;
         (void)row;
         getmaxyx(stdscr, row, col);
-        *init_x = (col - field_width * cell_width) / 2 - 1;
-        *initialized = true;
+        init_x = (col - field_width * cell_width) / 2 - 1;
+        initialized = true;
     }
+    return init_x;
 }
 
-void initialize_init_y(int *init_y, bool *initialized)
+int get_init_y()
 {
-    if (!*initialized) {
+    static int init_y;
+    static bool initialized;
+    if (!initialized) {
         int row, col;
         (void)col;
         getmaxyx(stdscr, row, col);
-        *init_y = row - field_height * cell_height - 1;
-        *initialized = true;
+        init_y = row - field_height * cell_height - 1;
+        initialized = true;
     }
+    return init_y;
 }
 
 void print_cell_(type_of_cell type, int x, int y)
@@ -80,27 +86,21 @@ void print_cell_(type_of_cell type, int x, int y)
 
 void print_field(bool (*field)[field_width])
 {
-    static int init_x, init_y;
-    static bool initialized_init_x, initialized_init_y;
-    int x, y, curr_x, curr_y;
-    initialize_init_x(&init_x, &initialized_init_x);
-    initialize_init_y(&init_y, &initialized_init_y);
+    int field_x, field_y, screen_x, screen_y;
     for (
-        y=0, curr_x = init_x, curr_y = init_y;
-        y < field_height;
-        y++, curr_x = init_x, curr_y += cell_height
+        field_y = 0, screen_x = get_init_x(), screen_y = get_init_y();
+        field_y < field_height;
+        field_y++, screen_x = get_init_x(), screen_y += cell_height
     )
     {
-        move(curr_y, curr_x);
-        for (x=0; x < field_width; x++) {
-            if (field[y][x] == 0)
-                print_cell_(empty, curr_x, curr_y);
-                /* addstr("0 "); */
+        move(screen_y, screen_x);
+        for (field_x=0; field_x < field_width; field_x++) {
+            if (field[field_y][field_x] == 0)
+                print_cell_(empty, screen_x, screen_y);
             else
-                print_cell_(occupied, curr_x, curr_y);
-                /* addstr("1 "); */
-            curr_x += cell_width;
-            move(curr_y, curr_x);
+                print_cell_(occupied, screen_x, screen_y);
+            screen_x += cell_width;
+            move(screen_y, screen_x);
         }
     }
     curs_set(0);
@@ -124,26 +124,17 @@ void take_(piece_action action, int x, int y)
 
 int ghost_y(figure *piece, int y)
 {
-    static int init_y;
-    static bool initialized;
-    initialize_init_y(&init_y, &initialized);
-    return init_y + (piece->ghost_decline + y) * cell_height;
+    return get_init_y() + (piece->ghost_decline + y) * cell_height;
 }
 
 int curr_y(figure *piece, int y)
 {
-    static int init_y;
-    static bool initialized;
-    initialize_init_y(&init_y, &initialized);
-    return init_y + (piece->y_decline + y) * cell_height;
+    return get_init_y() + (piece->y_decline + y) * cell_height;
 }
 
 int curr_x(figure *piece, int x)
 {
-    static int init_x;
-    static bool initialized;
-    initialize_init_x(&init_x, &initialized);
-    return init_x + (piece->x_shift + x) * cell_width;
+    return get_init_x() + (piece->x_shift + x) * cell_width;
 }
 
 void piece_(piece_action action, figure *piece)
@@ -478,6 +469,43 @@ figure get_random_piece(const figure *set_of_pieces)
     return set_of_pieces[i];
 }
 
+int game_info_y(int y)
+{
+    return get_init_y() + y * cell_height;
+}
+
+int game_info_x()
+{
+    return get_init_x() + (field_width + game_info_gap) * cell_width;
+}
+
+void print_labels()
+{
+    mvprintw(game_info_y(score_label_row), game_info_x(), "SCORE");
+    mvprintw(game_info_y(next_label_row), game_info_x(), "NEXT");
+    curs_set(0);
+    refresh();
+}
+
+void print_score(int score)
+{
+    mvprintw(game_info_y(score_row), game_info_x(), "%d", score);
+    curs_set(0);
+    refresh();
+}
+
+void print_next_piece(figure piece, figure next_piece)
+{
+    piece.x_shift = field_width + game_info_gap;
+    next_piece.x_shift = field_width + game_info_gap;
+    piece.y_decline = next_row;
+    next_piece.y_decline = next_row;
+    piece_(hide_piece, &piece);
+    piece_(print_piece, &next_piece);
+    curs_set(0);
+    refresh();
+}
+
 int main()
 {
     /* ncurses */
@@ -488,6 +516,7 @@ int main()
     ESCDELAY = 50;
 
     /* variables */
+    int score = 0;
     bool field[field_height][field_width];
     init_field(field);
     figure set_of_pieces[num_of_pieces];
@@ -498,6 +527,8 @@ int main()
     /* MAIN */
     srand(time(NULL));
     print_field(field);
+    print_labels();
+    print_score(score);
     /* int i = 0; */
     next_piece = get_random_piece(set_of_pieces);
     bool exit = false;
@@ -505,7 +536,7 @@ int main()
         /* piece = set_of_pieces[test_arr[i]]; */
         piece = next_piece;
         next_piece = get_random_piece(set_of_pieces);
-        /* print_next_piece(); */
+        print_next_piece(piece, next_piece);
         piece_spawn(field, &piece);
         piece_falls(field, &piece, &exit);
         /* i++; */

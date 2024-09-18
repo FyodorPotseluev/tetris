@@ -11,16 +11,16 @@ CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g -O0 -Iinclude$/;"	m
 CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
 CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
-EMPTY_CELL_ROW	include/frontend.h	11;"	d
+EMPTY_CELL_ROW	include/frontend.h	16;"	d
 EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
 FRONTEND_H_INCLUDED	include/frontend.h	4;"	d
-GHOST_CELL_ROW	include/frontend.h	15;"	d
+GHOST_CELL_ROW	include/frontend.h	20;"	d
 INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	/^MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)$/;"	f
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	7;"	d	file:
 OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o, $(SRCMODULES))$/;"	m
 OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
-OCCUPIED_CELL_ROW	include/frontend.h	13;"	d
+OCCUPIED_CELL_ROW	include/frontend.h	18;"	d
 PROJECT	Makefile	/^PROJECT := tetris$/;"	m
 ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
 SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
@@ -33,9 +33,9 @@ bottom_left_corner_conflict	src/conflict_resolution.c	/^bool bottom_left_corner_
 bottom_right_corner_conflict	src/conflict_resolution.c	/^bool bottom_right_corner_conflict($/;"	f
 bottom_top_boundaries_crossing_	src/conflict_resolution.c	/^bool bottom_top_boundaries_crossing_($/;"	f
 cast_ghost	src/tetris.c	/^void cast_ghost($/;"	f
-cell_height	include/frontend.h	/^    cell_height = 2,$/;"	e	enum:frontend_consts
+cell_height	include/frontend.h	/^    cell_height     = 1,$/;"	e	enum:frontend_consts
 cell_occupied_by_	src/conflict_resolution.c	/^bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)$/;"	f
-cell_width	include/frontend.h	/^    cell_width  = 3$/;"	e	enum:frontend_consts
+cell_width	include/frontend.h	/^    cell_width      = 2,$/;"	e	enum:frontend_consts
 constants	include/constants.h	/^enum constants {$/;"	g
 copy_callback	src/rotation.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	t	typeref:enum:tag_crossing_action
@@ -49,6 +49,11 @@ field_width	include/constants.h	/^    field_width         = 10,$/;"	e	enum:const
 figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
 frontend_consts	include/frontend.h	/^enum frontend_consts {$/;"	g
+game_info_gap	include/frontend.h	/^    game_info_gap   = 2 $/;"	e	enum:frontend_consts
+game_info_x	src/tetris.c	/^int game_info_x()$/;"	f
+game_info_y	src/tetris.c	/^int game_info_y(int y)$/;"	f
+get_init_x	src/tetris.c	/^int get_init_x()$/;"	f
+get_init_y	src/tetris.c	/^int get_init_y()$/;"	f
 get_random_piece	src/tetris.c	/^figure get_random_piece(const figure *set_of_pieces)$/;"	f
 ghost	src/tetris.c	/^    empty, occupied, ghost$/;"	e	enum:tag_type_of_cell	file:
 ghost_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
@@ -78,12 +83,10 @@ i_piece_horizontal_2_rotation_conflict_handling	src/conflict_resolution.c	/^void
 i_piece_vertical_1_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_1_rotation_conflict_handling($/;"	f
 i_piece_vertical_2_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_2_rotation_conflict_handling($/;"	f
 init_callback	src/rotation.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-init_delay	include/constants.h	/^    init_delay          = 100000,          \/* 1\/3 of a second *\/$/;"	e	enum:constants
+init_delay	include/constants.h	/^    init_delay          = 333,          \/* 1\/3 of a second *\/$/;"	e	enum:constants
 init_field	src/tetris.c	/^void init_field(bool (*field)[field_width])$/;"	f
 init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
 initial_piece_shift	include/constants.h	/^    initial_piece_shift = 4$/;"	e	enum:constants
-initialize_init_x	src/tetris.c	/^void initialize_init_x(int *init_x, bool *initialized)$/;"	f
-initialize_init_y	src/tetris.c	/^void initialize_init_y(int *init_y, bool *initialized)$/;"	f
 left	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
 left_center_conflict	src/conflict_resolution.c	/^bool left_center_conflict($/;"	f
 lower_field_cell_is_occupied	src/tetris.c	/^bool lower_field_cell_is_occupied($/;"	f
@@ -92,7 +95,9 @@ matrix_	src/rotation.c	/^void matrix_($/;"	f
 matrix_callback	src/rotation.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
 move_	src/tetris.c	/^void move_($/;"	f
 move_direction	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	t	typeref:enum:tag_move_direction
+next_label_row	include/frontend.h	/^    next_label_row  = 6,$/;"	e	enum:frontend_consts
 next_orientation	src/conflict_resolution.c	/^void next_orientation(figure *piece)$/;"	f
+next_row	include/frontend.h	/^    next_row        = 7,$/;"	e	enum:frontend_consts
 num_of_pieces	include/constants.h	/^    num_of_pieces       = 7,$/;"	e	enum:constants
 o_piece	src/conflict_resolution.c	/^bool o_piece(figure *piece)$/;"	f
 occupied	src/tetris.c	/^    empty, occupied, ghost$/;"	e	enum:tag_type_of_cell	file:
@@ -115,7 +120,10 @@ prevention	include/conflict_resolution.h	/^typedef enum tag_crossing_action { pr
 print_cell_	src/tetris.c	/^void print_cell_(type_of_cell type, int x, int y)$/;"	f
 print_field	src/tetris.c	/^void print_field(bool (*field)[field_width])$/;"	f
 print_ghost	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+print_labels	src/tetris.c	/^void print_labels()$/;"	f
+print_next_piece	src/tetris.c	/^void print_next_piece(figure piece, figure next_piece)$/;"	f
 print_piece	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
+print_score	src/tetris.c	/^void print_score(int score)$/;"	f
 process_input	src/tetris.c	/^void process_input(bool (*field)[field_width], figure *piece, bool *exit)$/;"	f
 process_key	src/tetris.c	/^void process_key($/;"	f
 regular_piece_rotation_conflicts_handling	src/conflict_resolution.c	/^void regular_piece_rotation_conflicts_handling($/;"	f
@@ -124,6 +132,8 @@ reversion	src/rotation.c	/^int reversion(int num, int arr_len)$/;"	f
 right	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
 right_center_conflict	src/conflict_resolution.c	/^bool right_center_conflict($/;"	f
 rotate	src/rotation.c	/^void rotate(void *piece, int len)$/;"	f
+score_label_row	include/frontend.h	/^    score_label_row = 1,$/;"	e	enum:frontend_consts
+score_row	include/frontend.h	/^    score_row       = 3,$/;"	e	enum:frontend_consts
 set_x_cycle_bound_cond	src/conflict_resolution.c	/^bool set_x_cycle_bound_cond($/;"	f
 set_x_cycle_cell_cond	src/conflict_resolution.c	/^bool set_x_cycle_cell_cond($/;"	f
 set_y_cycle_cond	src/conflict_resolution.c	/^bool set_y_cycle_cond(figure *piece, int *start_y, int *end_y, int *incr_y)$/;"	f
