@@ -46,6 +46,7 @@ crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action
 curr_x	src/tetris.c	/^int curr_x(figure *piece, int x)$/;"	f
 curr_y	src/tetris.c	/^int curr_y(figure *piece, int y)$/;"	f
 empty	src/tetris.c	/^    empty, occupied, ghost$/;"	e	enum:tag_type_of_cell	file:
+end_game	src/tetris.c	/^void end_game(int score)$/;"	f
 field_absorbes_piece	src/tetris.c	/^void field_absorbes_piece(bool (*field)[field_width], figure *piece)$/;"	f
 field_has_ended	src/tetris.c	/^bool field_has_ended(figure *piece, int y)$/;"	f
 field_height	include/constants.h	/^    field_height        = 20,$/;"	e	enum:constants
@@ -53,7 +54,7 @@ field_width	include/constants.h	/^    field_width         = 10,$/;"	e	enum:const
 figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
 frontend_consts	include/frontend.h	/^enum frontend_consts {$/;"	g
-game_info_gap	include/frontend.h	/^    game_info_gap       = 2 $/;"	e	enum:frontend_consts
+game_info_gap	include/frontend.h	/^    game_info_gap       = 2$/;"	e	enum:frontend_consts
 game_info_x	src/tetris.c	/^int game_info_x()$/;"	f
 game_info_y	src/tetris.c	/^int game_info_y(int y)$/;"	f
 get_init_x	src/tetris.c	/^int get_init_x()$/;"	f
@@ -132,6 +133,7 @@ print_labels	src/tetris.c	/^void print_labels()$/;"	f
 print_next_piece	src/tetris.c	/^void print_next_piece(figure piece, figure next_piece)$/;"	f
 print_piece	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 print_score	src/tetris.c	/^void print_score(int score)$/;"	f
+print_score_message	src/tetris.c	/^void print_score_message(int score)$/;"	f
 print_side_boundary	src/tetris.c	/^void print_side_boundary(int x, int y)$/;"	f
 process_input	src/tetris.c	/^void process_input(bool (*field)[field_width], figure *piece, bool *exit)$/;"	f
 process_key	src/tetris.c	/^void process_key($/;"	f

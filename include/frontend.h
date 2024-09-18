@@ -12,7 +12,7 @@ enum frontend_consts {
     score_row           = 3,
     next_label_row      = 6,
     next_row            = 7,
-    game_info_gap       = 2 
+    game_info_gap       = 2
 };
 
 #define EMPTY_CELL_ROW      "   "

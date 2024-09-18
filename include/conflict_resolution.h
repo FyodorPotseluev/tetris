@@ -36,29 +36,50 @@ RECEIVES:
 RETURNES:
     --- */
 
+bool piece_field_cell_crossing_conflict(
+    bool (*field)[field_width], figure *piece
+);
+/*
+    Signals if a piece cell is crossing an occupied field cell.
+RECEIVES:
+    - `field` the pointer to the matrix describing the current field state;
+    - `piece` the pointer to the structure containing the current piece
+    properties.
+RETURNES:
+    - the boolean value indicating whether a piece/field cell crossing occured.
+*/
+
 void make_backup(void *dst, figure *piece);
 /*
-    Copies to the `dst` argument the current state of the `piece->form` matrix. It can be used later to restore the initial `piece->form` state.
+    Copies to the `dst` argument the current state of the `piece->form` matrix.
+It can be used later to restore the initial `piece->form` state.
 RECEIVES:
-    - `dst` untyped pointer to the matrix to store the current state of the `piece->form` matrix;
-    - `piece` the pointer to the structure containing the current piece properties.
+    - `dst` untyped pointer to the matrix to store the current state of the
+    `piece->form` matrix;
+    - `piece` the pointer to the structure containing the current piece
+    properties.
 RETURNES:
     ---
 ERROR HANDLING:
     - the `len` can't be different from `small_piece_size` and `big_piece_size`
-values. If it does, an error message is printed with the current `len` value and
-the program terminates. */
+    values. If it does, an error message is printed with the current `len` value
+    and the program terminates. */
 
 
 void handle_rotation_conflicts(
     bool (*field)[field_width], figure *piece, void *backup
 );
 /*
-    Prevents conflicts (crossing the field borders or already occupied field cells) after a rotation of a piece. In some cases, if a conflict is too deep, it rolls the rotation back.
+    Prevents conflicts (crossing the field borders or already occupied field
+cells) after a rotation of a piece. In some cases, if a conflict is too deep, it
+rolls the rotation back.
 RECEIVES:
     - `field` the pointer to the matrix describing the current field state;
-    - `piece` the pointer to the structure containing the current piece properties;
-    - `backup` untyped pointer to the matrix containing the state of the piece before the rotation. It's used for rolling the rotation back in case we couldn't resolve the conflict.
+    - `piece` the pointer to the structure containing the current piece
+    properties;
+    - `backup` untyped pointer to the matrix containing the state of the piece
+    before the rotation. It's used for rolling the rotation back in case we
+    couldn't resolve the conflict.
 RETURNES:
     --- */
 

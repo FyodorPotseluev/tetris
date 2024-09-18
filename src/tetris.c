@@ -554,6 +554,32 @@ void print_next_piece(figure piece, figure next_piece)
     refresh();
 }
 
+void print_score_message(int score)
+{
+    char msg[26] = "YOUR SCORE IS ";
+    char score_str[12];
+    int row, col;
+    int x, y;
+    getmaxyx(stdscr, row, col);
+    sprintf(score_str, "%d", score);
+    /* strcpy(msg + strlen(msg), score_str); */
+    strcat(msg, score_str);
+    x = (col - strlen(msg)) / 2 - 1;
+    y = row / 2 - 1;
+    mvprintw(y, x, "%s", msg);
+}
+
+void end_game(int score)
+{
+    clear();
+    print_score_message(score);
+    /* wait until any key is pressed */
+    timeout(-1);
+    getch();
+    endwin();
+    exit(0);
+}
+
 int main()
 {
     /* ncurses */
@@ -586,11 +612,9 @@ int main()
         next_piece = get_random_piece(set_of_pieces);
         print_next_piece(piece, next_piece);
         piece_spawn(field, &piece);
+        if (piece_field_cell_crossing_conflict(field, &piece)) exit = true;
         piece_falls(field, &piece, &exit);
         /* i++; */
     }
-
-    /* ncurses */
-    endwin();
-    return 0;
+    end_game(score);
 }
