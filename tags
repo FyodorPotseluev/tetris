@@ -40,6 +40,8 @@ cast_ghost	src/tetris.c	/^void cast_ghost($/;"	f
 cell_height	include/frontend.h	/^    cell_height         = 2,$/;"	e	enum:frontend_consts
 cell_occupied_by_	src/conflict_resolution.c	/^bool cell_occupied_by_(bool (*field)[field_width], int x, int y, figure *piece)$/;"	f
 cell_width	include/frontend.h	/^    cell_width          = 3,$/;"	e	enum:frontend_consts
+clear_completed_lines	src/tetris.c	/^void clear_completed_lines(bool (*field)[field_width], int *score)$/;"	f
+completed_lines_block_ended	src/tetris.c	/^bool completed_lines_block_ended($/;"	f
 constants	include/constants.h	/^enum constants {$/;"	g
 copy_callback	src/rotation.c	/^void copy_callback(void *dst, void *src, int len, int x, int y)$/;"	f
 crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	t	typeref:enum:tag_crossing_action
@@ -50,6 +52,7 @@ end_game	src/tetris.c	/^void end_game(int score)$/;"	f
 field_absorbes_piece	src/tetris.c	/^void field_absorbes_piece(bool (*field)[field_width], figure *piece)$/;"	f
 field_has_ended	src/tetris.c	/^bool field_has_ended(figure *piece, int y)$/;"	f
 field_height	include/constants.h	/^    field_height        = 20,$/;"	e	enum:constants
+field_matrix_rearrangement	src/tetris.c	/^void field_matrix_rearrangement($/;"	f
 field_width	include/constants.h	/^    field_width         = 10,$/;"	e	enum:constants
 figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
@@ -88,7 +91,7 @@ i_piece_horizontal_2_rotation_conflict_handling	src/conflict_resolution.c	/^void
 i_piece_vertical_1_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_1_rotation_conflict_handling($/;"	f
 i_piece_vertical_2_rotation_conflict_handling	src/conflict_resolution.c	/^void i_piece_vertical_2_rotation_conflict_handling($/;"	f
 init_callback	src/rotation.c	/^void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f
-init_delay	include/constants.h	/^    init_delay          = 333,          \/* 1\/3 of a second *\/$/;"	e	enum:constants
+init_delay	include/constants.h	/^    init_delay          = 10000,          \/* 1\/3 of a second *\/$/;"	e	enum:constants
 init_field	src/tetris.c	/^void init_field(bool (*field)[field_width])$/;"	f
 init_screen_x	src/tetris.c	/^int init_screen_x()$/;"	f
 init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(figure *set_of_pieces)$/;"	f
@@ -167,6 +170,7 @@ tag_piece_action	src/tetris.c	/^typedef enum tag_piece_action {$/;"	g	file:
 tag_position	include/constants.h	/^typedef enum tag_position {$/;"	g
 tag_type_of_cell	src/tetris.c	/^typedef enum tag_type_of_cell {$/;"	g	file:
 take_	src/tetris.c	/^void take_(piece_action action, int x, int y)$/;"	f
+there_are_completed_lines	src/tetris.c	/^bool there_are_completed_lines($/;"	f
 time_start	src/tetris.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
 time_stop	src/tetris.c	/^int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)$/;"	f
 top	src/tetris.c	/^    bottom, top, left_side, right_side$/;"	e	enum:tag_boundary_side	file:

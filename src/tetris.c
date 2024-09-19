@@ -562,7 +562,6 @@ void print_score_message(int score)
     int x, y;
     getmaxyx(stdscr, row, col);
     sprintf(score_str, "%d", score);
-    /* strcpy(msg + strlen(msg), score_str); */
     strcat(msg, score_str);
     x = (col - strlen(msg)) / 2 - 1;
     y = row / 2 - 1;
@@ -578,6 +577,107 @@ void end_game(int score)
     getch();
     endwin();
     exit(0);
+}
+
+bool completed_lines_block_ended(
+    bool completed_line, int num_of_completed_lines
+)
+{
+    return ((!completed_line) && (num_of_completed_lines)) ? true : false;
+}
+
+bool there_are_completed_lines(
+    bool (*field)[field_width], int *num_of_completed_lines,
+    int *row_num_of_first_completed_line
+)
+{
+    /* searching for completed lines from the bottom to the top */
+    int x, y;
+    for (y=field_height-1; y > 0; y--) {
+        bool completed_line = true;
+        bool empty_line = true;
+        for (x=0; x < field_width; x++) {
+            if (field[y][x] == 1)
+                empty_line = false;
+            else
+                completed_line = false;
+        }
+        if (completed_line) {
+            (*num_of_completed_lines)++;
+            if (!(*row_num_of_first_completed_line))
+                *row_num_of_first_completed_line = y;
+        }
+        if (
+            empty_line ||
+            completed_lines_block_ended(completed_line, *num_of_completed_lines)
+        )
+        {
+            break;
+        }
+    }
+    return (*num_of_completed_lines) ? true : false;
+}
+
+void field_matrix_rearrangement(
+    bool (*field)[field_width], int num, int init_row
+)
+{
+    int field_x, field_y, screen_x, screen_y;
+    for (
+        field_y = init_row, screen_y = get_init_y() + init_row * cell_height;
+        field_y > 0;
+        field_y--, screen_y -= cell_height
+    )
+    {
+        bool empty_line = true;
+        for (
+            field_x = 0, screen_x = get_init_x();
+            field_x < field_width;
+            field_x++, screen_x += cell_width
+        )
+        {
+            field[field_y][field_x] = field[field_y-num][field_x];
+            if (field[field_y][field_x] == 1) {
+                empty_line = false;
+                print_cell_(occupied, screen_x, screen_y);
+            } else
+                print_cell_(empty, screen_x, screen_y);
+        }
+        if (empty_line)
+            break;
+    }
+    for (
+        num--, field_y--, screen_y -= cell_height;
+        num > 0;
+        num--, field_y--, screen_y -= cell_height
+    )
+    {
+        for (
+            field_x = 0, screen_x = get_init_x();
+            field_x < field_width;
+            field_x++, screen_x += cell_width
+        )
+        {
+            field[field_y][field_x] = 0;
+            print_cell_(empty, screen_x, screen_y);
+        }
+    }
+}
+
+void clear_completed_lines(bool (*field)[field_width], int *score)
+{
+    (void)score;
+    int num_of_completed_lines = 0, row_num_of_first_completed_line = 0;
+    if (
+        there_are_completed_lines(
+            field, &num_of_completed_lines, &row_num_of_first_completed_line
+        )
+    )
+    {
+        field_matrix_rearrangement(
+            field, num_of_completed_lines, row_num_of_first_completed_line
+        );
+    }
 }
 
 int main()
@@ -614,6 +714,7 @@ int main()
         piece_spawn(field, &piece);
         if (piece_field_cell_crossing_conflict(field, &piece)) exit = true;
         piece_falls(field, &piece, &exit);
+        clear_completed_lines(field, &score);
         /* i++; */
     }
     end_game(score);
