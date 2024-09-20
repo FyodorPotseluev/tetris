@@ -364,11 +364,18 @@ void process_key(
     }
 }
 
-void process_input(bool (*field)[field_width], figure *piece, bool *exit)
+void process_input(
+    bool (*field)[field_width], figure *piece, int level, bool *exit
+)
 {
     struct timeval tv1, tv2;
     struct timezone tz;
-    int key_pressed, delay = init_delay;
+    speed_list speed[] = {
+        zero,     first,       second,      third,      fourth,    fifth,
+        sixth,    seventh,     eighth,      ninth,      tenth,     eleventh,
+        twelfth,  thirteenth,  fourteenth,  fifteenth
+    };
+    int key_pressed, delay = speed[level];
     for (;;) {
         bool hard_drop = false;
         timeout(delay);
@@ -391,10 +398,12 @@ void process_input(bool (*field)[field_width], figure *piece, bool *exit)
     }
 }
 
-void piece_falls(bool (*field)[field_width], figure *piece, bool *exit)
+void piece_falls(
+    bool (*field)[field_width], figure *piece, int level, bool *exit
+)
 {
     while (!(*exit)) {
-        process_input(field, piece, exit);
+        process_input(field, piece, level, exit);
         if (piece_has_fallen(field, piece)) {
             field_absorbes_piece(field, piece);
             break;
@@ -529,15 +538,16 @@ int game_info_x()
 
 void print_labels()
 {
+    mvprintw(game_info_y(level_label_row), game_info_x(), "LEVEL");
     mvprintw(game_info_y(score_label_row), game_info_x(), "SCORE");
     mvprintw(game_info_y(next_label_row)+cell_height-1, game_info_x(), "NEXT");
     curs_set(0);
     refresh();
 }
 
-void print_score(int score)
+void print_game_info(int info, int position)
 {
-    mvprintw(game_info_y(score_row), game_info_x(), "%d", score);
+    mvprintw(game_info_y(position), game_info_x(), "%d", info);
     curs_set(0);
     refresh();
 }
@@ -572,9 +582,10 @@ void end_game(int score)
 {
     clear();
     print_score_message(score);
-    /* wait until any key is pressed */
+    /* wait until `Esc` key is pressed to quit the game completely */
     timeout(-1);
-    getch();
+    while (getch() != 27)
+        ;
     endwin();
     exit(0);
 }
@@ -664,9 +675,47 @@ void field_matrix_rearrangement(
     }
 }
 
-void clear_completed_lines(bool (*field)[field_width], int *score)
+int score_bonus(int level, int num_of_completed_lines)
+{
+    switch (num_of_completed_lines) {
+        case 1:
+            return level * one_line_score_bonus;
+        case 2:
+            return level * two_lines_score_bonus;
+        case 3:
+            return level * three_lines_score_bonus;
+        case 4:
+            return level * four_lines_score_bonus;
+        default:
+            fprintf(
+                stderr, "function `clear_completed_lines`: incorrect number "
+                "of completed lines: %d\n", num_of_completed_lines
+            );
+            exit(1);
+    }
+}
+
+void score_increase(int *score, int level, int num_of_completed_lines)
+{
+    *score += score_bonus(level, num_of_completed_lines);
+}
+
+void level_up_if_necessary(int *level, int num_of_completed_lines)
+{
+    static int total_num_of_completed_lines;
+    total_num_of_completed_lines += num_of_completed_lines;
+    if (total_num_of_completed_lines >= num_of_completed_lines_for_level_up) {
+        (*level)++;
+        if ((*level) > maximum_game_level) (*level) = maximum_game_level;
+        print_game_info(*level, level_row);
+        total_num_of_completed_lines = 0;
+    }
+}
+
+void clear_completed_lines(bool (*field)[field_width], int *level, int *score)
 {
     (void)score;
+    /* static int total_num_of_completed_lines; */
     int num_of_completed_lines = 0, row_num_of_first_completed_line = 0;
     if (
         there_are_completed_lines(
@@ -677,6 +726,9 @@ void clear_completed_lines(bool (*field)[field_width], int *score)
         field_matrix_rearrangement(
             field, num_of_completed_lines, row_num_of_first_completed_line
         );
+        score_increase(score, *level, num_of_completed_lines);
+        print_game_info(*score, score_row);
+        level_up_if_necessary(level, num_of_completed_lines);
     }
 }
 
@@ -690,7 +742,7 @@ int main()
     ESCDELAY = 50;
 
     /* variables */
-    int score = 0;
+    int level = 1, score = 0;
     bool field[field_height][field_width];
     init_field(field);
     figure set_of_pieces[num_of_pieces];
@@ -702,7 +754,8 @@ int main()
     srand(time(NULL));
     print_field(field);
     print_labels();
-    print_score(score);
+    print_game_info(level, level_row);
+    print_game_info(score, score_row);
     /* int i = 0; */
     next_piece = get_random_piece(set_of_pieces);
     bool exit = false;
@@ -713,8 +766,8 @@ int main()
         print_next_piece(piece, next_piece);
         piece_spawn(field, &piece);
         if (piece_field_cell_crossing_conflict(field, &piece)) exit = true;
-        piece_falls(field, &piece, &exit);
-        clear_completed_lines(field, &score);
+        piece_falls(field, &piece, level, &exit);
+        clear_completed_lines(field, &level, &score);
         /* i++; */
     }
     end_game(score);

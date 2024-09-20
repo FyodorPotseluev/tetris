@@ -8,8 +8,10 @@ enum frontend_consts {
     cell_width          = 3,
     side_boundary_width = 1,
     top_boundary_height = 1,
-    score_label_row     = 2,
-    score_row           = 3,
+    level_label_row     = 0,
+    level_row           = 1,
+    score_label_row     = 3,
+    score_row           = 4,
     next_label_row      = 6,
     next_row            = 7,
     game_info_gap       = 2
