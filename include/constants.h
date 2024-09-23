@@ -16,6 +16,7 @@ enum constants {
     big_piece_size                      = 4,
     /* initial piece shift to the left border of the field when it spawns */
     initial_piece_shift                 = 4,
+    key_esc                             = 27,
     /* the number of scores you get for completing the specified number of
     lines at a time (multiplied by the current level) */
     one_line_score_bonus                = 100,
@@ -23,7 +24,9 @@ enum constants {
     three_lines_score_bonus             = 500,
     four_lines_score_bonus              = 800,
     num_of_completed_lines_for_level_up = 10,
-    maximum_game_level                  = 15
+    maximum_game_level                  = 15,
+    num_of_resize_msg_lines             = 6,
+    max_msg_str_size                    = 80
 };
 
 /* the list of piece fall step delays (the time in milliseconds it takes for a
@@ -34,6 +37,20 @@ typedef enum tag_speed_list {
         eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,
         twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7
 } speed_list;
+
+#define RESIZE_WARNING_MSG         "YOUR TERMINAL WINDOW IS TOO SMALL!"
+
+#define CURR_TERMINAL_SIZE_MSG     "IT IS %dx%d CHARACTER CELLS NOW."
+
+#define REQUIRED_TERMINAL_SIZE_MSG "IT NEEDS TO BE AT LEAST %dx%d."
+
+#define RESIZE_REQUEST_MSG_1       "PLEASE RESIZE YOUR TERMINAL"
+
+#define RESIZE_REQUEST_MSG_2       "AND TRY AGAIN."
+
+#define CLOSE_WINDOW_MSG           "PRESS `ESC` TO CLOSE THIS WINDOW."
+
+#define FINAL_SCORE_MSG            "YOUR SCORE IS %d"
 
 typedef enum tag_move_direction { left = 1, right } move_direction;
 

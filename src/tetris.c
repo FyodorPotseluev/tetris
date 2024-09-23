@@ -50,7 +50,7 @@ int get_init_x()
         int row, col;
         (void)row;
         getmaxyx(stdscr, row, col);
-        init_x = (col - field_width * cell_width) / 2 - 1;
+        init_x = (col - field_width * cell_width) / 2;
         initialized = true;
     }
     return init_x;
@@ -356,7 +356,7 @@ void process_key(
             *hard_drop = true;
             break;
         /* exit the game (Esc) */
-        case 27:
+        case key_esc:
             *exit = true;
         case KEY_DOWN:
         case ERR:
@@ -564,30 +564,43 @@ void print_next_piece(figure piece, figure next_piece)
     refresh();
 }
 
+void print_centered_format_msg(
+    int *y, int col, char *msg, int format_1, int format_2
+)
+{
+    if (format_1) {
+        char assist_str[max_msg_str_size];
+        sprintf(assist_str, msg, format_1, format_2);
+        msg = assist_str;
+    }
+    int x = (col - strlen(msg)) / 2;
+    mvprintw(*y, x, "%s", msg);
+    (*y)++;
+}
+
 void print_score_message(int score)
 {
-    char msg[26] = "YOUR SCORE IS ";
-    char score_str[12];
     int row, col;
-    int x, y;
+    int y;
     getmaxyx(stdscr, row, col);
-    sprintf(score_str, "%d", score);
-    strcat(msg, score_str);
-    x = (col - strlen(msg)) / 2 - 1;
-    y = row / 2 - 1;
-    mvprintw(y, x, "%s", msg);
+    y = row / 2;
+    print_centered_format_msg(&y, col, FINAL_SCORE_MSG, score, 0);
+}
+
+void wait_until_esc_is_pressed()
+{
+    timeout(-1);
+    while (getch() != key_esc)
+        ;
+    endwin();
+    exit(0);
 }
 
 void end_game(int score)
 {
     clear();
     print_score_message(score);
-    /* wait until `Esc` key is pressed to quit the game completely */
-    timeout(-1);
-    while (getch() != 27)
-        ;
-    endwin();
-    exit(0);
+    wait_until_esc_is_pressed();
 }
 
 bool completed_lines_block_ended(
@@ -732,6 +745,45 @@ void clear_completed_lines(bool (*field)[field_width], int *level, int *score)
     }
 }
 
+int min_screen_width()
+{
+    return
+        (game_info_gap + big_piece_size) * cell_width * 2 +
+        field_width * cell_width - 1;
+}
+
+int min_screen_height()
+{
+    return 2*top_boundary_height + cell_height*field_height;
+}
+
+int init_resize_screen_y(int row)
+{
+    return (row - num_of_resize_msg_lines) / 2;
+}
+
+void screen_size_check()
+{
+    int row, col;
+    getmaxyx(stdscr, row, col);
+    if ((col < min_screen_width()) || (row < min_screen_height())) {
+        int y;
+        y = init_resize_screen_y(row);
+        print_centered_format_msg(&y, col, RESIZE_WARNING_MSG, 0, 0);
+        print_centered_format_msg(&y, col, CURR_TERMINAL_SIZE_MSG, col, row);
+        print_centered_format_msg(
+            &y, col, REQUIRED_TERMINAL_SIZE_MSG,
+            min_screen_width(), min_screen_height()
+        );
+        print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_1, 0, 0);
+        print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_2, 0, 0);
+        print_centered_format_msg(&y, col, CLOSE_WINDOW_MSG, 0, 0);
+        refresh();
+        curs_set(0);
+        wait_until_esc_is_pressed();
+    }
+}
+
 int main()
 {
     /* ncurses */
@@ -748,19 +800,17 @@ int main()
     figure set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     figure piece, next_piece;
-    /* int test_arr[] = { 5, 5, 1, 1, 1 }; */
 
     /* MAIN */
+    screen_size_check();
     srand(time(NULL));
     print_field(field);
     print_labels();
     print_game_info(level, level_row);
     print_game_info(score, score_row);
-    /* int i = 0; */
     next_piece = get_random_piece(set_of_pieces);
     bool exit = false;
     while (!exit) {
-        /* piece = set_of_pieces[test_arr[i]]; */
         piece = next_piece;
         next_piece = get_random_piece(set_of_pieces);
         print_next_piece(piece, next_piece);
@@ -768,7 +818,6 @@ int main()
         if (piece_field_cell_crossing_conflict(field, &piece)) exit = true;
         piece_falls(field, &piece, level, &exit);
         clear_completed_lines(field, &level, &score);
-        /* i++; */
     }
     end_game(score);
 }
