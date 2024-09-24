@@ -23,7 +23,7 @@ RETURNES:
     - the boolean value indicating whether a side boundary crossing took place. */
 
 void side_cells_crossing_prevention(
-    move_direction direction, bool (*field)[field_width], figure *piece
+    move_direction direction, const bool (*field)[field_width], figure *piece
 );
 /*
     Prevents a piece from crossing already occupied side field cells by
@@ -37,7 +37,7 @@ RETURNES:
     --- */
 
 bool piece_field_cell_crossing_conflict(
-    bool (*field)[field_width], figure *piece
+    const bool (*field)[field_width], const figure *piece
 );
 /*
     Signals if a piece cell is crossing an occupied field cell.
@@ -49,7 +49,7 @@ RETURNES:
     - the boolean value indicating whether a piece/field cell crossing occured.
 */
 
-void make_backup(void *dst, figure *piece);
+void make_backup(void *dst, const figure *piece);
 /*
     Copies to the `dst` argument the current state of the `piece->form` matrix.
 It can be used later to restore the initial `piece->form` state.
@@ -67,7 +67,7 @@ ERROR HANDLING:
 
 
 void handle_rotation_conflicts(
-    bool (*field)[field_width], figure *piece, void *backup
+    const bool (*field)[field_width], figure *piece, const void *backup
 );
 /*
     Prevents conflicts (crossing the field borders or already occupied field

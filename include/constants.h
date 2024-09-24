@@ -23,9 +23,13 @@ enum constants {
     two_lines_score_bonus               = 300,
     three_lines_score_bonus             = 500,
     four_lines_score_bonus              = 800,
+    /* the number of lines you need to get level up */
     num_of_completed_lines_for_level_up = 10,
+    /* the maximum game level after which you cannot level up any more */
     maximum_game_level                  = 15,
+    /* the number of lines the resize request message consists of */
     num_of_resize_msg_lines             = 6,
+    /* the maximum length of a game message (for example, the score message) */
     max_msg_str_size                    = 80
 };
 
@@ -38,6 +42,8 @@ typedef enum tag_speed_list {
         twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7
 } speed_list;
 
+/* the messages used when the player's terminal window is too small */
+
 #define RESIZE_WARNING_MSG         "YOUR TERMINAL WINDOW IS TOO SMALL!"
 
 #define CURR_TERMINAL_SIZE_MSG     "IT IS %dx%d CHARACTER CELLS NOW."
@@ -49,6 +55,8 @@ typedef enum tag_speed_list {
 #define RESIZE_REQUEST_MSG_2       "AND TRY AGAIN."
 
 #define CLOSE_WINDOW_MSG           "PRESS `ESC` TO CLOSE THIS WINDOW."
+
+/* the message at the end of the game */
 
 #define FINAL_SCORE_MSG            "YOUR SCORE IS %d"
 

@@ -7,6 +7,7 @@ digraph codeviz {
 
     node [fillcolor="#ccccff", style=filled] "./include/conflict_resolution.h" [label = "./include/conflict_resolution.h"]
     node [fillcolor="#ccccff", style=filled] "./include/constants.h"           [label = "./include/constants.h"]
+    node [fillcolor="#ccccff", style=filled] "./include/frontend.h"            [label = "./include/frontend.h"]
     node [fillcolor="#ccccff", style=filled] "./include/rotation.h"            [label = "./include/rotation.h"]
     node [fillcolor="#ff9999", style=filled] "./src/conflict_resolution.c"     [label = "./src/conflict_resolution.c"]
     node [fillcolor="#ff9999", style=filled] "./src/rotation.c"                [label = "./src/rotation.c"]
@@ -18,5 +19,6 @@ digraph codeviz {
     "./src/rotation.c"                -> "./include/constants.h"
     "./src/tetris.c"                  -> "./include/conflict_resolution.h"
     "./src/tetris.c"                  -> "./include/constants.h"
+    "./src/tetris.c"                  -> "./include/frontend.h"
     "./src/tetris.c"                  -> "./include/rotation.h"
 }

@@ -28,7 +28,9 @@ void time_start(struct timeval *tv1, struct timezone *tz)
     gettimeofday(tv1, tz);
 }
 
-int time_stop(struct timeval *tv1, struct timeval *tv2, struct timezone *tz)
+int time_stop(
+    const struct timeval *tv1, struct timeval *tv2, struct timezone *tz
+)
 {
     struct timeval dtv;
     gettimeofday(tv2, tz);
@@ -104,7 +106,9 @@ void print_side_boundary(int x, int y)
     }
 }
 
-void print_field_boundary(boundary_side side, int *screen_x, int *screen_y)
+void print_field_boundary(
+    boundary_side side, int *screen_x, const int *screen_y
+)
 {
     switch (side) {
         case top:
@@ -129,7 +133,7 @@ int init_screen_x()
     return get_init_x() - side_boundary_width;
 }
 
-void print_field(bool (*field)[field_width])
+void print_field(const bool (*field)[field_width])
 {
     int field_x, field_y, screen_x, screen_y;
     print_field_boundary(top, NULL, NULL);
@@ -170,26 +174,26 @@ void take_(piece_action action, int x, int y)
     }
 }
 
-int ghost_y(figure *piece, int y)
+int ghost_y(const figure *piece, int y)
 {
     return get_init_y() + (piece->ghost_decline + y) * cell_height;
 }
 
-int curr_y(figure *piece, int y)
+int curr_y(const figure *piece, int y)
 {
     return get_init_y() + (piece->y_decline + y) * cell_height;
 }
 
-int curr_x(figure *piece, int x)
+int curr_x(const figure *piece, int x)
 {
     return get_init_x() + (piece->x_shift + x) * cell_width;
 }
 
-void piece_(piece_action action, figure *piece)
+void piece_(piece_action action, const figure *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
-    bool (*matrix)[piece->size] = piece->form.small;
+    const bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
     for (y=0; y < piece->size; y++) {
         for (x=0; x < piece->size; x++) {
@@ -222,13 +226,13 @@ void truncate_piece(figure *piece)
     }
 }
 
-bool field_has_ended(figure *piece, int y)
+bool field_has_ended(const figure *piece, int y)
 {
     return (y + piece->y_decline + 1 == field_height) ? true : false;
 }
 
 bool lower_field_cell_is_occupied(
-    bool (*field)[field_width], figure *piece, int x, int y
+    const bool (*field)[field_width], const figure *piece, int x, int y
 )
 {
     if (field[y + piece->y_decline + 1][x + piece->x_shift] ==1)
@@ -237,11 +241,11 @@ bool lower_field_cell_is_occupied(
         return false;
 }
 
-bool piece_has_fallen(bool (*field)[field_width], figure *piece)
+bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
-    bool (*matrix)[piece->size] = piece->form.small;
+    const bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
     /* fall_checks: looking for every lowest cell in each column */
     for (y=piece->size-1; y >= 0; y--) {
@@ -258,7 +262,7 @@ bool piece_has_fallen(bool (*field)[field_width], figure *piece)
 }
 
 void cast_ghost(
-    bool (*field)[field_width], figure piece, signed char *ghost_decline
+    const bool (*field)[field_width], figure piece, signed char *ghost_decline
 )
 {
     while (!piece_has_fallen(field, &piece))
@@ -267,7 +271,7 @@ void cast_ghost(
     *ghost_decline = piece.y_decline;
 }
 
-void piece_spawn(bool (*field)[field_width], figure *piece)
+void piece_spawn(const bool (*field)[field_width], figure *piece)
 {
     truncate_piece(piece);
     cast_ghost(field, *piece, &piece->ghost_decline);
@@ -276,11 +280,11 @@ void piece_spawn(bool (*field)[field_width], figure *piece)
     refresh();
 }
 
-void field_absorbes_piece(bool (*field)[field_width], figure *piece)
+void field_absorbes_piece(bool (*field)[field_width], const figure *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
-    bool (*matrix)[piece->size] = piece->form.small;
+    const bool (*matrix)[piece->size] = piece->form.small;
     int x, y;
     /* `piece` cells become `field` cells */
     for (y=0; y < piece->size; y++) {
@@ -292,7 +296,7 @@ void field_absorbes_piece(bool (*field)[field_width], figure *piece)
 }
 
 void move_(
-    move_direction direction, bool (*field)[field_width], figure *piece
+    move_direction direction, const bool (*field)[field_width], figure *piece
 )
 {
     piece_(hide_ghost, piece);
@@ -319,7 +323,7 @@ void piece_fall_step(figure *piece)
     refresh();
 }
 
-void handle_rotation(bool (*field)[field_width], figure *piece)
+void handle_rotation(const bool (*field)[field_width], figure *piece)
 {
     bool backup_matrix[piece->size][piece->size];
     make_backup(backup_matrix, piece);
@@ -334,7 +338,7 @@ void handle_rotation(bool (*field)[field_width], figure *piece)
 }
 
 void process_key(
-    int key_pressed, bool (*field)[field_width],
+    int key_pressed, const bool (*field)[field_width],
     figure *piece, bool *hard_drop, bool *exit
 )
 {
@@ -365,7 +369,7 @@ void process_key(
 }
 
 void process_input(
-    bool (*field)[field_width], figure *piece, int level, bool *exit
+    const bool (*field)[field_width], figure *piece, int level, bool *exit
 )
 {
     struct timeval tv1, tv2;
@@ -565,14 +569,12 @@ void print_next_piece(figure piece, figure next_piece)
 }
 
 void print_centered_format_msg(
-    int *y, int col, char *msg, int format_1, int format_2
+    int *y, int col, const char *msg, int format_1, int format_2
 )
 {
-    if (format_1) {
-        char assist_str[max_msg_str_size];
-        sprintf(assist_str, msg, format_1, format_2);
-        msg = assist_str;
-    }
+    char assist_str[max_msg_str_size];
+    sprintf(assist_str, msg, format_1, format_2);
+    msg = assist_str;
     int x = (col - strlen(msg)) / 2;
     mvprintw(*y, x, "%s", msg);
     (*y)++;
@@ -587,7 +589,7 @@ void print_score_message(int score)
     print_centered_format_msg(&y, col, FINAL_SCORE_MSG, score, 0);
 }
 
-void wait_until_esc_is_pressed()
+void wait_until_esc_is_pressed_then_exit()
 {
     timeout(-1);
     while (getch() != key_esc)
@@ -600,7 +602,7 @@ void end_game(int score)
 {
     clear();
     print_score_message(score);
-    wait_until_esc_is_pressed();
+    wait_until_esc_is_pressed_then_exit();
 }
 
 bool completed_lines_block_ended(
@@ -611,7 +613,7 @@ bool completed_lines_block_ended(
 }
 
 bool there_are_completed_lines(
-    bool (*field)[field_width], int *num_of_completed_lines,
+    const bool (*field)[field_width], int *num_of_completed_lines,
     int *row_num_of_first_completed_line
 )
 {
@@ -762,25 +764,30 @@ int init_resize_screen_y(int row)
     return (row - num_of_resize_msg_lines) / 2;
 }
 
+void print_resize_request_msg(int row, int col)
+{
+    int y;
+    y = init_resize_screen_y(row);
+    print_centered_format_msg(&y, col, RESIZE_WARNING_MSG, 0, 0);
+    print_centered_format_msg(&y, col, CURR_TERMINAL_SIZE_MSG, col, row);
+    print_centered_format_msg(
+        &y, col, REQUIRED_TERMINAL_SIZE_MSG,
+        min_screen_width(), min_screen_height()
+    );
+    print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_1, 0, 0);
+    print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_2, 0, 0);
+    print_centered_format_msg(&y, col, CLOSE_WINDOW_MSG, 0, 0);
+    refresh();
+    curs_set(0);
+}
+
 void screen_size_check()
 {
     int row, col;
     getmaxyx(stdscr, row, col);
     if ((col < min_screen_width()) || (row < min_screen_height())) {
-        int y;
-        y = init_resize_screen_y(row);
-        print_centered_format_msg(&y, col, RESIZE_WARNING_MSG, 0, 0);
-        print_centered_format_msg(&y, col, CURR_TERMINAL_SIZE_MSG, col, row);
-        print_centered_format_msg(
-            &y, col, REQUIRED_TERMINAL_SIZE_MSG,
-            min_screen_width(), min_screen_height()
-        );
-        print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_1, 0, 0);
-        print_centered_format_msg(&y, col, RESIZE_REQUEST_MSG_2, 0, 0);
-        print_centered_format_msg(&y, col, CLOSE_WINDOW_MSG, 0, 0);
-        refresh();
-        curs_set(0);
-        wait_until_esc_is_pressed();
+        print_resize_request_msg(row, col);
+        wait_until_esc_is_pressed_then_exit();
     }
 }
 

@@ -9,7 +9,7 @@
 
 typedef void (*matrix_callback)(void*, void*, int, int, int);
 
-int reversion(int num, int arr_len)
+static int reversion(int num, int arr_len)
 {
     int i, count;
     for (i=arr_len-1, count=0; i >= 0; i--, count++) {
@@ -20,35 +20,35 @@ int reversion(int num, int arr_len)
     exit(1);
 }
 
-void init_callback(void *dst, void *src, int len, int x, int y)
+static void init_callback(void *dst, void *src, int len, int x, int y)
 {
     (void)dst;
     bool (*src_arr)[len] = src;
     src_arr[y][x] = 0;
 }
 
-void transpose_callback(void *dst, void *src, int len, int x, int y)
+static void transpose_callback(void *dst, void *src, int len, int x, int y)
 {
     bool (*dst_arr)[len] = dst;
     bool (*src_arr)[len] = src;
     dst_arr[x][y] = src_arr[y][x];
 }
 
-void reverse_rows_callback(void *dst, void *src, int len, int x, int y)
+static void reverse_rows_callback(void *dst, void *src, int len, int x, int y)
 {
     bool (*dst_arr)[len] = dst;
     bool (*src_arr)[len] = src;
     dst_arr[y][reversion(x, len)] = src_arr[y][x];
 }
 
-void copy_callback(void *dst, void *src, int len, int x, int y)
+static void copy_callback(void *dst, void *src, int len, int x, int y)
 {
     bool (*dst_arr)[len] = dst;
     bool (*src_arr)[len] = src;
     dst_arr[y][x] = src_arr[y][x];
 }
 
-void matrix_(
+static void matrix_(
     matrix_callback callback, void *dst, void *src, int len
 )
 {
