@@ -51,6 +51,7 @@
 
                                 Contributing
 
+    Discussions:   github.com/FyodorPotseluev/tetris/discussions
     Issue Tracker: github.com/FyodorPotseluev/tetris/issues
 
                                 License
