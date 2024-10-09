@@ -235,10 +235,13 @@ bool lower_field_cell_is_occupied(
     const bool (*field)[field_width], const figure *piece, int x, int y
 )
 {
-    if (field[y + piece->y_decline + 1][x + piece->x_shift] ==1)
+    if (field_has_ended(piece, y) ||
+        field[y + piece->y_decline + 1][x + piece->x_shift] == 1)
+    {
         return true;
-    else
+    } else {
         return false;
+    }
 }
 
 bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
@@ -252,8 +255,6 @@ bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
         for (x=0; x < piece->size; x++) {
             if (matrix[y][x] == 1) {
                 if (lower_field_cell_is_occupied(field, piece, x, y))
-                    return true;
-                if (field_has_ended(piece, y))
                     return true;
             }
         }

@@ -5,33 +5,33 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 BIN_DIR	Makefile	/^BIN_DIR := $(BUILD_DIR)\/bin$/;"	m
-BOTTOM_TOP_BOUNDARY	include/frontend.h	26;"	d
+BOTTOM_TOP_BOUNDARY	include/frontend.h	36;"	d
 BUILD_DIR	Makefile	/^BUILD_DIR := .\/build$/;"	m
 BUILD_DIRS	Makefile	/^BUILD_DIRS := $(OBJ_DIR) $(BIN_DIR)$/;"	m
 CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
-CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g -O0 -Iinclude$/;"	m
-CLOSE_WINDOW_MSG	include/constants.h	51;"	d
+CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g3 -O0 -Iinclude -fsanitize=address,undefined$/;"	m
+CLOSE_WINDOW_MSG	include/constants.h	57;"	d
 CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
 CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
-CURR_TERMINAL_SIZE_MSG	include/constants.h	43;"	d
-EMPTY_CELL_ROW	include/frontend.h	20;"	d
+CURR_TERMINAL_SIZE_MSG	include/constants.h	49;"	d
+EMPTY_CELL_ROW	include/frontend.h	28;"	d
 EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
-FINAL_SCORE_MSG	include/constants.h	53;"	d
+FINAL_SCORE_MSG	include/constants.h	61;"	d
 FRONTEND_H_INCLUDED	include/frontend.h	4;"	d
-GHOST_CELL_ROW	include/frontend.h	24;"	d
+GHOST_CELL_ROW	include/frontend.h	32;"	d
 INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	/^MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)$/;"	f
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	7;"	d	file:
 OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o, $(SRCMODULES))$/;"	m
 OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
-OCCUPIED_CELL_ROW	include/frontend.h	22;"	d
+OCCUPIED_CELL_ROW	include/frontend.h	30;"	d
 PROJECT	Makefile	/^PROJECT := tetris$/;"	m
-REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	45;"	d
-RESIZE_REQUEST_MSG_1	include/constants.h	47;"	d
-RESIZE_REQUEST_MSG_2	include/constants.h	49;"	d
-RESIZE_WARNING_MSG	include/constants.h	41;"	d
+REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	51;"	d
+RESIZE_REQUEST_MSG_1	include/constants.h	53;"	d
+RESIZE_REQUEST_MSG_2	include/constants.h	55;"	d
+RESIZE_WARNING_MSG	include/constants.h	47;"	d
 ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
-SIDE_BOUNDARY	include/frontend.h	28;"	d
+SIDE_BOUNDARY	include/frontend.h	38;"	d
 SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
 SRC_DIR	Makefile	/^SRC_DIR := .\/src$/;"	m
 apply_backup	src/conflict_resolution.c	/^static void apply_backup(figure *piece, const void *src, int dx, int dy)$/;"	f	file:

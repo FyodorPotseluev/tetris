@@ -26,14 +26,23 @@ OBJMODULES := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCMODULES))
 
 # C compiler configuration
 CC = gcc # using gcc compiler
-CFLAGS = -Wall -Wextra -g -O0 -Iinclude
+CFLAGS = -Wall -Wextra -g3 -O0 -Iinclude -fsanitize=address,undefined
 # CFLAGS options:
-# -Wall		Warnings: all - display every single warning
-# -Wextra	Enable some extra warning flags that are not enabled by -Wall
-# -g		Compile with debug symbols in binary files
-# -O0		Disable compilation optimizations
+# -Wall		Warnings: all - display every single warning;
+# -Wextra	Warnings: extra - enable some extra warning flags that are not
+#		enabled by -Wall;
+# -g3		Compile with verbose debugging information, including
+#		preprocessor macros and additional metadata;
+# -O0		Disable compilation optimizations;
 # -Iinclude	Add the directory /include to the list of directories to be
-#  		searched for header files during preprocessing.
+#  		searched for header files during preprocessing;
+# -fsanitize=	Enable sanitizers, which inject extra checks into the code
+#		compile time, preparing it to catch potential issues at runtime;
+#	address
+#		This sanitizer detects memory-related errors such as buffer
+#		overflows, heap-use-after-free and stack-use-after-return;
+#	undefined
+#		This sanitizer detects undefined behavior.
 
 all: $(EXECUTABLE)
 
