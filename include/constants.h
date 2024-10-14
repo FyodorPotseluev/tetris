@@ -16,6 +16,8 @@ enum constants {
     big_piece_size                      = 4,
     /* initial piece shift to the left border of the field when it spawns */
     initial_piece_shift                 = 4,
+    /* the maximum number of lines that can be completed in one game move */
+    max_num_of_completed_lines          = 4,
     key_esc                             = 27,
     /* the number of scores you get for completing the specified number of
     lines at a time (multiplied by the current level) */

@@ -36,7 +36,7 @@ RECEIVES:
 RETURNES:
     --- */
 
-bool piece_field_cell_crossing_conflict(
+bool piece_field_crossing_conflict(
     const bool (*field)[field_width], const figure *piece
 );
 /*

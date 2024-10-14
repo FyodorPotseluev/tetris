@@ -340,7 +340,7 @@ void handle_rotation(const bool (*field)[field_width], figure *piece)
 
 void process_key(
     int key_pressed, const bool (*field)[field_width],
-    figure *piece, bool *hard_drop, bool *exit
+    figure *piece, bool *hard_drop, bool *game_on
 )
 {
     switch (key_pressed) {
@@ -362,7 +362,7 @@ void process_key(
             break;
         /* exit the game (Esc) */
         case key_esc:
-            *exit = true;
+            *game_on = false;
         case KEY_DOWN:
         case ERR:
             ;
@@ -370,7 +370,7 @@ void process_key(
 }
 
 void process_input(
-    const bool (*field)[field_width], figure *piece, int level, bool *exit
+    const bool (*field)[field_width], figure *piece, int level, bool *game_on
 )
 {
     struct timeval tv1, tv2;
@@ -386,10 +386,10 @@ void process_input(
         timeout(delay);
         time_start(&tv1, &tz);
         key_pressed = getch();
-        process_key(key_pressed, field, piece, &hard_drop, exit);
+        process_key(key_pressed, field, piece, &hard_drop, game_on);
         if (
             (key_pressed == ERR) || (key_pressed == KEY_DOWN) ||
-            (hard_drop) || (*exit)
+            (hard_drop) || (!*game_on)
         )
         {
             break;
@@ -404,11 +404,11 @@ void process_input(
 }
 
 void piece_falls(
-    bool (*field)[field_width], figure *piece, int level, bool *exit
+    bool (*field)[field_width], figure *piece, int level, bool *game_on
 )
 {
-    while (!(*exit)) {
-        process_input(field, piece, level, exit);
+    while ((*game_on)) {
+        process_input(field, piece, level, game_on);
         if (piece_has_fallen(field, piece)) {
             field_absorbes_piece(field, piece);
             break;
@@ -515,16 +515,6 @@ void init_set_of_pieces(figure *set_of_pieces)
     memcpy(&set_of_pieces[i], &L_piece, sizeof(figure));
 }
 
-void init_field(bool (*field)[field_width])
-{
-    int x, y;
-    for (y=0; y < field_height; y++) {
-        for (x=0; x < field_width; x++) {
-            field[y][x] = 0;
-        }
-    }
-}
-
 figure get_random_piece(const figure *set_of_pieces)
 {
     int i = (int)(((double)num_of_pieces) * rand() / (RAND_MAX+1.0));
@@ -557,7 +547,7 @@ void print_game_info(int info, int position)
     refresh();
 }
 
-void print_next_piece(figure piece, figure next_piece)
+void show_next_piece_preview(figure piece, figure next_piece)
 {
     piece.x_shift = field_width + game_info_gap;
     next_piece.x_shift = field_width + game_info_gap;
@@ -606,23 +596,40 @@ void end_game(int score)
     wait_until_esc_is_pressed_then_exit();
 }
 
-bool completed_lines_block_ended(
-    bool completed_line, int num_of_completed_lines
+void process_uncompleted_line(
+    bool we_are_checking_block_with_completed_lines,
+    int *num_of_checked_lines, bool **sequence_of_completed_lines
 )
 {
-    return ((!completed_line) && (num_of_completed_lines)) ? true : false;
+    if (we_are_checking_block_with_completed_lines) {
+        num_of_checked_lines++;
+        (*sequence_of_completed_lines)++;
+    }
+}
+
+void process_completed_line(
+    int *num_of_completed_lines, bool **sequence_of_completed_lines,
+    int *row_num_of_first_completed_line, int *num_of_checked_lines, int y
+)
+{
+    (*num_of_checked_lines)++;
+    (*num_of_completed_lines)++;
+    **sequence_of_completed_lines = 1;
+    (*sequence_of_completed_lines)++;
+    if (!(*row_num_of_first_completed_line))
+        *row_num_of_first_completed_line = y;
 }
 
 bool there_are_completed_lines(
     const bool (*field)[field_width], int *num_of_completed_lines,
-    int *row_num_of_first_completed_line
+    int *row_num_of_first_completed_line, bool *sequence_of_completed_lines
 )
 {
+    int x, y, num_of_checked_lines = 0;
+    bool we_are_checking_block_with_completed_lines = false;
     /* searching for completed lines from the bottom to the top */
-    int x, y;
     for (y=field_height-1; y > 0; y--) {
-        bool completed_line = true;
-        bool empty_line = true;
+        bool completed_line = true, empty_line = true;
         for (x=0; x < field_width; x++) {
             if (field[y][x] == 1)
                 empty_line = false;
@@ -630,64 +637,119 @@ bool there_are_completed_lines(
                 completed_line = false;
         }
         if (completed_line) {
-            (*num_of_completed_lines)++;
-            if (!(*row_num_of_first_completed_line))
-                *row_num_of_first_completed_line = y;
+            we_are_checking_block_with_completed_lines = true;
+            process_completed_line(
+                num_of_completed_lines, &sequence_of_completed_lines,
+                row_num_of_first_completed_line, &num_of_checked_lines, y
+            );
+        } else {
+            process_uncompleted_line(
+                we_are_checking_block_with_completed_lines,
+                &num_of_checked_lines, &sequence_of_completed_lines
+            );
         }
-        if (
-            empty_line ||
-            completed_lines_block_ended(completed_line, *num_of_completed_lines)
-        )
-        {
+        if (empty_line || num_of_checked_lines == max_num_of_completed_lines)
             break;
-        }
     }
     return (*num_of_completed_lines) ? true : false;
 }
 
-void field_matrix_rearrangement(
-    bool (*field)[field_width], int num, int init_row
+void shift_down_upper_not_empty_lines_for_num_positions(
+    bool (*field)[field_width], int init_row_to_replace,
+    int num, int *field_y, int *screen_y
 )
 {
-    int field_x, field_y, screen_x, screen_y;
-    for (
-        field_y = init_row, screen_y = get_init_y() + init_row * cell_height;
-        field_y > 0;
-        field_y--, screen_y -= cell_height
-    )
+    int field_x, screen_x;
+    for(*field_y = init_row_to_replace,
+            *screen_y = get_init_y() + init_row_to_replace * cell_height;
+        *field_y > 0;
+        (*field_y)--, *screen_y -= cell_height)
     {
         bool empty_line = true;
-        for (
-            field_x = 0, screen_x = get_init_x();
+        for(field_x = 0, screen_x = get_init_x();
             field_x < field_width;
-            field_x++, screen_x += cell_width
-        )
+            field_x++, screen_x += cell_width)
         {
-            field[field_y][field_x] = field[field_y-num][field_x];
-            if (field[field_y][field_x] == 1) {
+            field[*field_y][field_x] = field[*field_y-num][field_x];
+            if (field[*field_y][field_x] == 1) {
                 empty_line = false;
-                print_cell_(occupied, screen_x, screen_y);
+                print_cell_(occupied, screen_x, *screen_y);
             } else
-                print_cell_(empty, screen_x, screen_y);
+                print_cell_(empty, screen_x, *screen_y);
         }
         if (empty_line)
             break;
     }
-    for (
-        num--, field_y--, screen_y -= cell_height;
+}
+
+void replace_upmost_not_empty_lines_with_empty_cells(
+    bool (*field)[field_width], int num, int field_y, int screen_y
+)
+{
+    int field_x, screen_x;
+    for(num--, field_y--, screen_y -= cell_height;
         num > 0;
-        num--, field_y--, screen_y -= cell_height
-    )
+        num--, field_y--, screen_y -= cell_height)
     {
-        for (
-            field_x = 0, screen_x = get_init_x();
+        for(field_x = 0, screen_x = get_init_x();
             field_x < field_width;
-            field_x++, screen_x += cell_width
-        )
+            field_x++, screen_x += cell_width)
         {
             field[field_y][field_x] = 0;
             print_cell_(empty, screen_x, screen_y);
         }
+    }
+}
+
+void delete_completed_lines(
+    bool (*field)[field_width], int init_row_to_replace, int num
+)
+{
+    int field_y, screen_y;
+    shift_down_upper_not_empty_lines_for_num_positions(
+        field, init_row_to_replace, num, &field_y, &screen_y
+    );
+    replace_upmost_not_empty_lines_with_empty_cells(
+        field, num, field_y, screen_y
+    );
+}
+
+bool curr_line_is_completed(int num)
+{
+    return (num) ? true : false;
+}
+
+void find_continuous_block_of_completed_lines(
+    bool *sequence_of_completed_lines, int *i, int *num_of_deleted_lines
+)
+{
+    while ((*i < max_num_of_completed_lines) && sequence_of_completed_lines[*i])
+    {
+        (*num_of_deleted_lines)++;
+        (*i)++;
+    }
+}
+
+void field_matrix_rearrangement(
+    bool (*field)[field_width], int init_row_to_replace,
+    bool *sequence_of_completed_lines
+)
+{
+    int i = 0, num_of_deleted_lines = 0;
+    for(;
+        i < max_num_of_completed_lines;
+        i++, num_of_deleted_lines = 0, init_row_to_replace--)
+    {
+        find_continuous_block_of_completed_lines(
+            sequence_of_completed_lines, &i, &num_of_deleted_lines
+        );
+        if (curr_line_is_completed(num_of_deleted_lines))
+            delete_completed_lines(
+                field, init_row_to_replace, num_of_deleted_lines
+            );
+        else
+            /* it's an uncompleted line in the block of completed lines */
+            continue;
     }
 }
 
@@ -728,19 +790,23 @@ void level_up_if_necessary(int *level, int num_of_completed_lines)
     }
 }
 
-void clear_completed_lines(bool (*field)[field_width], int *level, int *score)
+void clear_completed_lines_update_score_and_level_up(
+    bool (*field)[field_width], int *level, int *score
+)
 {
     (void)score;
-    /* static int total_num_of_completed_lines; */
     int num_of_completed_lines = 0, row_num_of_first_completed_line = 0;
-    if (
-        there_are_completed_lines(
-            field, &num_of_completed_lines, &row_num_of_first_completed_line
+    /* completed lines may not be continuous and may contain breaks */
+    /* the following array records this sequence */
+    bool sequence_of_completed_lines[max_num_of_completed_lines] = { 0 };
+    if (there_are_completed_lines(
+            field, &num_of_completed_lines, &row_num_of_first_completed_line,
+            sequence_of_completed_lines
         )
     )
     {
         field_matrix_rearrangement(
-            field, num_of_completed_lines, row_num_of_first_completed_line
+            field, row_num_of_first_completed_line, sequence_of_completed_lines
         );
         score_increase(score, *level, num_of_completed_lines);
         print_game_info(*score, score_row);
@@ -803,8 +869,7 @@ int main()
 
     /* variables */
     int level = 1, score = 0;
-    bool field[field_height][field_width];
-    init_field(field);
+    bool field[field_height][field_width] = { 0 };
     figure set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     figure piece, next_piece;
@@ -817,15 +882,16 @@ int main()
     print_game_info(level, level_row);
     print_game_info(score, score_row);
     next_piece = get_random_piece(set_of_pieces);
-    bool exit = false;
-    while (!exit) {
+    bool game_on = true;
+    while (game_on) {
         piece = next_piece;
         next_piece = get_random_piece(set_of_pieces);
-        print_next_piece(piece, next_piece);
+        show_next_piece_preview(piece, next_piece);
         piece_spawn(field, &piece);
-        if (piece_field_cell_crossing_conflict(field, &piece)) exit = true;
-        piece_falls(field, &piece, level, &exit);
-        clear_completed_lines(field, &level, &score);
+        if (piece_field_crossing_conflict(field, &piece))
+            game_on = false;
+        piece_falls(field, &piece, level, &game_on);
+        clear_completed_lines_update_score_and_level_up(field, &level, &score);
     }
     end_game(score);
 }

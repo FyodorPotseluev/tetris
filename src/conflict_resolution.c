@@ -355,7 +355,7 @@ static bool cell_occupied_by_(
     return (field[y+piece->y_decline][x+piece->x_shift] == 1) ? true : false;
 }
 
-bool piece_field_cell_crossing_conflict(
+bool piece_field_crossing_conflict(
     const bool (*field)[field_width], const figure *piece
 )
 {
@@ -888,6 +888,6 @@ void handle_rotation_conflicts(
         return;
     }
     piece_field_cell_crossing_check:
-    if (piece_field_cell_crossing_conflict(field, piece))
+    if (piece_field_crossing_conflict(field, piece))
         apply_backup(piece, backup_matrix, dx, dy);
 }
