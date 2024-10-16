@@ -33,8 +33,8 @@ void make_backup(void *dst, const figure *piece)
             break;
         default:
             fprintf(
-                stderr, "make_backup function: incorrect piece size %d\n",
-                piece->size
+                stderr, "%s:%d: incorrect piece size %d\n",
+                __FILE__, __LINE__, piece->size
             );
             exit(1);
     }
@@ -61,8 +61,8 @@ static void apply_backup(figure *piece, const void *src, int dx, int dy)
             break;
         default:
             fprintf(
-                stderr, "make_backup function: incorrect piece size %d\n",
-                piece->size
+                stderr, "%s:%d: incorrect piece size %d\n",
+                __FILE__, __LINE__, piece->size
             );
             exit(1);
     }
@@ -85,13 +85,13 @@ static bool i_piece_rotation_conflict(
 }
 
 static void handle_i_form_piece_rotation_conflict(
-    const bool (*field)[field_width], figure *piece,
-    int *confl_coords, int *amendments, int *coordinate
+    const bool (*field)[field_width], const figure *piece,
+    const int (*confl_coords)[2], const int *amendments, int *coordinate
 )
 {
-    int confl_1_x = confl_coords[0], confl_1_y = confl_coords[1];
-    int confl_2_x = confl_coords[2], confl_2_y = confl_coords[3];
-    int confl_3_x = confl_coords[4], confl_3_y = confl_coords[5];
+    int confl_1_x = confl_coords[0][0], confl_1_y = confl_coords[0][1];
+    int confl_2_x = confl_coords[1][0], confl_2_y = confl_coords[1][1];
+    int confl_3_x = confl_coords[2][0], confl_3_y = confl_coords[2][1];
     int amendment = 0;
         /* short_side_conflict */
     if (i_piece_rotation_conflict(field, piece, confl_1_x, confl_1_y)) {
@@ -147,7 +147,7 @@ static void i_form_piece_rotation_conflicts_handling(
     int tmpdx = 0, tmpdy = 0;
     switch (piece->orientation) {
         case (horizontal_1): {
-            int conflict_coordinates[] = { 0, 2, 3, 2, 2, 2 };
+            int conflict_coordinates[][2] = { { 0, 2 }, { 3, 2 }, { 2, 2 } };
             int amendments[] = { 1, -2, -1 };
             handle_i_form_piece_rotation_conflict(
                 field, piece, conflict_coordinates, amendments, &tmpdx
@@ -155,7 +155,7 @@ static void i_form_piece_rotation_conflicts_handling(
             break;
         }
         case (vertical_1): {
-            int conflict_coordinates[] = { 1, 3, 1, 0, 1, 1 };
+            int conflict_coordinates[][2] = { { 1, 3 }, { 1, 0 }, { 1, 1 } };
             int amendments[] = { -1, 2, 1 };
             handle_i_form_piece_rotation_conflict(
                 field, piece, conflict_coordinates, amendments, &tmpdy
@@ -163,7 +163,7 @@ static void i_form_piece_rotation_conflicts_handling(
             break;
         }
         case (horizontal_2): {
-            int conflict_coordinates[] = { 3, 1, 0, 1, 1, 1 };
+            int conflict_coordinates[][2] = { { 3, 1 }, { 0, 1 }, { 1, 1 } };
             int amendments[] = { -1, 2, 1 };
             handle_i_form_piece_rotation_conflict(
                 field, piece, conflict_coordinates, amendments, &tmpdx
@@ -171,7 +171,7 @@ static void i_form_piece_rotation_conflicts_handling(
             break;
         }
         case (vertical_2): {
-            int conflict_coordinates[] = { 2, 0, 2, 3, 2, 2 };
+            int conflict_coordinates[][2] = { { 2, 0 }, { 2, 3 }, { 2, 2 } };
             int amendments[] = { 1, -2, -1 };
             handle_i_form_piece_rotation_conflict(
                 field, piece, conflict_coordinates, amendments, &tmpdy
@@ -180,6 +180,10 @@ static void i_form_piece_rotation_conflicts_handling(
         }
         case (orientation_count):
             ;
+            break;
+        default:
+            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+            exit(1);
     }
     piece->x_shift += tmpdx;
     *dx += tmpdx;
@@ -220,14 +224,14 @@ static bool regular_piece_rotation_conflict(
 }
 
 static void handle_regular_piece_rotation_conflict(
-    const bool (*field)[field_width], figure *piece,
-    int *confl_coords, int *amendment_1, int *amendment_2,
+    const bool (*field)[field_width], const figure *piece,
+    const int (*confl_coords)[2], int *amendment_1, int *amendment_2,
     int default_change
 )
 {
-    int confl_1_x = confl_coords[0], confl_1_y = confl_coords[1];
-    int confl_2_x = confl_coords[2], confl_2_y = confl_coords[3];
-    int confl_3_x = confl_coords[4], confl_3_y = confl_coords[5];
+    int confl_1_x = confl_coords[0][0], confl_1_y = confl_coords[0][1];
+    int confl_2_x = confl_coords[1][0], confl_2_y = confl_coords[1][1];
+    int confl_3_x = confl_coords[2][0], confl_3_y = confl_coords[2][1];
     /*  - double center conflict: no solution, roll the rotation back */
     if (regular_piece_rotation_conflict(field, piece, confl_1_x, confl_1_y))
         return;
@@ -290,28 +294,28 @@ static void regular_piece_rotation_conflicts_handling(
     int tmpdx = 0, tmpdy = 0;
         /* top center conflict */
     if (regular_piece_rotation_conflict(field, piece, 1, 0)) {
-        int conflict_coordinates[] = { 1, 2, 0, 2, 2, 2 };
+        int conflict_coordinates[][2] = { { 1, 2 }, { 0, 2 }, { 2, 2 } };
         handle_regular_piece_rotation_conflict(
             field, piece, conflict_coordinates, &tmpdx, &tmpdy, 1
         );
     } else
         /* right center conflict */
     if (regular_piece_rotation_conflict(field, piece, 2, 1)) {
-        int conflict_coordinates[] = { 0, 1, 0, 0, 0, 2 };
+        int conflict_coordinates[][2] = { { 0, 1 }, { 0, 0 }, { 0, 2 } };
         handle_regular_piece_rotation_conflict(
             field, piece, conflict_coordinates, &tmpdy, &tmpdx, -1
         );
     } else
         /* bottom center conflict */
     if (regular_piece_rotation_conflict(field, piece, 1, 2)) {
-        int conflict_coordinates[] = { 1, 0, 0, 0, 2, 0 };
+        int conflict_coordinates[][2] = { { 1, 0 }, { 0, 0 }, { 2, 0 } };
         handle_regular_piece_rotation_conflict(
             field, piece, conflict_coordinates, &tmpdx, &tmpdy, -1
         );
     } else
         /* left center conflict */
     if (regular_piece_rotation_conflict(field, piece, 0, 1)) {
-        int conflict_coordinates[] = { 2, 1, 2, 0, 2, 2 };
+        int conflict_coordinates[][2] = { { 2, 1 }, { 2, 0 }, { 2, 2 } };
         handle_regular_piece_rotation_conflict(
             field, piece, conflict_coordinates, &tmpdy, &tmpdx, 1
         );
@@ -355,6 +359,9 @@ static bool set_x_cycle_cell_cond(
             *end_x   = -1;
             *incr_x  = -1;
             return true;
+        default:
+            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+            exit(1);
     }
     return true;
 }

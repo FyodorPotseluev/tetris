@@ -16,7 +16,7 @@ static int reversion(int num, int arr_len)
         if (count == num)
             return i;
     }
-    fprintf(stderr, "`reversion` function failed\n");
+    fprintf(stderr, "%s:%d: `reversion` function failed\n", __FILE__, __LINE__);
     exit(1);
 }
 
@@ -63,7 +63,8 @@ void rotate(void *piece, int len)
 {
     if ((len != small_piece_size) && (len != big_piece_size)) {
         fprintf(
-            stderr, "`rotate` function failed: invalid `len` value: %d\n", len
+            stderr, "%s:%d: `rotate` function failed: invalid `len` value: %d\n"
+            , __FILE__, __LINE__, len
         );
         exit(1);
     }

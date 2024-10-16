@@ -46,28 +46,24 @@ int time_stop(
 
 int get_init_x()
 {
-    static int init_x;
-    static bool initialized;
-    if (!initialized) {
+    static int init_x = -1;
+    if (init_x < 0) {
         int row, col;
         (void)row;
         getmaxyx(stdscr, row, col);
         init_x = (col - field_width * cell_width) / 2;
-        initialized = true;
     }
     return init_x;
 }
 
 int get_init_y()
 {
-    static int init_y;
-    static bool initialized;
-    if (!initialized) {
+    static int init_y = -1;
+    if (init_y < 0) {
         int row, col;
         (void)col;
         getmaxyx(stdscr, row, col);
         init_y = row - field_height * cell_height - 1;
-        initialized = true;
     }
     return init_y;
 }
@@ -86,6 +82,10 @@ void print_cell_(type_of_cell type, int x, int y)
                 break;
             case ghost:
                 addstr(GHOST_CELL_ROW);
+                break;
+            default:
+                fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+                exit(1);
         }
     }
 }
@@ -125,6 +125,10 @@ void print_field_boundary(
             break;
         case right_side:
             print_side_boundary(*screen_x, *screen_y);
+            break;
+        default:
+            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+            exit(1);
     }
 }
 
@@ -171,6 +175,10 @@ void take_(piece_action action, int x, int y)
             break;
         case print_ghost:
             print_cell_(ghost, x, y);
+            break;
+        default:
+            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+            exit(1);
     }
 }
 
@@ -308,6 +316,10 @@ void move_(
             break;
         case right:
             piece->x_shift++;
+            break;
+        default:
+            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+            exit(1);
     }
     side_boundaries_crossing_(prevention, piece, NULL);
     side_cells_crossing_prevention(direction, field, piece);
@@ -363,6 +375,7 @@ void process_key(
         /* exit the game (Esc) */
         case key_esc:
             *game_on = false;
+            break;
         case KEY_DOWN:
         case ERR:
             ;
@@ -766,8 +779,8 @@ int score_bonus(int level, int num_of_completed_lines)
             return level * four_lines_score_bonus;
         default:
             fprintf(
-                stderr, "function `clear_completed_lines`: incorrect number "
-                "of completed lines: %d\n", num_of_completed_lines
+                stderr, "%s:%d: incorrect number of completed lines: %d\n", 
+                __FILE__, __LINE__, num_of_completed_lines
             );
             exit(1);
     }
