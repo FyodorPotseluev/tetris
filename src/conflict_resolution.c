@@ -21,7 +21,7 @@ MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)
 
 MAKE_FUNCTION_MATRIX_COPY(big_matrix_copy, big)
 
-/* !!! */ void make_backup(void *dst, const figure *piece)
+void make_backup(void *dst, const figure *piece)
 {
     bool (*backup_matrix)[piece->size] = dst;
     switch (piece->size) {
@@ -74,231 +74,45 @@ static void apply_backup(figure *piece, const void *src, int dx, int dy)
 
 static bool o_piece(const figure *piece)
 {
-    return ((piece->size == big_piece_size) && (!piece->i_form)) ? true : false;
+    return ((piece->size == big_piece_size) && (!piece->i_form));
 }
 
-static bool horizontal_1_long_side_center_conflict(
-    const bool (*field)[field_width], const figure *piece
+static bool i_piece_rotation_conflict(
+    const bool (*field)[field_width], const figure *piece, int x, int y
 )
 {
-    if (field[piece->y_decline + 2][piece->x_shift + 2] == 1)
-        return true;
-    else
-        return false;
+    return (field[piece->y_decline + y][piece->x_shift + x] == 1);
 }
 
-static bool horizontal_1_long_side_border_conflict(
-    const bool (*field)[field_width], const figure *piece
+static void handle_i_form_piece_rotation_conflict(
+    const bool (*field)[field_width], figure *piece,
+    int *confl_coords, int *amendments, int *coordinate
 )
 {
-    if (field[piece->y_decline + 2][piece->x_shift + 3] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool horizontal_1_short_side_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 2][piece->x_shift + 0] == 1)
-        return true;
-    else
-        return false;
-}
-
-static void i_piece_horizontal_1_rotation_conflict_handling(
-    const bool (*field)[field_width], figure *piece, int *dx
-)
-{
-    int tmpdx = 0;
-    if (horizontal_1_short_side_conflict(field, piece)) {
-        if (
-            horizontal_1_long_side_border_conflict(field, piece) ||
-            horizontal_1_long_side_center_conflict(field, piece)
-        )
+    int confl_1_x = confl_coords[0], confl_1_y = confl_coords[1];
+    int confl_2_x = confl_coords[2], confl_2_y = confl_coords[3];
+    int confl_3_x = confl_coords[4], confl_3_y = confl_coords[5];
+    int amendment = 0;
+        /* short_side_conflict */
+    if (i_piece_rotation_conflict(field, piece, confl_1_x, confl_1_y)) {
+            /* long_side_border_conflict */
+        if (i_piece_rotation_conflict(field, piece, confl_2_x, confl_2_y) ||
+            /* long_side_center_conflict */
+            i_piece_rotation_conflict(field, piece, confl_3_x, confl_3_y))
         {
             return;
-        } else {
-            tmpdx = 1;
-        }
+        } else
+            amendment = amendments[0];
     }
     else
-    if (horizontal_1_long_side_center_conflict(field, piece))
-        tmpdx = -2;
+        /* long_side_border_conflict */
+    if (i_piece_rotation_conflict(field, piece, confl_2_x, confl_2_y))
+        amendment = amendments[1];
     else
-    if (horizontal_1_long_side_border_conflict(field, piece))
-        tmpdx = -1;
-    piece->x_shift += tmpdx;
-    *dx += tmpdx;
-}
-
-static bool vertical_2_long_side_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 2][piece->x_shift + 2] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool vertical_2_long_side_border_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 3][piece->x_shift + 2] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool vertical_2_short_side_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 0][piece->x_shift + 2] == 1)
-        return true;
-    else
-        return false;
-}
-
-static void i_piece_vertical_2_rotation_conflict_handling(
-    const bool (*field)[field_width], figure *piece, int *dy
-)
-{
-    int tmpdy = 0;
-    if (vertical_2_short_side_conflict(field, piece)) {
-        if (
-            vertical_2_long_side_border_conflict(field, piece) ||
-            vertical_2_long_side_center_conflict(field, piece)
-        )
-        {
-            return;
-        } else {
-            tmpdy = 1;
-        }
-    }
-    else
-    if (vertical_2_long_side_center_conflict(field, piece))
-        tmpdy = -2;
-    else
-    if (vertical_2_long_side_border_conflict(field, piece))
-        tmpdy = -1;
-    piece->y_decline += tmpdy;
-    *dy += tmpdy;
-}
-
-static bool horizontal_2_long_side_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 1][piece->x_shift + 1] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool horizontal_2_long_side_border_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 1][piece->x_shift + 0] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool horizontal_2_short_side_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 1][piece->x_shift + 3] == 1)
-        return true;
-    else
-        return false;
-}
-
-static void i_piece_horizontal_2_rotation_conflict_handling(
-    const bool (*field)[field_width], figure *piece, int *dx
-)
-{
-    int tmpdx = 0;
-    if (horizontal_2_short_side_conflict(field, piece)) {
-        if (
-            horizontal_2_long_side_border_conflict(field, piece) ||
-            horizontal_2_long_side_center_conflict(field, piece)
-        )
-        {
-            return;
-        } else {
-            tmpdx = -1;
-        }
-    }
-    else
-    if (horizontal_2_long_side_center_conflict(field, piece))
-        tmpdx = 2;
-    else
-    if (horizontal_2_long_side_border_conflict(field, piece))
-        tmpdx = 1;
-    piece->x_shift += tmpdx;
-    *dx += tmpdx;
-}
-
-static bool vertical_1_long_side_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 1][piece->x_shift + 1] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool vertical_1_long_side_border_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 0][piece->x_shift + 1] == 1)
-        return true;
-    else
-        return false;
-}
-
-static bool vertical_1_short_side_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (field[piece->y_decline + 3][piece->x_shift + 1] == 1)
-        return true;
-    else
-        return false;
-}
-
-static void i_piece_vertical_1_rotation_conflict_handling(
-    const bool (*field)[field_width], figure *piece, int *dy
-)
-{
-    int tmpdy = 0;
-    if (vertical_1_short_side_conflict(field, piece)) {
-        if (
-            vertical_1_long_side_border_conflict(field, piece) ||
-            vertical_1_long_side_center_conflict(field, piece)
-        )
-        {
-            return;
-        } else {
-            tmpdy = -1;
-        }
-    }
-    else
-    if (vertical_1_long_side_center_conflict(field, piece))
-        tmpdy = 2;
-    else
-    if (vertical_1_long_side_border_conflict(field, piece))
-        tmpdy = 1;
-    piece->y_decline += tmpdy;
-    *dy += tmpdy;
+        /* long_side_center_conflict */
+    if (i_piece_rotation_conflict(field, piece, confl_3_x, confl_3_y))
+        amendment = amendments[2];
+    *coordinate += amendment;
 }
 
 /*
@@ -330,29 +144,54 @@ static void i_form_piece_rotation_conflicts_handling(
     const bool (*field)[field_width], figure *piece, int *dx, int *dy
 )
 {
+    int tmpdx = 0, tmpdy = 0;
     switch (piece->orientation) {
-        case (horizontal_1):
-            i_piece_horizontal_1_rotation_conflict_handling(field, piece, dx);
+        case (horizontal_1): {
+            int conflict_coordinates[] = { 0, 2, 3, 2, 2, 2 };
+            int amendments[] = { 1, -2, -1 };
+            handle_i_form_piece_rotation_conflict(
+                field, piece, conflict_coordinates, amendments, &tmpdx
+            );
             break;
-        case (vertical_1):
-            i_piece_vertical_1_rotation_conflict_handling(field, piece, dy);
+        }
+        case (vertical_1): {
+            int conflict_coordinates[] = { 1, 3, 1, 0, 1, 1 };
+            int amendments[] = { -1, 2, 1 };
+            handle_i_form_piece_rotation_conflict(
+                field, piece, conflict_coordinates, amendments, &tmpdy
+            );
             break;
-        case (horizontal_2):
-            i_piece_horizontal_2_rotation_conflict_handling(field, piece, dx);
+        }
+        case (horizontal_2): {
+            int conflict_coordinates[] = { 3, 1, 0, 1, 1, 1 };
+            int amendments[] = { -1, 2, 1 };
+            handle_i_form_piece_rotation_conflict(
+                field, piece, conflict_coordinates, amendments, &tmpdx
+            );
             break;
-        case (vertical_2):
-            i_piece_vertical_2_rotation_conflict_handling(field, piece, dy);
+        }
+        case (vertical_2): {
+            int conflict_coordinates[] = { 2, 0, 2, 3, 2, 2 };
+            int amendments[] = { 1, -2, -1 };
+            handle_i_form_piece_rotation_conflict(
+                field, piece, conflict_coordinates, amendments, &tmpdy
+            );
             break;
+        }
         case (orientation_count):
             ;
     }
+    piece->x_shift += tmpdx;
+    *dx += tmpdx;
+    piece->y_decline += tmpdy;
+    *dy += tmpdy;
 }
 
 static bool cell_occupied_by_(
     const bool (*field)[field_width], int x, int y, const figure *piece
 )
 {
-    return (field[y+piece->y_decline][x+piece->x_shift] == 1) ? true : false;
+    return (field[y+piece->y_decline][x+piece->x_shift] == 1);
 }
 
 bool piece_field_crossing_conflict(
@@ -372,196 +211,41 @@ bool piece_field_crossing_conflict(
     return false;
 }
 
-static bool top_center_conflict(
-    const bool (*field)[field_width], const figure *piece
+static bool regular_piece_rotation_conflict(
+    const bool (*field)[field_width], const figure *piece, int x, int y
 )
 {
-    if (
-        (field[piece->y_decline + 0][piece->x_shift + 1] == 1) &&
-        (piece->form.small[0][1] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
+    return ((field[piece->y_decline + y][piece->x_shift + x] == 1) &&
+        (piece->form.small[y][x] == 1));
 }
 
-static bool top_right_corner_conflict(
-    const bool (*field)[field_width], const figure *piece
+static void handle_regular_piece_rotation_conflict(
+    const bool (*field)[field_width], figure *piece,
+    int *confl_coords, int *amendment_1, int *amendment_2,
+    int default_change
 )
 {
-    if (
-        (field[piece->y_decline + 0][piece->x_shift + 2] == 1) &&
-        (piece->form.small[0][2] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool right_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 1][piece->x_shift + 2] == 1) &&
-        (piece->form.small[1][2] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool bottom_right_corner_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 2][piece->x_shift + 2] == 1) &&
-        (piece->form.small[2][2] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool bottom_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 2][piece->x_shift + 1] == 1) &&
-        (piece->form.small[2][1] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool bottom_left_corner_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 2][piece->x_shift + 0] == 1) &&
-        (piece->form.small[2][0] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool left_center_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 1][piece->x_shift + 0] == 1) &&
-        (piece->form.small[1][0] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static bool top_left_corner_conflict(
-    const bool (*field)[field_width], const figure *piece
-)
-{
-    if (
-        (field[piece->y_decline + 0][piece->x_shift + 0] == 1) &&
-        (piece->form.small[0][0] == 1)
-    )
-    {
-        return true;
-    } else
-        return false;
-}
-
-static void handle_left_center_conflict(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
-)
-{
-    if (right_center_conflict(field, piece))
+    int confl_1_x = confl_coords[0], confl_1_y = confl_coords[1];
+    int confl_2_x = confl_coords[2], confl_2_y = confl_coords[3];
+    int confl_3_x = confl_coords[4], confl_3_y = confl_coords[5];
+    /*  - double center conflict: no solution, roll the rotation back */
+    if (regular_piece_rotation_conflict(field, piece, confl_1_x, confl_1_y))
         return;
-    if (top_right_corner_conflict(field, piece)) {
-        piece->y_decline++;
-        *dy += 1;
+
+    /*  - center + corner conflict: if the conflicting cells are in the
+    opposite rows/columns: move toward the only empty row/column */
+    if (regular_piece_rotation_conflict(field, piece, confl_2_x, confl_2_y)) {
+        *amendment_1 += 1;
         return;
     } else
-    if (bottom_right_corner_conflict(field, piece)) {
-        piece->y_decline--;
-        *dy -= 1;
+    /* the same center + corner conflict as the previous one.
+    The difference - now the conflicting cell is in the opposite far corner */
+    if (regular_piece_rotation_conflict(field, piece, confl_3_x, confl_3_y)) {
+        *amendment_1 -= 1;
         return;
     }
-    piece->x_shift++;
-    *dx += 1;
-}
-
-static void handle_bottom_center_conflict(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
-)
-{
-    if (top_center_conflict(field, piece))
-        return;
-    if (top_left_corner_conflict(field, piece)) {
-        piece->x_shift++;
-        *dx += 1;
-        return;
-    } else
-    if (top_right_corner_conflict(field, piece)) {
-        piece->x_shift--;
-        *dx -= 1;
-        return;
-    }
-    piece->y_decline--;
-    *dy -= 1;
-}
-
-static void handle_right_center_conflict(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
-)
-{
-    if (left_center_conflict(field, piece))
-        return;
-    if (top_left_corner_conflict(field, piece)) {
-        piece->y_decline++;
-        *dy += 1;
-        return;
-    } else
-    if (bottom_left_corner_conflict(field, piece)) {
-        piece->y_decline--;
-        *dy -= 1;
-        return;
-    }
-    piece->x_shift--;
-    *dx -= 1;
-}
-
-static void handle_top_center_conflict(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
-)
-{
-    if (bottom_center_conflict(field, piece))
-        return;
-    if (bottom_left_corner_conflict(field, piece)) {
-        piece->x_shift++;
-        *dx += 1;
-        return;
-    } else
-    if (bottom_right_corner_conflict(field, piece)) {
-        piece->x_shift--;
-        *dx -= 1;
-        return;
-    }
-    piece->y_decline++;
-    *dy += 1;
+    /* no additional conflicting cells. Just and ordinary center conflict */
+    *amendment_2 += default_change;
 }
 
 /*
@@ -603,35 +287,54 @@ static void regular_piece_rotation_conflicts_handling(
     const bool (*field)[field_width], figure *piece, int *dx, int *dy
 )
 {
-    if (top_center_conflict(field, piece)) {
-        handle_top_center_conflict(field, piece, dx, dy);
+    int tmpdx = 0, tmpdy = 0;
+        /* top center conflict */
+    if (regular_piece_rotation_conflict(field, piece, 1, 0)) {
+        int conflict_coordinates[] = { 1, 2, 0, 2, 2, 2 };
+        handle_regular_piece_rotation_conflict(
+            field, piece, conflict_coordinates, &tmpdx, &tmpdy, 1
+        );
     } else
-    if (right_center_conflict(field, piece)) {
-        handle_right_center_conflict(field, piece, dx, dy);
+        /* right center conflict */
+    if (regular_piece_rotation_conflict(field, piece, 2, 1)) {
+        int conflict_coordinates[] = { 0, 1, 0, 0, 0, 2 };
+        handle_regular_piece_rotation_conflict(
+            field, piece, conflict_coordinates, &tmpdy, &tmpdx, -1
+        );
     } else
-    if (bottom_center_conflict(field, piece)) {
-        handle_bottom_center_conflict(field, piece, dx, dy);
+        /* bottom center conflict */
+    if (regular_piece_rotation_conflict(field, piece, 1, 2)) {
+        int conflict_coordinates[] = { 1, 0, 0, 0, 2, 0 };
+        handle_regular_piece_rotation_conflict(
+            field, piece, conflict_coordinates, &tmpdx, &tmpdy, -1
+        );
     } else
-    if (left_center_conflict(field, piece)) {
-        handle_left_center_conflict(field, piece, dx, dy);
+        /* left center conflict */
+    if (regular_piece_rotation_conflict(field, piece, 0, 1)) {
+        int conflict_coordinates[] = { 2, 1, 2, 0, 2, 2 };
+        handle_regular_piece_rotation_conflict(
+            field, piece, conflict_coordinates, &tmpdy, &tmpdx, 1
+        );
     } else
-    if (
-        top_left_corner_conflict(field, piece) ||
-        bottom_left_corner_conflict(field, piece)
-    )
+        /* top left corner conflict */
+    if (regular_piece_rotation_conflict(field, piece, 0, 0) ||
+        /* bottom left corner conflict */
+        regular_piece_rotation_conflict(field, piece, 0, 2))
     {
-        piece->x_shift++;
-        *dx += 1;
+        tmpdx++;
     }
     else
-    if (
-        top_right_corner_conflict(field, piece) ||
-        bottom_right_corner_conflict(field, piece)
-    )
+        /* top right corner conflict */
+    if (regular_piece_rotation_conflict(field, piece, 2, 0) ||
+        /* bottom right corner conflict */
+        regular_piece_rotation_conflict(field, piece, 2, 2))
     {
-        piece->x_shift--;
-        *dx -= 1;
+        tmpdx--;
     }
+    piece->x_shift += tmpdx;
+    *dx += tmpdx;
+    piece->y_decline += tmpdy;
+    *dy += tmpdy;
 }
 
 static bool set_x_cycle_cell_cond(
@@ -679,12 +382,12 @@ void side_cells_crossing_prevention(
 
 static bool out_of_bottom_field_boundary(const figure *piece)
 {
-    return (piece->y_decline > field_height - piece->size) ? true : false;
+    return (piece->y_decline > field_height - piece->size);
 }
 
 static bool out_of_top_field_boundary(const figure *piece)
 {
-    return (piece->y_decline < 0) ? true : false;
+    return (piece->y_decline < 0);
 }
 
 static bool set_y_cycle_cond(
@@ -712,18 +415,13 @@ static bool set_y_cycle_cond(
 
 static bool vertical_orientation(const figure *piece)
 {
-    if (
-        (piece->orientation == vertical_1) ||
-        (piece->orientation == vertical_2)
-    )
-        return true;
-    else
-        return false;
+    return ((piece->orientation == vertical_1) ||
+        (piece->orientation == vertical_2));
 }
 
 static bool special_i_piece_bottom_top_case(const figure *piece)
 {
-    return ((piece->i_form) && vertical_orientation(piece)) ? true : false;
+    return ((piece->i_form) && vertical_orientation(piece));
 }
 
 static bool bottom_top_boundaries_crossing_(
@@ -758,12 +456,12 @@ static bool bottom_top_boundaries_crossing_(
 
 static bool out_of_right_boundary(const figure *piece)
 {
-    return (piece->x_shift > field_width - piece->size) ? true : false;
+    return (piece->x_shift > field_width - piece->size);
 }
 
 static bool out_of_left_boundary(const figure *piece)
 {
-    return (piece->x_shift < 0) ? true : false;
+    return (piece->x_shift < 0);
 }
 
 static bool set_x_cycle_bound_cond(
@@ -791,18 +489,13 @@ static bool set_x_cycle_bound_cond(
 
 static bool horizontal_orientation(const figure *piece)
 {
-    if (
-        (piece->orientation == horizontal_1) ||
-        (piece->orientation == horizontal_2)
-    )
-        return true;
-    else
-        return false;
+    return ((piece->orientation == horizontal_1) ||
+        (piece->orientation == horizontal_2));
 }
 
 static bool special_i_piece_side_case(const figure *piece)
 {
-    return ((piece->i_form) && horizontal_orientation(piece)) ? true : false;
+    return ((piece->i_form) && horizontal_orientation(piece));
 }
 
 bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)
