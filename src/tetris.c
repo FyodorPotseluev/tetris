@@ -243,13 +243,8 @@ bool lower_field_cell_is_occupied(
     const bool (*field)[field_width], const figure *piece, int x, int y
 )
 {
-    if (field_has_ended(piece, y) ||
-        field[y + piece->y_decline + 1][x + piece->x_shift] == 1)
-    {
-        return true;
-    } else {
-        return false;
-    }
+    return (field_has_ended(piece, y) ||
+        field[y + piece->y_decline + 1][x + piece->x_shift] == 1);
 }
 
 bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
@@ -611,21 +606,18 @@ void end_game(int score)
 
 void process_uncompleted_line(
     bool we_are_checking_block_with_completed_lines,
-    int *num_of_checked_lines, bool **sequence_of_completed_lines
+    bool **sequence_of_completed_lines
 )
 {
-    if (we_are_checking_block_with_completed_lines) {
-        num_of_checked_lines++;
+    if (we_are_checking_block_with_completed_lines)
         (*sequence_of_completed_lines)++;
-    }
 }
 
 void process_completed_line(
     int *num_of_completed_lines, bool **sequence_of_completed_lines,
-    int *row_num_of_first_completed_line, int *num_of_checked_lines, int y
+    int *row_num_of_first_completed_line, int y
 )
 {
-    (*num_of_checked_lines)++;
     (*num_of_completed_lines)++;
     **sequence_of_completed_lines = 1;
     (*sequence_of_completed_lines)++;
@@ -638,7 +630,7 @@ bool there_are_completed_lines(
     int *row_num_of_first_completed_line, bool *sequence_of_completed_lines
 )
 {
-    int x, y, num_of_checked_lines = 0;
+    int x, y;
     bool we_are_checking_block_with_completed_lines = false;
     /* searching for completed lines from the bottom to the top */
     for (y=field_height-1; y > 0; y--) {
@@ -653,16 +645,22 @@ bool there_are_completed_lines(
             we_are_checking_block_with_completed_lines = true;
             process_completed_line(
                 num_of_completed_lines, &sequence_of_completed_lines,
-                row_num_of_first_completed_line, &num_of_checked_lines, y
+                row_num_of_first_completed_line, y
             );
         } else {
             process_uncompleted_line(
                 we_are_checking_block_with_completed_lines,
-                &num_of_checked_lines, &sequence_of_completed_lines
+                &sequence_of_completed_lines
             );
         }
-        if (empty_line || num_of_checked_lines == max_num_of_completed_lines)
+        if (empty_line ||
+            /* since we met 1st completed line we looked through the maximum
+            number of possibly completed lines and can break now */
+            (*row_num_of_first_completed_line - y ==
+            max_num_of_completed_lines - 1))
+        {
             break;
+        }
     }
     return (*num_of_completed_lines) ? true : false;
 }
