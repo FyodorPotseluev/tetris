@@ -66,7 +66,7 @@ fifteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourt
 fifth	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
 figure	include/constants.h	/^} figure;$/;"	t	typeref:struct:tag_figure
 find_continuous_block_of_completed_lines	src/tetris.c	/^void find_continuous_block_of_completed_lines($/;"	f
-first	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+first	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_figure	typeref:union:tag_figure::tag_form
 four_lines_score_bonus	include/constants.h	/^    four_lines_score_bonus              = 800,$/;"	e	enum:constants
 fourteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7$/;"	e	enum:tag_speed_list
@@ -174,7 +174,7 @@ score_increase	src/tetris.c	/^void score_increase(int *score, int level, int num
 score_label_row	include/frontend.h	/^    score_label_row     = 3,$/;"	e	enum:frontend_consts
 score_row	include/frontend.h	/^    score_row           = 4,$/;"	e	enum:frontend_consts
 screen_size_check	src/tetris.c	/^void screen_size_check()$/;"	f
-second	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+second	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 set_x_cycle_bound_cond	src/conflict_resolution.c	/^static bool set_x_cycle_bound_cond($/;"	f	file:
 set_y_cycle_cond	src/conflict_resolution.c	/^static bool set_y_cycle_cond($/;"	f	file:
 seventh	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
@@ -202,7 +202,7 @@ tag_type_of_cell	src/tetris.c	/^typedef enum tag_type_of_cell {$/;"	g	file:
 take_	src/tetris.c	/^void take_(piece_action action, int x, int y)$/;"	f
 tenth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 there_are_completed_lines	src/tetris.c	/^bool there_are_completed_lines($/;"	f
-third	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+third	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 thirteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7$/;"	e	enum:tag_speed_list
 three_lines_score_bonus	include/constants.h	/^    three_lines_score_bonus             = 500,$/;"	e	enum:constants
 time_start	src/tetris.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
@@ -220,4 +220,4 @@ vertical_orientation	src/conflict_resolution.c	/^static bool vertical_orientatio
 wait_until_esc_is_pressed_then_exit	src/tetris.c	/^void wait_until_esc_is_pressed_then_exit()$/;"	f
 x_shift	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
 y_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_figure
-zero	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+zero	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list

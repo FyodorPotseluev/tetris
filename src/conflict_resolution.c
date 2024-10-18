@@ -371,9 +371,9 @@ bool field_or_side_boundaries_conflict(
     int y, x;
     for (y=0; y < piece->size; y++) {
         for (x=0; x < piece->size; x++) {
-            if (piece_field_conflict(field, x, y, piece) ||
-                piece_left_boundary_conflict(x, y, piece) ||
-                piece_right_boundary_conflict(x, y, piece))
+            if (piece_left_boundary_conflict(x, y, piece) ||
+                piece_right_boundary_conflict(x, y, piece) ||
+                piece_field_conflict(field, x, y, piece))
             {
                 return true;
             }
