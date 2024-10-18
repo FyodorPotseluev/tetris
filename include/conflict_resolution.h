@@ -22,19 +22,19 @@ RECEIVES:
 RETURNES:
     - the boolean value indicating whether a side boundary crossing took place. */
 
-void side_cells_crossing_prevention(
-    move_direction direction, const bool (*field)[field_width], figure *piece
+bool field_or_side_boundaries_conflict(
+    const bool (*field)[field_width], const figure *piece
 );
 /*
-    Prevents a piece from crossing already occupied side field cells by
-changing the `piece->x_shift` value.
+    Signals if a piece now has a conflict with occupied field cells, or if it
+crosses the side field boundaries.
 RECEIVES:
-    - `direction` the direction in which the piece was just moved;
     - `field` the pointer to the matrix describing the current field state;
     - `piece` the pointer to the structure containing the current piece
     properties.
 RETURNES:
-    --- */
+    - the boolean value indicating whether the conflict occurred.
+*/
 
 bool piece_field_crossing_conflict(
     const bool (*field)[field_width], const figure *piece
@@ -46,7 +46,7 @@ RECEIVES:
     - `piece` the pointer to the structure containing the current piece
     properties.
 RETURNES:
-    - the boolean value indicating whether a piece/field cell crossing occured.
+    - the boolean value indicating whether a piece/field cell crossing occurred.
 */
 
 void make_backup(void *dst, const figure *piece);

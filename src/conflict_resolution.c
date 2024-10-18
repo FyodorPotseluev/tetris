@@ -198,17 +198,24 @@ static bool cell_occupied_by_(
     return (field[y+piece->y_decline][x+piece->x_shift] == 1);
 }
 
-bool piece_field_crossing_conflict(
-    const bool (*field)[field_width], const figure *piece
+static bool piece_field_conflict(
+    const bool (*field)[field_width], int x, int y, const figure *piece
 )
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     const bool (*matrix)[piece->size] = piece->form.small;
+    return ((matrix[y][x] == 1) && (cell_occupied_by_(field, x, y, piece)));
+}
+
+bool piece_field_crossing_conflict(
+    const bool (*field)[field_width], const figure *piece
+)
+{
     int x, y;
     for (y=0; y < piece->size; y++) {
         for (x=0; x < piece->size; x++) {
-            if ((matrix[y][x] == 1) && (cell_occupied_by_(field, x, y, piece)))
+            if (piece_field_conflict(field, x, y, piece))
                 return true;
         }
     }
@@ -341,50 +348,38 @@ static void regular_piece_rotation_conflicts_handling(
     *dy += tmpdy;
 }
 
-static bool set_x_cycle_cell_cond(
-    move_direction direction, const figure *piece,
-    int *start_x, int *end_x, int *incr_x
-)
-{
-    switch (direction) {
-        case left:
-            /* loop forward */
-            *start_x = 0;
-            *end_x   = piece->size;
-            *incr_x  = 1;
-            return true;
-        case right:
-            /* loop back */
-            *start_x = piece->size - 1;
-            *end_x   = -1;
-            *incr_x  = -1;
-            return true;
-        default:
-            fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
-            exit(1);
-    }
-    return true;
-}
-
-void side_cells_crossing_prevention(
-    move_direction direction, const bool (*field)[field_width], figure *piece
-)
+static bool piece_left_boundary_conflict(int x, int y, const figure *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     const bool (*matrix)[piece->size] = piece->form.small;
-    int x, y;
-    int start_x, end_x, incr_x;
-    set_x_cycle_cell_cond(direction, piece, &start_x, &end_x, &incr_x);
+    return (x + piece->x_shift < 0 && matrix[y][x] == 1);
+}
+
+static bool piece_right_boundary_conflict(int x, int y, const figure *piece)
+{
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    const bool (*matrix)[piece->size] = piece->form.small;
+    return ((x + piece->x_shift > field_width - 1 && matrix[y][x] == 1));
+}
+
+bool field_or_side_boundaries_conflict(
+    const bool (*field)[field_width], const figure *piece
+)
+{
+    int y, x;
     for (y=0; y < piece->size; y++) {
-        for (x=start_x; x != end_x; x+=incr_x) {
-            if ((matrix[y][x] == 1) && (cell_occupied_by_(field, x, y, piece)))
+        for (x=0; x < piece->size; x++) {
+            if (piece_field_conflict(field, x, y, piece) ||
+                piece_left_boundary_conflict(x, y, piece) ||
+                piece_right_boundary_conflict(x, y, piece))
             {
-                piece->x_shift += incr_x;
-                return;
+                return true;
             }
         }
     }
+    return false;
 }
 
 static bool out_of_bottom_field_boundary(const figure *piece)

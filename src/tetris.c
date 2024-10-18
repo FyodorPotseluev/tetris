@@ -303,6 +303,7 @@ void move_(
     move_direction direction, const bool (*field)[field_width], figure *piece
 )
 {
+    int x_shift_backup = piece->x_shift;
     piece_(hide_ghost, piece);
     piece_(hide_piece, piece);
     switch (direction) {
@@ -316,8 +317,8 @@ void move_(
             fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
             exit(1);
     }
-    side_boundaries_crossing_(prevention, piece, NULL);
-    side_cells_crossing_prevention(direction, field, piece);
+    if (field_or_side_boundaries_conflict(field, piece))
+        piece->x_shift = x_shift_backup;
     cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
 }

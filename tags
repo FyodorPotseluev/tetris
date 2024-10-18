@@ -60,6 +60,7 @@ field_absorbes_piece	src/tetris.c	/^void field_absorbes_piece(bool (*field)[fiel
 field_has_ended	src/tetris.c	/^bool field_has_ended(const figure *piece, int y)$/;"	f
 field_height	include/constants.h	/^    field_height                        = 20,$/;"	e	enum:constants
 field_matrix_rearrangement	src/tetris.c	/^void field_matrix_rearrangement($/;"	f
+field_or_side_boundaries_conflict	src/conflict_resolution.c	/^bool field_or_side_boundaries_conflict($/;"	f
 field_width	include/constants.h	/^    field_width                         = 10,$/;"	e	enum:constants
 fifteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7$/;"	e	enum:tag_speed_list
 fifth	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
@@ -135,8 +136,11 @@ piece_	src/tetris.c	/^void piece_(piece_action action, const figure *piece)$/;"	
 piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
 piece_fall_step	src/tetris.c	/^void piece_fall_step(figure *piece)$/;"	f
 piece_falls	src/tetris.c	/^void piece_falls($/;"	f
+piece_field_conflict	src/conflict_resolution.c	/^static bool piece_field_conflict($/;"	f	file:
 piece_field_crossing_conflict	src/conflict_resolution.c	/^bool piece_field_crossing_conflict($/;"	f
 piece_has_fallen	src/tetris.c	/^bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)$/;"	f
+piece_left_boundary_conflict	src/conflict_resolution.c	/^static bool piece_left_boundary_conflict(int x, int y, const figure *piece)$/;"	f	file:
+piece_right_boundary_conflict	src/conflict_resolution.c	/^static bool piece_right_boundary_conflict(int x, int y, const figure *piece)$/;"	f	file:
 piece_spawn	src/tetris.c	/^void piece_spawn(const bool (*field)[field_width], figure *piece)$/;"	f
 position	include/constants.h	/^} position;$/;"	t	typeref:enum:tag_position
 prev_orientation	src/conflict_resolution.c	/^static void prev_orientation(figure *piece)$/;"	f	file:
@@ -172,14 +176,12 @@ score_row	include/frontend.h	/^    score_row           = 4,$/;"	e	enum:frontend_
 screen_size_check	src/tetris.c	/^void screen_size_check()$/;"	f
 second	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 set_x_cycle_bound_cond	src/conflict_resolution.c	/^static bool set_x_cycle_bound_cond($/;"	f	file:
-set_x_cycle_cell_cond	src/conflict_resolution.c	/^static bool set_x_cycle_cell_cond($/;"	f	file:
 set_y_cycle_cond	src/conflict_resolution.c	/^static bool set_y_cycle_cond($/;"	f	file:
 seventh	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
 shift_down_upper_not_empty_lines_for_num_positions	src/tetris.c	/^void shift_down_upper_not_empty_lines_for_num_positions($/;"	f
 show_next_piece_preview	src/tetris.c	/^void show_next_piece_preview(figure piece, figure next_piece)$/;"	f
 side_boundaries_crossing_	src/conflict_resolution.c	/^bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)$/;"	f
 side_boundary_width	include/frontend.h	/^    side_boundary_width = 1,$/;"	e	enum:frontend_consts
-side_cells_crossing_prevention	src/conflict_resolution.c	/^void side_cells_crossing_prevention($/;"	f
 signal	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	e	enum:tag_crossing_action
 sixth	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
 size	include/constants.h	/^    unsigned char size;$/;"	m	struct:tag_figure
