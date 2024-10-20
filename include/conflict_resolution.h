@@ -7,7 +7,9 @@
 
 typedef enum tag_crossing_action { prevention, signal } crossing_action;
 
-bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx);
+bool side_boundaries_crossing_(
+    crossing_action action, struct_piece *piece, int *dx
+);
 /*
     Indicates whether the piece has crossed the field side boundary. If the
 `crossing_action` value is `signal`, it does nothing else. If the
@@ -23,7 +25,7 @@ RETURNES:
     - the boolean value indicating whether a side boundary crossing took place. */
 
 bool field_or_side_boundaries_conflict(
-    const bool (*field)[field_width], const figure *piece
+    const bool (*field)[field_width], const struct_piece *piece
 );
 /*
     Signals if a piece now has a conflict with occupied field cells, or if it
@@ -37,7 +39,7 @@ RETURNES:
 */
 
 bool piece_field_crossing_conflict(
-    const bool (*field)[field_width], const figure *piece
+    const bool (*field)[field_width], const struct_piece *piece
 );
 /*
     Signals if a piece cell is crossing an occupied field cell.
@@ -49,7 +51,7 @@ RETURNES:
     - the boolean value indicating whether a piece/field cell crossing occurred.
 */
 
-void make_backup(void *dst, const figure *piece);
+void make_backup(void *dst, const struct_piece *piece);
 /*
     Copies to the `dst` argument the current state of the `piece->form` matrix.
 It can be used later to restore the initial `piece->form` state.
@@ -67,7 +69,7 @@ ERROR HANDLING:
 
 
 void handle_rotation_conflicts(
-    const bool (*field)[field_width], figure *piece, const void *backup
+    const bool (*field)[field_width], struct_piece *piece, const void *backup
 );
 /*
     Prevents conflicts (crossing the field borders or already occupied field

@@ -68,7 +68,7 @@ typedef enum tag_position {
     horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count
 } position;
 
-typedef struct tag_figure {
+typedef struct tag_struct_piece {
     /* piece size */
     unsigned char size;
     /* cell order in the piece */
@@ -84,6 +84,6 @@ typedef struct tag_figure {
     bool i_form;
     /* the current piece orientation in space */
     position orientation;
-} figure;
+} struct_piece;
 
 #endif

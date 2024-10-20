@@ -3,11 +3,11 @@
 #ifndef ROTATION_DEMO_H_INCLUDED
 #define ROTATION_DEMO_H_INCLUDED
 
-void rotate(void *figure, int len);
+void rotate(void *piece, int len);
 /*
     Rotates the incoming matrix 90 degrees clockwise.
 RECEIVES:
-    - `figure` an untyped pointer to the incoming matrix;
+    - `piece` an untyped pointer to the incoming matrix;
     - `len` the matrix size;
 ERROR HANDLING:
     - the `len` can't be different from `small_piece_size` and `big_piece_size`

@@ -182,22 +182,22 @@ void take_(piece_action action, int x, int y)
     }
 }
 
-int ghost_y(const figure *piece, int y)
+int ghost_y(const struct_piece *piece, int y)
 {
     return get_init_y() + (piece->ghost_decline + y) * cell_height;
 }
 
-int curr_y(const figure *piece, int y)
+int curr_y(const struct_piece *piece, int y)
 {
     return get_init_y() + (piece->y_decline + y) * cell_height;
 }
 
-int curr_x(const figure *piece, int x)
+int curr_x(const struct_piece *piece, int x)
 {
     return get_init_x() + (piece->x_shift + x) * cell_width;
 }
 
-void piece_(piece_action action, const figure *piece)
+void piece_(piece_action action, const struct_piece *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -215,7 +215,7 @@ void piece_(piece_action action, const figure *piece)
     }
 }
 
-void truncate_piece(figure *piece)
+void truncate_piece(struct_piece *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -234,20 +234,20 @@ void truncate_piece(figure *piece)
     }
 }
 
-bool field_has_ended(const figure *piece, int y)
+bool field_has_ended(const struct_piece *piece, int y)
 {
     return (y + piece->y_decline + 1 == field_height) ? true : false;
 }
 
 bool lower_field_cell_is_occupied(
-    const bool (*field)[field_width], const figure *piece, int x, int y
+    const bool (*field)[field_width], const struct_piece *piece, int x, int y
 )
 {
     return (field_has_ended(piece, y) ||
         field[y + piece->y_decline + 1][x + piece->x_shift] == 1);
 }
 
-bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
+bool piece_has_fallen(const bool (*field)[field_width], const struct_piece *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -266,7 +266,8 @@ bool piece_has_fallen(const bool (*field)[field_width], const figure *piece)
 }
 
 void cast_ghost(
-    const bool (*field)[field_width], figure piece, signed char *ghost_decline
+    const bool (*field)[field_width], struct_piece piece,
+    signed char *ghost_decline
 )
 {
     while (!piece_has_fallen(field, &piece))
@@ -275,7 +276,7 @@ void cast_ghost(
     *ghost_decline = piece.y_decline;
 }
 
-void piece_spawn(const bool (*field)[field_width], figure *piece)
+void piece_spawn(const bool (*field)[field_width], struct_piece *piece)
 {
     truncate_piece(piece);
     cast_ghost(field, *piece, &piece->ghost_decline);
@@ -284,7 +285,7 @@ void piece_spawn(const bool (*field)[field_width], figure *piece)
     refresh();
 }
 
-void field_absorbes_piece(bool (*field)[field_width], const figure *piece)
+void field_absorbes_piece(bool (*field)[field_width], const struct_piece *piece)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -300,7 +301,8 @@ void field_absorbes_piece(bool (*field)[field_width], const figure *piece)
 }
 
 void move_(
-    move_direction direction, const bool (*field)[field_width], figure *piece
+    move_direction direction, const bool (*field)[field_width],
+    struct_piece *piece
 )
 {
     int x_shift_backup = piece->x_shift;
@@ -323,7 +325,7 @@ void move_(
     piece_(print_piece, piece);
 }
 
-void piece_fall_step(figure *piece)
+void piece_fall_step(struct_piece *piece)
 {
     piece_(hide_piece, piece);
     piece->y_decline++;
@@ -332,7 +334,7 @@ void piece_fall_step(figure *piece)
     refresh();
 }
 
-void handle_rotation(const bool (*field)[field_width], figure *piece)
+void handle_rotation(const bool (*field)[field_width], struct_piece *piece)
 {
     bool backup_matrix[piece->size][piece->size];
     make_backup(backup_matrix, piece);
@@ -348,7 +350,7 @@ void handle_rotation(const bool (*field)[field_width], figure *piece)
 
 void process_key(
     int key_pressed, const bool (*field)[field_width],
-    figure *piece, bool *hard_drop, bool *game_on
+    struct_piece *piece, bool *hard_drop, bool *game_on
 )
 {
     switch (key_pressed) {
@@ -379,7 +381,8 @@ void process_key(
 }
 
 void process_input(
-    const bool (*field)[field_width], figure *piece, int level, bool *game_on
+    const bool (*field)[field_width], struct_piece *piece,
+    int level, bool *game_on
 )
 {
     struct timeval tv1, tv2;
@@ -413,7 +416,7 @@ void process_input(
 }
 
 void piece_falls(
-    bool (*field)[field_width], figure *piece, int level, bool *game_on
+    bool (*field)[field_width], struct_piece *piece, int level, bool *game_on
 )
 {
     while ((*game_on)) {
@@ -426,10 +429,10 @@ void piece_falls(
     }
 }
 
-void init_set_of_pieces(figure *set_of_pieces)
+void init_set_of_pieces(struct_piece *set_of_pieces)
 {
     int i = 0;
-    figure I_piece = {
+    struct_piece I_piece = {
         .size = big_piece_size,
         .form.big = {
             { 0, 0, 0, 0 },
@@ -442,9 +445,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .i_form = true,
         .orientation = horizontal_1
     };
-    memcpy(&set_of_pieces[i], &I_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &I_piece, sizeof(struct_piece));
     i++;
-    figure O_piece = {
+    struct_piece O_piece = {
         .size = big_piece_size,
         .form.big = {
             { 0, 0, 0, 0 },
@@ -456,9 +459,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &O_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &O_piece, sizeof(struct_piece));
     i++;
-    figure T_piece = {
+    struct_piece T_piece = {
         .size = small_piece_size,
         .form.small = {
             { 0, 0, 0 },
@@ -469,9 +472,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &T_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &T_piece, sizeof(struct_piece));
     i++;
-    figure S_piece = {
+    struct_piece S_piece = {
         .size = small_piece_size,
         .form.small = {
             { 0, 0, 0 },
@@ -482,9 +485,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &S_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &S_piece, sizeof(struct_piece));
     i++;
-    figure Z_piece = {
+    struct_piece Z_piece = {
         .size = small_piece_size,
         .form.small = {
             { 0, 0, 0 },
@@ -495,9 +498,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &Z_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &Z_piece, sizeof(struct_piece));
     i++;
-    figure J_piece = {
+    struct_piece J_piece = {
         .size = small_piece_size,
         .form.small = {
             { 0, 0, 0 },
@@ -508,9 +511,9 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &J_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &J_piece, sizeof(struct_piece));
     i++;
-    figure L_piece = {
+    struct_piece L_piece = {
         .size = small_piece_size,
         .form.small = {
             { 0, 0, 0 },
@@ -521,10 +524,10 @@ void init_set_of_pieces(figure *set_of_pieces)
         .y_decline = 0, .ghost_decline = 0,
         .i_form = false
     };
-    memcpy(&set_of_pieces[i], &L_piece, sizeof(figure));
+    memcpy(&set_of_pieces[i], &L_piece, sizeof(struct_piece));
 }
 
-figure get_random_piece(const figure *set_of_pieces)
+struct_piece get_random_piece(const struct_piece *set_of_pieces)
 {
     int i = (int)(((double)num_of_pieces) * rand() / (RAND_MAX+1.0));
     return set_of_pieces[i];
@@ -556,7 +559,7 @@ void print_game_info(int info, int position)
     refresh();
 }
 
-void show_next_piece_preview(figure piece, figure next_piece)
+void show_next_piece_preview(struct_piece piece, struct_piece next_piece)
 {
     piece.x_shift = field_width + game_info_gap;
     next_piece.x_shift = field_width + game_info_gap;
@@ -882,9 +885,9 @@ int main()
     /* variables */
     int level = 1, score = 0;
     bool field[field_height][field_width] = { 0 };
-    figure set_of_pieces[num_of_pieces];
+    struct_piece set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
-    figure piece, next_piece;
+    struct_piece piece, next_piece;
 
     /* MAIN */
     screen_size_check();
@@ -893,6 +896,7 @@ int main()
     print_labels();
     print_game_info(level, level_row);
     print_game_info(score, score_row);
+    /* print_dude */
     next_piece = get_random_piece(set_of_pieces);
     bool game_on = true;
     while (game_on) {

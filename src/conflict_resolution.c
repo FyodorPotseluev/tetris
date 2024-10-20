@@ -21,7 +21,7 @@ MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)
 
 MAKE_FUNCTION_MATRIX_COPY(big_matrix_copy, big)
 
-void make_backup(void *dst, const figure *piece)
+void make_backup(void *dst, const struct_piece *piece)
 {
     bool (*backup_matrix)[piece->size] = dst;
     switch (piece->size) {
@@ -40,7 +40,7 @@ void make_backup(void *dst, const figure *piece)
     }
 }
 
-static void prev_orientation(figure *piece)
+static void prev_orientation(struct_piece *piece)
 {
     /* traversing a list of enumerated values cyclically in reverse order
     (after the 1st value, we get the last value) */
@@ -49,7 +49,7 @@ static void prev_orientation(figure *piece)
         piece->orientation = piece->orientation + orientation_count;
 }
 
-static void apply_backup(figure *piece, const void *src, int dx, int dy)
+static void apply_backup(struct_piece *piece, const void *src, int dx, int dy)
 {
     const bool (*backup_matrix)[piece->size] = src;
     switch (piece->size) {
@@ -72,20 +72,20 @@ static void apply_backup(figure *piece, const void *src, int dx, int dy)
         prev_orientation(piece);
 }
 
-static bool o_piece(const figure *piece)
+static bool o_piece(const struct_piece *piece)
 {
     return ((piece->size == big_piece_size) && (!piece->i_form));
 }
 
 static bool i_piece_rotation_conflict(
-    const bool (*field)[field_width], const figure *piece, int x, int y
+    const bool (*field)[field_width], const struct_piece *piece, int x, int y
 )
 {
     return (field[piece->y_decline + y][piece->x_shift + x] == 1);
 }
 
 static void handle_i_form_piece_rotation_conflict(
-    const bool (*field)[field_width], const figure *piece,
+    const bool (*field)[field_width], const struct_piece *piece,
     const int (*confl_coords)[2], const int *amendments, int *coordinate
 )
 {
@@ -141,7 +141,7 @@ static void handle_i_form_piece_rotation_conflict(
 
 */
 static void i_form_piece_rotation_conflicts_handling(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
+    const bool (*field)[field_width], struct_piece *piece, int *dx, int *dy
 )
 {
     int tmpdx = 0, tmpdy = 0;
@@ -192,14 +192,14 @@ static void i_form_piece_rotation_conflicts_handling(
 }
 
 static bool cell_occupied_by_(
-    const bool (*field)[field_width], int x, int y, const figure *piece
+    const bool (*field)[field_width], int x, int y, const struct_piece *piece
 )
 {
     return (field[y+piece->y_decline][x+piece->x_shift] == 1);
 }
 
 static bool piece_field_conflict(
-    const bool (*field)[field_width], int x, int y, const figure *piece
+    const bool (*field)[field_width], int x, int y, const struct_piece *piece
 )
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
@@ -209,7 +209,7 @@ static bool piece_field_conflict(
 }
 
 bool piece_field_crossing_conflict(
-    const bool (*field)[field_width], const figure *piece
+    const bool (*field)[field_width], const struct_piece *piece
 )
 {
     int x, y;
@@ -223,7 +223,7 @@ bool piece_field_crossing_conflict(
 }
 
 static bool regular_piece_rotation_conflict(
-    const bool (*field)[field_width], const figure *piece, int x, int y
+    const bool (*field)[field_width], const struct_piece *piece, int x, int y
 )
 {
     return ((field[piece->y_decline + y][piece->x_shift + x] == 1) &&
@@ -231,7 +231,7 @@ static bool regular_piece_rotation_conflict(
 }
 
 static void handle_regular_piece_rotation_conflict(
-    const bool (*field)[field_width], const figure *piece,
+    const bool (*field)[field_width], const struct_piece *piece,
     const int (*confl_coords)[2], int *amendment_1, int *amendment_2,
     int default_change
 )
@@ -295,7 +295,7 @@ static void handle_regular_piece_rotation_conflict(
 
 */
 static void regular_piece_rotation_conflicts_handling(
-    const bool (*field)[field_width], figure *piece, int *dx, int *dy
+    const bool (*field)[field_width], struct_piece *piece, int *dx, int *dy
 )
 {
     int tmpdx = 0, tmpdy = 0;
@@ -348,7 +348,9 @@ static void regular_piece_rotation_conflicts_handling(
     *dy += tmpdy;
 }
 
-static bool piece_left_boundary_conflict(int x, int y, const figure *piece)
+static bool piece_left_boundary_conflict(
+    int x, int y, const struct_piece *piece
+)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -356,7 +358,9 @@ static bool piece_left_boundary_conflict(int x, int y, const figure *piece)
     return (x + piece->x_shift < 0 && matrix[y][x] == 1);
 }
 
-static bool piece_right_boundary_conflict(int x, int y, const figure *piece)
+static bool piece_right_boundary_conflict(
+    int x, int y, const struct_piece *piece
+)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -365,7 +369,7 @@ static bool piece_right_boundary_conflict(int x, int y, const figure *piece)
 }
 
 bool field_or_side_boundaries_conflict(
-    const bool (*field)[field_width], const figure *piece
+    const bool (*field)[field_width], const struct_piece *piece
 )
 {
     int y, x;
@@ -382,18 +386,18 @@ bool field_or_side_boundaries_conflict(
     return false;
 }
 
-static bool out_of_bottom_field_boundary(const figure *piece)
+static bool out_of_bottom_field_boundary(const struct_piece *piece)
 {
     return (piece->y_decline > field_height - piece->size);
 }
 
-static bool out_of_top_field_boundary(const figure *piece)
+static bool out_of_top_field_boundary(const struct_piece *piece)
 {
     return (piece->y_decline < 0);
 }
 
 static bool set_y_cycle_cond(
-    const figure *piece, int *start_y, int *end_y, int *incr_y
+    const struct_piece *piece, int *start_y, int *end_y, int *incr_y
 )
 {
     if (out_of_top_field_boundary(piece)) {
@@ -415,19 +419,19 @@ static bool set_y_cycle_cond(
         return false;
 }
 
-static bool vertical_orientation(const figure *piece)
+static bool vertical_orientation(const struct_piece *piece)
 {
     return ((piece->orientation == vertical_1) ||
         (piece->orientation == vertical_2));
 }
 
-static bool special_i_piece_bottom_top_case(const figure *piece)
+static bool special_i_piece_bottom_top_case(const struct_piece *piece)
 {
     return ((piece->i_form) && vertical_orientation(piece));
 }
 
 static bool bottom_top_boundaries_crossing_(
-    crossing_action action, figure *piece, int *dy
+    crossing_action action, struct_piece *piece, int *dy
 )
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
@@ -456,18 +460,18 @@ static bool bottom_top_boundaries_crossing_(
     return res;
 }
 
-static bool out_of_right_boundary(const figure *piece)
+static bool out_of_right_boundary(const struct_piece *piece)
 {
     return (piece->x_shift > field_width - piece->size);
 }
 
-static bool out_of_left_boundary(const figure *piece)
+static bool out_of_left_boundary(const struct_piece *piece)
 {
     return (piece->x_shift < 0);
 }
 
 static bool set_x_cycle_bound_cond(
-    const figure *piece, int *start_x, int *end_x, int *incr_x
+    const struct_piece *piece, int *start_x, int *end_x, int *incr_x
 )
 {
     if (out_of_left_boundary(piece)) {
@@ -489,18 +493,20 @@ static bool set_x_cycle_bound_cond(
         return false;
 }
 
-static bool horizontal_orientation(const figure *piece)
+static bool horizontal_orientation(const struct_piece *piece)
 {
     return ((piece->orientation == horizontal_1) ||
         (piece->orientation == horizontal_2));
 }
 
-static bool special_i_piece_side_case(const figure *piece)
+static bool special_i_piece_side_case(const struct_piece *piece)
 {
     return ((piece->i_form) && horizontal_orientation(piece));
 }
 
-bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)
+bool side_boundaries_crossing_(
+    crossing_action action, struct_piece *piece, int *dx
+)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -529,14 +535,14 @@ bool side_boundaries_crossing_(crossing_action action, figure *piece, int *dx)
     return res;
 }
 
-static void next_orientation(figure *piece)
+static void next_orientation(struct_piece *piece)
 {
     /* traversing a list of enumerated values cyclically (after the last
     value, we get the 1st value again) */
     piece->orientation = (piece->orientation + 1) % orientation_count;
 }
 
-static void handle_i_piece(figure *piece, int *dx)
+static void handle_i_piece(struct_piece *piece, int *dx)
 {
     /* after the rotation of the I piece, we need that both of it vertical
     incarnations were at the same column */
@@ -554,7 +560,7 @@ static void handle_i_piece(figure *piece, int *dx)
 }
 
 void handle_rotation_conflicts(
-    const bool (*field)[field_width], figure *piece, const void *backup
+    const bool (*field)[field_width], struct_piece *piece, const void *backup
 )
 {
     const bool (*backup_matrix)[piece->size] = backup;
