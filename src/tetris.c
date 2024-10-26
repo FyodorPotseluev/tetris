@@ -15,6 +15,10 @@ typedef enum tag_piece_action {
     hide_piece, print_piece, hide_ghost, print_ghost
 } piece_action;
 
+typedef enum tag_dude_action {
+    hide_dude, print_dude
+} dude_action;
+
 typedef enum tag_type_of_cell {
     empty, occupied, ghost
 } type_of_cell;
@@ -325,11 +329,102 @@ void move_(
     piece_(print_piece, piece);
 }
 
-void piece_fall_step(struct_piece *piece)
+void choose_curr_dude_img_array(
+    const struct_dude *dude, const char *const **dude_img_arr
+)
+{
+    if (dude->posture == straight) {
+        if (dude->direction == forward)
+            *dude_img_arr = straight_dude_goes_forth;
+        else
+        if (dude->direction == backward)
+            *dude_img_arr = straight_dude_goes_back;
+        else
+            goto error_msg;
+    }
+    else
+    if (dude->posture == squat) {
+        if (dude->direction == forward)
+            *dude_img_arr = squat_dude_goes_forth;
+        else
+        if (dude->direction == backward)
+            *dude_img_arr = squat_dude_goes_back;
+        else
+            goto error_msg;
+    }
+    else {
+        error_msg:
+        fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+        exit(1);
+    }
+}
+
+int get_dude_screen_x(const struct_dude *dude)
+{
+    return get_init_x() + (dude->x_shift * cell_width);;
+}
+
+int get_last_dude_y(const struct_dude *dude)
+{
+    return dude->y_decline * cell_height + cell_height - 1;
+}
+
+int dude_cell_height(const struct_dude *dude)
+{
+    return dude->height * cell_height;
+}
+
+int get_dude_screen_y(const struct_dude *dude)
+{
+    return get_init_y() + get_last_dude_y(dude) - (dude_cell_height(dude) - 1);
+}
+
+void dude_(dude_action action, const struct_dude *dude)
+{
+    const char *const *dude_img_arr;
+    if (action == print_dude)
+        choose_curr_dude_img_array(dude, &dude_img_arr);
+    int i, x, y;
+    for (i = 0, x = get_dude_screen_x(dude), y = get_dude_screen_y(dude);
+        i < dude_cell_height(dude);
+        i++, y++)
+    {
+        if (action == print_dude)
+            mvprintw(y, x, "%s", dude_img_arr[i]);
+        else
+        if (action == hide_dude)
+            mvprintw(y, x, EMPTY_CELL_ROW);
+        else {
+            fprintf(
+                stderr, "%s:%d: incorrect `action` value: %d\n",
+                __FILE__, __LINE__, action
+            );
+            exit(1);
+        }
+    }
+}
+
+void piece_fall_step(const bool (*field)[field_width], struct_piece *piece)
 {
     piece_(hide_piece, piece);
     piece->y_decline++;
+    cast_ghost(field, *piece, &piece->ghost_decline);
     piece_(print_piece, piece);
+    curs_set(0);
+    refresh();
+}
+
+void dude_step(struct_dude *dude)
+{
+    dude_(hide_dude, dude);
+    /* fix broken "ghost cells" */
+    /* turn around check */
+    if (dude->direction == forward)
+        dude->x_shift++;
+    else
+        dude->x_shift--;
+    /* game over check */
+    dude_(print_dude, dude);
     curs_set(0);
     refresh();
 }
@@ -367,7 +462,8 @@ void process_key(
         /* hard drop */
         case ' ':
             while (!piece_has_fallen(field, piece))
-                piece_fall_step(piece);
+                piece_fall_step(field, piece);
+            /* game over - dude has been crushed - check */
             *hard_drop = true;
             break;
         /* exit the game (Esc) */
@@ -416,16 +512,23 @@ void process_input(
 }
 
 void piece_falls(
-    bool (*field)[field_width], struct_piece *piece, int level, bool *game_on
+    bool (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, int level, bool *game_on
 )
 {
     while ((*game_on)) {
-        process_input(field, piece, level, game_on);
+        process_input(field, piece, level, game_on/*, time_left */);
+        /* stop here every now and then to check if `time_left < 0` and move
+        the dude in this case */
+        /* `time_left` should be static */
+
         if (piece_has_fallen(field, piece)) {
+            /* game over - dude has been crushed - check */
             field_absorbes_piece(field, piece);
             break;
         }
-        piece_fall_step(piece);
+        piece_fall_step(field, piece);
+        dude_step(dude);
     }
 }
 
@@ -873,69 +976,6 @@ void screen_size_check()
     }
 }
 
-void choose_curr_dude_img_array(
-    const struct_dude *dude, const char *const **dude_img_arr
-)
-{
-    if (dude->posture == straight) {
-        if (dude->direction == forward)
-            *dude_img_arr = straight_dude_goes_forth;
-        else
-        if (dude->direction == backward)
-            *dude_img_arr = straight_dude_goes_back;
-        else
-            goto error_msg;
-    }
-    else
-    if (dude->posture == squat) {
-        if (dude->direction == forward)
-            *dude_img_arr = squat_dude_goes_forth;
-        else
-        if (dude->direction == backward)
-            *dude_img_arr = squat_dude_goes_back;
-        else
-            goto error_msg;
-    }
-    else {
-        error_msg:
-        fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
-        exit(1);
-    }
-}
-
-int get_dude_screen_x(const struct_dude *dude)
-{
-    return get_init_x() + (dude->x_shift * cell_width);;
-}
-
-int get_last_dude_y(const struct_dude *dude)
-{
-    return dude->y_decline * cell_height + cell_height - 1;
-}
-
-int dude_cell_height(const struct_dude *dude)
-{
-    return dude->height * cell_height;
-}
-
-int get_dude_screen_y(const struct_dude *dude)
-{
-    return get_init_y() + get_last_dude_y(dude) - (dude_cell_height(dude) - 1);
-}
-
-void print_dude(const struct_dude *dude)
-{
-    const char *const *dude_img_arr;
-    choose_curr_dude_img_array(dude, &dude_img_arr);
-    int i, x, y;
-    for (i = 0, x = get_dude_screen_x(dude), y = get_dude_screen_y(dude);
-        i < dude_cell_height(dude);
-        i++, y++)
-    {
-        mvprintw(y, x, "%s", dude_img_arr[i]);
-    }
-}
-
 int main()
 {
     /* ncurses */
@@ -962,7 +1002,7 @@ int main()
     print_labels();
     print_game_info(level, level_row);
     print_game_info(score, score_row);
-    print_dude(&dude);
+    dude_(print_dude, &dude);
     next_piece = get_random_piece(set_of_pieces);
     bool game_on = true;
     while (game_on) {
@@ -972,7 +1012,7 @@ int main()
         piece_spawn(field, &piece);
         if (piece_field_crossing_conflict(field, &piece))
             game_on = false;
-        piece_falls(field, &piece, level, &game_on);
+        piece_falls(field, &piece, &dude, level, &game_on);
         clear_completed_lines_update_score_and_level_up(field, &level, &score);
     }
     end_game(score);

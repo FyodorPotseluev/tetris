@@ -5,33 +5,33 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 BIN_DIR	Makefile	/^BIN_DIR := $(BUILD_DIR)\/bin$/;"	m
-BOTTOM_TOP_BOUNDARY	include/frontend.h	67;"	d
+BOTTOM_TOP_BOUNDARY	include/frontend.h	62;"	d
 BUILD_DIR	Makefile	/^BUILD_DIR := .\/build$/;"	m
 BUILD_DIRS	Makefile	/^BUILD_DIRS := $(OBJ_DIR) $(BIN_DIR)$/;"	m
 CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g3 -O0 -Iinclude -fsanitize=address,undefined$/;"	m
-CLOSE_WINDOW_MSG	include/constants.h	60;"	d
+CLOSE_WINDOW_MSG	include/constants.h	64;"	d
 CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
 CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
-CURR_TERMINAL_SIZE_MSG	include/constants.h	52;"	d
-EMPTY_CELL_ROW	include/frontend.h	59;"	d
+CURR_TERMINAL_SIZE_MSG	include/constants.h	56;"	d
+EMPTY_CELL_ROW	include/frontend.h	54;"	d
 EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
-FINAL_SCORE_MSG	include/constants.h	64;"	d
+FINAL_SCORE_MSG	include/constants.h	68;"	d
 FRONTEND_H_INCLUDED	include/frontend.h	4;"	d
-GHOST_CELL_ROW	include/frontend.h	63;"	d
+GHOST_CELL_ROW	include/frontend.h	58;"	d
 INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	/^MAKE_FUNCTION_MATRIX_COPY(small_matrix_copy, small)$/;"	f
 MAKE_FUNCTION_MATRIX_COPY	src/conflict_resolution.c	7;"	d	file:
 OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o, $(SRCMODULES))$/;"	m
 OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
-OCCUPIED_CELL_ROW	include/frontend.h	61;"	d
+OCCUPIED_CELL_ROW	include/frontend.h	56;"	d
 PROJECT	Makefile	/^PROJECT := tetris$/;"	m
-REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	54;"	d
-RESIZE_REQUEST_MSG_1	include/constants.h	56;"	d
-RESIZE_REQUEST_MSG_2	include/constants.h	58;"	d
-RESIZE_WARNING_MSG	include/constants.h	50;"	d
+REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	58;"	d
+RESIZE_REQUEST_MSG_1	include/constants.h	60;"	d
+RESIZE_REQUEST_MSG_2	include/constants.h	62;"	d
+RESIZE_WARNING_MSG	include/constants.h	54;"	d
 ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
-SIDE_BOUNDARY	include/frontend.h	69;"	d
+SIDE_BOUNDARY	include/frontend.h	64;"	d
 SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
 SRC_DIR	Makefile	/^SRC_DIR := .\/src$/;"	m
 apply_backup	src/conflict_resolution.c	/^static void apply_backup(struct_piece *piece, const void *src, int dx, int dy)$/;"	f	file:
@@ -55,10 +55,13 @@ curr_x	src/tetris.c	/^int curr_x(const struct_piece *piece, int x)$/;"	f
 curr_y	src/tetris.c	/^int curr_y(const struct_piece *piece, int y)$/;"	f
 delete_completed_lines	src/tetris.c	/^void delete_completed_lines($/;"	f
 direction	include/constants.h	/^    enum_direction direction;$/;"	m	struct:tag_struct_dude
+dude_	src/tetris.c	/^void dude_(dude_action action, const struct_dude *dude)$/;"	f
+dude_action	src/tetris.c	/^} dude_action;$/;"	t	typeref:enum:tag_dude_action	file:
 dude_cell_height	src/tetris.c	/^int dude_cell_height(const struct_dude *dude)$/;"	f
-dude_squat_height	include/frontend.h	/^    dude_squat_height                   = 1,$/;"	e	enum:frontend_consts
-dude_straight_height	include/frontend.h	/^    dude_straight_height                = 2,$/;"	e	enum:frontend_consts
-dude_width	include/frontend.h	/^    dude_width                          = 1,$/;"	e	enum:frontend_consts
+dude_squat_height	include/constants.h	/^    dude_squat_height                   = 1,$/;"	e	enum:constants
+dude_step	src/tetris.c	/^void dude_step(struct_dude *dude)$/;"	f
+dude_straight_height	include/constants.h	/^    dude_straight_height                = 2,$/;"	e	enum:constants
+dude_width	include/constants.h	/^    dude_width                          = 1,$/;"	e	enum:constants
 eighth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 eleventh	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 empty	src/tetris.c	/^    empty, occupied, ghost$/;"	e	enum:tag_type_of_cell	file:
@@ -98,6 +101,8 @@ handle_i_piece	src/conflict_resolution.c	/^static void handle_i_piece(struct_pie
 handle_regular_piece_rotation_conflict	src/conflict_resolution.c	/^static void handle_regular_piece_rotation_conflict($/;"	f	file:
 handle_rotation	src/tetris.c	/^void handle_rotation(const bool (*field)[field_width], struct_piece *piece)$/;"	f
 handle_rotation_conflicts	src/conflict_resolution.c	/^void handle_rotation_conflicts($/;"	f
+height	include/constants.h	/^    unsigned char height;$/;"	m	struct:tag_struct_dude
+hide_dude	src/tetris.c	/^    hide_dude, print_dude$/;"	e	enum:tag_dude_action	file:
 hide_ghost	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 hide_piece	src/tetris.c	/^    hide_piece, print_piece, hide_ghost, print_ghost$/;"	e	enum:tag_piece_action	file:
 horizontal_1	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
@@ -107,12 +112,9 @@ i_form	include/constants.h	/^    bool i_form;$/;"	m	struct:tag_struct_piece
 i_form_piece_rotation_conflicts_handling	src/conflict_resolution.c	/^static void i_form_piece_rotation_conflicts_handling($/;"	f	file:
 i_piece_rotation_conflict	src/conflict_resolution.c	/^static bool i_piece_rotation_conflict($/;"	f	file:
 init_callback	src/rotation.c	/^static void init_callback(void *dst, void *src, int len, int x, int y)$/;"	f	file:
-init_dude_img_arrays	tmp.c	/^void init_dude_img_arrays($/;"	f
 init_resize_screen_y	src/tetris.c	/^int init_resize_screen_y(int row)$/;"	f
 init_screen_x	src/tetris.c	/^int init_screen_x()$/;"	f
 init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(struct_piece *set_of_pieces)$/;"	f
-init_squat_dude_img_arrays	tmp.c	/^void init_squat_dude_img_arrays($/;"	f
-init_straight_dude_img_arrays	tmp.c	/^void init_straight_dude_img_arrays($/;"	f
 initial_piece_shift	include/constants.h	/^    initial_piece_shift                 = 4,$/;"	e	enum:constants
 key_esc	include/constants.h	/^    key_esc                             = 27,$/;"	e	enum:constants
 last_field_row_num	include/constants.h	/^    last_field_row_num                  = 19,$/;"	e	enum:constants
@@ -125,7 +127,6 @@ lower_field_cell_is_occupied	src/tetris.c	/^bool lower_field_cell_is_occupied($/
 main	src/tetris.c	/^int main()$/;"	f
 matrix_	src/rotation.c	/^static void matrix_($/;"	f	file:
 matrix_callback	src/rotation.c	/^typedef void (*matrix_callback)(void*, void*, int, int, int);$/;"	t	file:
-max_dude_height_in_character_cells	include/frontend.h	/^    max_dude_height_in_character_cells  = dude_straight_height * cell_height,$/;"	e	enum:frontend_consts
 max_msg_str_size	include/constants.h	/^    max_msg_str_size                    = 80$/;"	e	enum:constants
 max_num_of_completed_lines	include/constants.h	/^    max_num_of_completed_lines          = 4,$/;"	e	enum:constants
 maximum_game_level	include/constants.h	/^    maximum_game_level                  = 15,$/;"	e	enum:constants
@@ -149,10 +150,9 @@ out_of_bottom_field_boundary	src/conflict_resolution.c	/^static bool out_of_bott
 out_of_left_boundary	src/conflict_resolution.c	/^static bool out_of_left_boundary(const struct_piece *piece)$/;"	f	file:
 out_of_right_boundary	src/conflict_resolution.c	/^static bool out_of_right_boundary(const struct_piece *piece)$/;"	f	file:
 out_of_top_field_boundary	src/conflict_resolution.c	/^static bool out_of_top_field_boundary(const struct_piece *piece)$/;"	f	file:
-pick_curr_dude_img_array	tmp.c	/^void pick_curr_dude_img_array($/;"	f
 piece_	src/tetris.c	/^void piece_(piece_action action, const struct_piece *piece)$/;"	f
 piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
-piece_fall_step	src/tetris.c	/^void piece_fall_step(struct_piece *piece)$/;"	f
+piece_fall_step	src/tetris.c	/^void piece_fall_step(const bool (*field)[field_width], struct_piece *piece)$/;"	f
 piece_falls	src/tetris.c	/^void piece_falls($/;"	f
 piece_field_conflict	src/conflict_resolution.c	/^static bool piece_field_conflict($/;"	f	file:
 piece_field_crossing_conflict	src/conflict_resolution.c	/^bool piece_field_crossing_conflict($/;"	f
@@ -167,8 +167,7 @@ prevention	include/conflict_resolution.h	/^typedef enum tag_crossing_action { pr
 print_bottom_top_boundary	src/tetris.c	/^void print_bottom_top_boundary()$/;"	f
 print_cell_	src/tetris.c	/^void print_cell_(type_of_cell type, int x, int y)$/;"	f
 print_centered_format_msg	src/tetris.c	/^void print_centered_format_msg($/;"	f
-print_dude	src/tetris.c	/^void print_dude(const struct_dude *dude)$/;"	f
-print_dude	tmp.c	/^void print_dude(const struct_dude *dude)$/;"	f
+print_dude	src/tetris.c	/^    hide_dude, print_dude$/;"	e	enum:tag_dude_action	file:
 print_field	src/tetris.c	/^void print_field(const bool (*field)[field_width])$/;"	f
 print_field_boundary	src/tetris.c	/^void print_field_boundary($/;"	f
 print_game_info	src/tetris.c	/^void print_game_info(int info, int position)$/;"	f
@@ -221,6 +220,7 @@ struct_dude	include/constants.h	/^} struct_dude;$/;"	t	typeref:struct:tag_struct
 struct_piece	include/constants.h	/^} struct_piece;$/;"	t	typeref:struct:tag_struct_piece
 tag_boundary_side	src/tetris.c	/^typedef enum tag_boundary_side {$/;"	g	file:
 tag_crossing_action	include/conflict_resolution.h	/^typedef enum tag_crossing_action { prevention, signal } crossing_action;$/;"	g
+tag_dude_action	src/tetris.c	/^typedef enum tag_dude_action {$/;"	g	file:
 tag_enum_direction	include/constants.h	/^typedef enum tag_enum_direction {$/;"	g
 tag_enum_posture	include/constants.h	/^typedef enum tag_enum_posture {$/;"	g
 tag_form	include/constants.h	/^    union tag_form {$/;"	u	struct:tag_struct_piece
