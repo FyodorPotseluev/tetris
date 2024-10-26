@@ -6,12 +6,17 @@
 #include <stdbool.h>
 
 enum constants {
-    /* game field size in cells */
+    /* game field size */
     field_height                        = 20,
+    last_field_row_num                  = 19,
     field_width                         = 10,
+    /* dude size */
+    dude_straight_height                = 2,
+    dude_squat_height                   = 1,
+    dude_width                          = 1,
     /* the number of pieces available in the game */
     num_of_pieces                       = 7,
-    /* piece sizes in cells */
+    /* piece sizes */
     small_piece_size                    = 3,
     big_piece_size                      = 4,
     /* initial piece shift to the left border of the field when it spawns */
@@ -68,6 +73,14 @@ typedef enum tag_position {
     horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count
 } position;
 
+typedef enum tag_enum_direction {
+    forward, backward
+} enum_direction;
+
+typedef enum tag_enum_posture {
+    straight, squat
+} enum_posture;
+
 typedef struct tag_struct_piece {
     /* piece size */
     unsigned char size;
@@ -85,5 +98,16 @@ typedef struct tag_struct_piece {
     /* the current piece orientation in space */
     position orientation;
 } struct_piece;
+
+typedef struct tag_struct_dude {
+    /* current dude coordinates to the top left field corner. */
+    signed char x_shift, y_decline;
+    /* current dude's height */
+    unsigned char height;
+    /* posture - either straight or squat */
+    enum_posture posture;
+    /* moving direction - either forward or backward */
+    enum_direction direction;
+} struct_dude;
 
 #endif

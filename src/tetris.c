@@ -873,6 +873,69 @@ void screen_size_check()
     }
 }
 
+void choose_curr_dude_img_array(
+    const struct_dude *dude, const char *const **dude_img_arr
+)
+{
+    if (dude->posture == straight) {
+        if (dude->direction == forward)
+            *dude_img_arr = straight_dude_goes_forth;
+        else
+        if (dude->direction == backward)
+            *dude_img_arr = straight_dude_goes_back;
+        else
+            goto error_msg;
+    }
+    else
+    if (dude->posture == squat) {
+        if (dude->direction == forward)
+            *dude_img_arr = squat_dude_goes_forth;
+        else
+        if (dude->direction == backward)
+            *dude_img_arr = squat_dude_goes_back;
+        else
+            goto error_msg;
+    }
+    else {
+        error_msg:
+        fprintf(stderr, "%s:%d: incorrect value", __FILE__, __LINE__);
+        exit(1);
+    }
+}
+
+int get_dude_screen_x(const struct_dude *dude)
+{
+    return get_init_x() + (dude->x_shift * cell_width);;
+}
+
+int get_last_dude_y(const struct_dude *dude)
+{
+    return dude->y_decline * cell_height + cell_height - 1;
+}
+
+int dude_cell_height(const struct_dude *dude)
+{
+    return dude->height * cell_height;
+}
+
+int get_dude_screen_y(const struct_dude *dude)
+{
+    return get_init_y() + get_last_dude_y(dude) - (dude_cell_height(dude) - 1);
+}
+
+void print_dude(const struct_dude *dude)
+{
+    const char *const *dude_img_arr;
+    choose_curr_dude_img_array(dude, &dude_img_arr);
+    int i, x, y;
+    for (i = 0, x = get_dude_screen_x(dude), y = get_dude_screen_y(dude);
+        i < dude_cell_height(dude);
+        i++, y++)
+    {
+        mvprintw(y, x, "%s", dude_img_arr[i]);
+    }
+}
+
 int main()
 {
     /* ncurses */
@@ -888,6 +951,9 @@ int main()
     struct_piece set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     struct_piece piece, next_piece;
+    struct_dude dude = {
+        0, last_field_row_num, dude_straight_height, straight, forward
+    };
 
     /* MAIN */
     screen_size_check();
@@ -896,7 +962,7 @@ int main()
     print_labels();
     print_game_info(level, level_row);
     print_game_info(score, score_row);
-    /* print_dude */
+    print_dude(&dude);
     next_piece = get_random_piece(set_of_pieces);
     bool game_on = true;
     while (game_on) {
