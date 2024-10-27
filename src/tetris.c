@@ -11,6 +11,11 @@
 #include <time.h>
 #include <unistd.h>
 
+typedef enum tag_transform_field_action {
+    field_absorbes_piece, record_falling_cells, record_ghost_cells,
+    erase_ghost_cells, erase_falling_cells
+} transform_field_action;
+
 typedef enum tag_piece_action {
     hide_piece, print_piece, hide_ghost, print_ghost
 } piece_action;
@@ -18,10 +23,6 @@ typedef enum tag_piece_action {
 typedef enum tag_dude_action {
     hide_dude, print_dude
 } dude_action;
-
-typedef enum tag_type_of_cell {
-    empty, occupied, ghost
-} type_of_cell;
 
 typedef enum tag_boundary_side {
     bottom, top, left_side, right_side
@@ -72,7 +73,7 @@ int get_init_y()
     return init_y;
 }
 
-void print_cell_(type_of_cell type, int x, int y)
+void print_cell_(enum_field type, int x, int y)
 {
     int i;
     for (i=0; i < cell_height; i++, y++) {
@@ -141,7 +142,7 @@ int init_screen_x()
     return get_init_x() - side_boundary_width;
 }
 
-void print_field(const bool (*field)[field_width])
+void print_field(const enum_field (*field)[field_width])
 {
     int field_x, field_y, screen_x, screen_y;
     print_field_boundary(top, NULL, NULL);
@@ -244,14 +245,17 @@ bool field_has_ended(const struct_piece *piece, int y)
 }
 
 bool lower_field_cell_is_occupied(
-    const bool (*field)[field_width], const struct_piece *piece, int x, int y
+    const enum_field (*field)[field_width],
+    const struct_piece *piece, int x, int y
 )
 {
     return (field_has_ended(piece, y) ||
         field[y + piece->y_decline + 1][x + piece->x_shift] == 1);
 }
 
-bool piece_has_fallen(const bool (*field)[field_width], const struct_piece *piece)
+bool piece_has_fallen(
+    const enum_field (*field)[field_width], const struct_piece *piece
+)
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
@@ -269,48 +273,92 @@ bool piece_has_fallen(const bool (*field)[field_width], const struct_piece *piec
     return false;
 }
 
+bool select_and_perform_transformation(
+    transform_field_action action, enum_field (*field)[field_width],
+    const struct_piece *piece, int x, int y
+)
+{
+    bool leave = false;
+    switch (action) {
+        case field_absorbes_piece:
+            field[y + piece->y_decline][x + piece->x_shift]     = occupied;
+            break;
+        case record_falling_cells:
+            field[y + piece->y_decline][x + piece->x_shift]     = falling;
+            break;
+        case record_ghost_cells:
+            if (field[y + piece->y_decline][x + piece->x_shift] == ghost)
+                return true;
+            field[y + piece->y_decline][x + piece->x_shift]     = ghost;
+            break;
+        case erase_ghost_cells:
+            field[y + piece->ghost_decline][x + piece->x_shift] = empty;
+            break;
+        case erase_falling_cells:
+            field[y + piece->y_decline][x + piece->x_shift]     = empty;
+            break;
+        default:
+            fprintf(
+                stderr, "%s:%d: incorrect value %d", __FILE__, __LINE__, action
+            );
+            exit(1);
+    }
+    return leave;
+}
+
+void transform_field_array(
+    transform_field_action action, enum_field (*field)[field_width],
+    const struct_piece *piece
+)
+{
+    /* `piece->form.small` and `piece->form.big` share the same address,
+    so we handle both scenarios here */
+    const bool (*matrix)[piece->size] = piece->form.small;
+    bool quit;
+    int x, y;
+    for (y=0; y < piece->size; y++) {
+        for (x=0; x < piece->size; x++) {
+            if (matrix[y][x] == 1) {
+                quit = select_and_perform_transformation(
+                    action, field, piece, x, y
+                );
+                if (quit) return;
+            }
+        }
+    }
+}
+
 void cast_ghost(
-    const bool (*field)[field_width], struct_piece piece,
+    enum_field (*field)[field_width], struct_piece piece,
     signed char *ghost_decline
 )
 {
     while (!piece_has_fallen(field, &piece))
         piece.y_decline++;
+    transform_field_array(record_ghost_cells, field, &piece);
     piece_(print_ghost, &piece);
     *ghost_decline = piece.y_decline;
 }
 
-void piece_spawn(const bool (*field)[field_width], struct_piece *piece)
+void piece_spawn(enum_field (*field)[field_width], struct_piece *piece)
 {
     truncate_piece(piece);
     cast_ghost(field, *piece, &piece->ghost_decline);
+    transform_field_array(record_falling_cells, field, piece);
     piece_(print_piece, piece);
     curs_set(0);
     refresh();
 }
 
-void field_absorbes_piece(bool (*field)[field_width], const struct_piece *piece)
-{
-    /* `piece->form.small` and `piece->form.big` share the same address,
-    so we handle both scenarios here */
-    const bool (*matrix)[piece->size] = piece->form.small;
-    int x, y;
-    /* `piece` cells become `field` cells */
-    for (y=0; y < piece->size; y++) {
-        for (x=0; x < piece->size; x++) {
-            if (matrix[y][x] == 1)
-                field[y + piece->y_decline][x + piece->x_shift] = 1;
-        }
-    }
-}
-
 void move_(
-    move_direction direction, const bool (*field)[field_width],
+    move_direction direction, enum_field (*field)[field_width],
     struct_piece *piece
 )
 {
     int x_shift_backup = piece->x_shift;
+    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_ghost, piece);
+    transform_field_array(erase_falling_cells, field, piece);
     piece_(hide_piece, piece);
     switch (direction) {
         case left:
@@ -326,6 +374,7 @@ void move_(
     if (field_or_side_boundaries_conflict(field, piece))
         piece->x_shift = x_shift_backup;
     cast_ghost(field, *piece, &piece->ghost_decline);
+    transform_field_array(record_falling_cells, field, piece);
     piece_(print_piece, piece);
 }
 
@@ -404,11 +453,16 @@ void dude_(dude_action action, const struct_dude *dude)
     }
 }
 
-void piece_fall_step(const bool (*field)[field_width], struct_piece *piece)
+void piece_fall_step(
+    enum_field (*field)[field_width], struct_piece *piece
+)
 {
+    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_piece, piece);
+    transform_field_array(erase_falling_cells, field, piece);
     piece->y_decline++;
     cast_ghost(field, *piece, &piece->ghost_decline);
+    transform_field_array(record_falling_cells, field, piece);
     piece_(print_piece, piece);
     curs_set(0);
     refresh();
@@ -417,34 +471,43 @@ void piece_fall_step(const bool (*field)[field_width], struct_piece *piece)
 void dude_step(struct_dude *dude)
 {
     dude_(hide_dude, dude);
-    /* fix broken "ghost cells" */
     /* turn around check */
+    /* change the posture check */
     if (dude->direction == forward)
         dude->x_shift++;
     else
         dude->x_shift--;
     /* game over check */
+    /* fix broken "ghost cells":
+        depending on the dude direction check the two cells that left behind him
+        . If any of them / both were "ghost cells" - print ghost cells at their
+        place again. */
     dude_(print_dude, dude);
     curs_set(0);
     refresh();
 }
 
-void handle_rotation(const bool (*field)[field_width], struct_piece *piece)
+void handle_rotation(
+    enum_field (*field)[field_width], struct_piece *piece
+)
 {
     bool backup_matrix[piece->size][piece->size];
     make_backup(backup_matrix, piece);
+    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_ghost, piece);
+    transform_field_array(erase_falling_cells, field, piece);
     piece_(hide_piece, piece);
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     rotate(piece->form.small, piece->size);
     handle_rotation_conflicts(field, piece, backup_matrix);
     cast_ghost(field, *piece, &piece->ghost_decline);
+    transform_field_array(record_falling_cells, field, piece);
     piece_(print_piece, piece);
 }
 
 void process_key(
-    int key_pressed, const bool (*field)[field_width],
+    int key_pressed, enum_field (*field)[field_width],
     struct_piece *piece, bool *hard_drop, bool *game_on
 )
 {
@@ -477,7 +540,7 @@ void process_key(
 }
 
 void process_input(
-    const bool (*field)[field_width], struct_piece *piece,
+    enum_field (*field)[field_width], struct_piece *piece,
     int level, bool *game_on
 )
 {
@@ -493,6 +556,7 @@ void process_input(
         bool hard_drop = false;
         timeout(delay);
         time_start(&tv1, &tz);
+        /* `getch()` also works as `refresh()` */
         key_pressed = getch();
         process_key(key_pressed, field, piece, &hard_drop, game_on);
         if (
@@ -512,7 +576,7 @@ void process_input(
 }
 
 void piece_falls(
-    bool (*field)[field_width], struct_piece *piece,
+    enum_field (*field)[field_width], struct_piece *piece,
     struct_dude *dude, int level, bool *game_on
 )
 {
@@ -524,7 +588,7 @@ void piece_falls(
 
         if (piece_has_fallen(field, piece)) {
             /* game over - dude has been crushed - check */
-            field_absorbes_piece(field, piece);
+            transform_field_array(field_absorbes_piece, field, piece);
             break;
         }
         piece_fall_step(field, piece);
@@ -733,7 +797,7 @@ void process_completed_line(
 }
 
 bool there_are_completed_lines(
-    const bool (*field)[field_width], int *num_of_completed_lines,
+    const enum_field (*field)[field_width], int *num_of_completed_lines,
     int *row_num_of_first_completed_line, bool *sequence_of_completed_lines
 )
 {
@@ -773,7 +837,7 @@ bool there_are_completed_lines(
 }
 
 void shift_down_upper_not_empty_lines_for_num_positions(
-    bool (*field)[field_width], int init_row_to_replace,
+    enum_field (*field)[field_width], int init_row_to_replace,
     int num, int *field_y, int *screen_y
 )
 {
@@ -801,7 +865,7 @@ void shift_down_upper_not_empty_lines_for_num_positions(
 }
 
 void replace_upmost_not_empty_lines_with_empty_cells(
-    bool (*field)[field_width], int num, int field_y, int screen_y
+    enum_field (*field)[field_width], int num, int field_y, int screen_y
 )
 {
     int field_x, screen_x;
@@ -820,7 +884,7 @@ void replace_upmost_not_empty_lines_with_empty_cells(
 }
 
 void delete_completed_lines(
-    bool (*field)[field_width], int init_row_to_replace, int num
+    enum_field (*field)[field_width], int init_row_to_replace, int num
 )
 {
     int field_y, screen_y;
@@ -849,7 +913,7 @@ void find_continuous_block_of_completed_lines(
 }
 
 void field_matrix_rearrangement(
-    bool (*field)[field_width], int init_row_to_replace,
+    enum_field (*field)[field_width], int init_row_to_replace,
     bool *sequence_of_completed_lines
 )
 {
@@ -909,7 +973,7 @@ void level_up_if_necessary(int *level, int num_of_completed_lines)
 }
 
 void clear_completed_lines_update_score_and_level_up(
-    bool (*field)[field_width], int *level, int *score
+    enum_field (*field)[field_width], int *level, int *score
 )
 {
     (void)score;
@@ -987,7 +1051,7 @@ int main()
 
     /* variables */
     int level = 1, score = 0;
-    bool field[field_height][field_width] = { 0 };
+    enum_field field[field_height][field_width] = { 0 };
     struct_piece set_of_pieces[num_of_pieces];
     init_set_of_pieces(set_of_pieces);
     struct_piece piece, next_piece;

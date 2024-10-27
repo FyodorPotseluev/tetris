@@ -25,7 +25,7 @@ RETURNES:
     - the boolean value indicating whether a side boundary crossing took place. */
 
 bool field_or_side_boundaries_conflict(
-    const bool (*field)[field_width], const struct_piece *piece
+    const enum_field (*field)[field_width], const struct_piece *piece
 );
 /*
     Signals if a piece now has a conflict with occupied field cells, or if it
@@ -39,7 +39,7 @@ RETURNES:
 */
 
 bool piece_field_crossing_conflict(
-    const bool (*field)[field_width], const struct_piece *piece
+    const enum_field (*field)[field_width], const struct_piece *piece
 );
 /*
     Signals if a piece cell is crossing an occupied field cell.
@@ -69,7 +69,8 @@ ERROR HANDLING:
 
 
 void handle_rotation_conflicts(
-    const bool (*field)[field_width], struct_piece *piece, const void *backup
+    const enum_field (*field)[field_width], struct_piece *piece,
+    const void *backup
 );
 /*
     Prevents conflicts (crossing the field borders or already occupied field

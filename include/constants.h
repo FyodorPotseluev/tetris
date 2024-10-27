@@ -43,7 +43,7 @@ enum constants {
 /* the list of piece fall step delays (the time in milliseconds it takes for a
 piece to fall by one cell) for the corresponding level */
 typedef enum tag_speed_list {
-        zero,           first      = 1000, second     = 793,  third     = 618,
+        zero,           first      = 1000000, second     = 793,  third     = 618,
         fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,
         eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,
         twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7
@@ -80,6 +80,10 @@ typedef enum tag_enum_direction {
 typedef enum tag_enum_posture {
     straight, squat
 } enum_posture;
+
+typedef enum tag_enum_field {
+    empty = 0, occupied = 1, ghost, falling
+} enum_field;
 
 typedef struct tag_struct_piece {
     /* piece size */

@@ -78,14 +78,15 @@ static bool o_piece(const struct_piece *piece)
 }
 
 static bool i_piece_rotation_conflict(
-    const bool (*field)[field_width], const struct_piece *piece, int x, int y
+    const enum_field (*field)[field_width], const struct_piece *piece,
+    int x, int y
 )
 {
     return (field[piece->y_decline + y][piece->x_shift + x] == 1);
 }
 
 static void handle_i_form_piece_rotation_conflict(
-    const bool (*field)[field_width], const struct_piece *piece,
+    const enum_field (*field)[field_width], const struct_piece *piece,
     const int (*confl_coords)[2], const int *amendments, int *coordinate
 )
 {
@@ -141,7 +142,8 @@ static void handle_i_form_piece_rotation_conflict(
 
 */
 static void i_form_piece_rotation_conflicts_handling(
-    const bool (*field)[field_width], struct_piece *piece, int *dx, int *dy
+    const enum_field (*field)[field_width], struct_piece *piece,
+    int *dx, int *dy
 )
 {
     int tmpdx = 0, tmpdy = 0;
@@ -192,14 +194,16 @@ static void i_form_piece_rotation_conflicts_handling(
 }
 
 static bool cell_occupied_by_(
-    const bool (*field)[field_width], int x, int y, const struct_piece *piece
+    const enum_field (*field)[field_width], int x, int y,
+    const struct_piece *piece
 )
 {
     return (field[y+piece->y_decline][x+piece->x_shift] == 1);
 }
 
 static bool piece_field_conflict(
-    const bool (*field)[field_width], int x, int y, const struct_piece *piece
+    const enum_field (*field)[field_width], int x, int y,
+    const struct_piece *piece
 )
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
@@ -209,7 +213,7 @@ static bool piece_field_conflict(
 }
 
 bool piece_field_crossing_conflict(
-    const bool (*field)[field_width], const struct_piece *piece
+    const enum_field (*field)[field_width], const struct_piece *piece
 )
 {
     int x, y;
@@ -223,7 +227,8 @@ bool piece_field_crossing_conflict(
 }
 
 static bool regular_piece_rotation_conflict(
-    const bool (*field)[field_width], const struct_piece *piece, int x, int y
+    const enum_field (*field)[field_width], const struct_piece *piece,
+    int x, int y
 )
 {
     return ((field[piece->y_decline + y][piece->x_shift + x] == 1) &&
@@ -231,7 +236,7 @@ static bool regular_piece_rotation_conflict(
 }
 
 static void handle_regular_piece_rotation_conflict(
-    const bool (*field)[field_width], const struct_piece *piece,
+    const enum_field (*field)[field_width], const struct_piece *piece,
     const int (*confl_coords)[2], int *amendment_1, int *amendment_2,
     int default_change
 )
@@ -295,7 +300,8 @@ static void handle_regular_piece_rotation_conflict(
 
 */
 static void regular_piece_rotation_conflicts_handling(
-    const bool (*field)[field_width], struct_piece *piece, int *dx, int *dy
+    const enum_field (*field)[field_width], struct_piece *piece,
+    int *dx, int *dy
 )
 {
     int tmpdx = 0, tmpdy = 0;
@@ -369,7 +375,7 @@ static bool piece_right_boundary_conflict(
 }
 
 bool field_or_side_boundaries_conflict(
-    const bool (*field)[field_width], const struct_piece *piece
+    const enum_field (*field)[field_width], const struct_piece *piece
 )
 {
     int y, x;
@@ -560,7 +566,8 @@ static void handle_i_piece(struct_piece *piece, int *dx)
 }
 
 void handle_rotation_conflicts(
-    const bool (*field)[field_width], struct_piece *piece, const void *backup
+    const enum_field (*field)[field_width], struct_piece *piece,
+    const void *backup
 )
 {
     const bool (*backup_matrix)[piece->size] = backup;
