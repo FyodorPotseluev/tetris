@@ -83,7 +83,7 @@ field_width	include/constants.h	/^    field_width                         = 10,$
 fifteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7$/;"	e	enum:tag_speed_list
 fifth	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
 find_continuous_block_of_completed_lines	src/tetris.c	/^void find_continuous_block_of_completed_lines($/;"	f
-first	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+first	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 form	include/constants.h	/^    } form;$/;"	m	struct:tag_struct_piece	typeref:union:tag_struct_piece::tag_form
 forward	include/constants.h	/^    forward, backward$/;"	e	enum:tag_enum_direction
 four_lines_score_bonus	include/constants.h	/^    four_lines_score_bonus              = 800,$/;"	e	enum:constants
@@ -124,6 +124,7 @@ init_resize_screen_y	src/tetris.c	/^int init_resize_screen_y(int row)$/;"	f
 init_screen_x	src/tetris.c	/^int init_screen_x()$/;"	f
 init_set_of_pieces	src/tetris.c	/^void init_set_of_pieces(struct_piece *set_of_pieces)$/;"	f
 initial_piece_shift	include/constants.h	/^    initial_piece_shift                 = 4,$/;"	e	enum:constants
+input_processed_and_dude_takes_step	src/tetris.c	/^void input_processed_and_dude_takes_step($/;"	f
 key_esc	include/constants.h	/^    key_esc                             = 27,$/;"	e	enum:constants
 last_field_row_num	include/constants.h	/^    last_field_row_num                  = 19,$/;"	e	enum:constants
 left	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
@@ -161,7 +162,7 @@ out_of_top_field_boundary	src/conflict_resolution.c	/^static bool out_of_top_fie
 piece_	src/tetris.c	/^void piece_(piece_action action, const struct_piece *piece)$/;"	f
 piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
 piece_fall_step	src/tetris.c	/^void piece_fall_step($/;"	f
-piece_falls	src/tetris.c	/^void piece_falls($/;"	f
+piece_falls_and_dude_takes_step	src/tetris.c	/^void piece_falls_and_dude_takes_step($/;"	f
 piece_has_fallen	src/tetris.c	/^bool piece_has_fallen($/;"	f
 piece_left_boundary_conflict	src/conflict_resolution.c	/^static bool piece_left_boundary_conflict($/;"	f	file:
 piece_right_boundary_conflict	src/conflict_resolution.c	/^static bool piece_right_boundary_conflict($/;"	f	file:
@@ -184,7 +185,6 @@ print_resize_request_msg	src/tetris.c	/^void print_resize_request_msg(int row, i
 print_score_message	src/tetris.c	/^void print_score_message(int score)$/;"	f
 print_side_boundary	src/tetris.c	/^void print_side_boundary(int x, int y)$/;"	f
 process_completed_line	src/tetris.c	/^void process_completed_line($/;"	f
-process_input	src/tetris.c	/^void process_input($/;"	f
 process_key	src/tetris.c	/^void process_key($/;"	f
 process_uncompleted_line	src/tetris.c	/^void process_uncompleted_line($/;"	f
 record_falling_cells	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, record_ghost_cells,$/;"	e	enum:tag_transform_field_action	file:
@@ -203,7 +203,7 @@ score_increase	src/tetris.c	/^void score_increase(int *score, int level, int num
 score_label_row	include/frontend.h	/^    score_label_row                     = 3,$/;"	e	enum:frontend_consts
 score_row	include/frontend.h	/^    score_row                           = 4,$/;"	e	enum:frontend_consts
 screen_size_check	src/tetris.c	/^void screen_size_check()$/;"	f
-second	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+second	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 select_and_perform_transformation	src/tetris.c	/^bool select_and_perform_transformation($/;"	f
 set_x_cycle_bound_cond	src/conflict_resolution.c	/^static bool set_x_cycle_bound_cond($/;"	f	file:
 set_y_cycle_cond	src/conflict_resolution.c	/^static bool set_y_cycle_cond($/;"	f	file:
@@ -245,7 +245,7 @@ tag_transform_field_action	src/tetris.c	/^typedef enum tag_transform_field_actio
 take_	src/tetris.c	/^void take_(piece_action action, int x, int y)$/;"	f
 tenth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 there_are_completed_lines	src/tetris.c	/^bool there_are_completed_lines($/;"	f
-third	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+third	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
 thirteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   fourteenth = 11,   fifteenth = 7$/;"	e	enum:tag_speed_list
 three_lines_score_bonus	include/constants.h	/^    three_lines_score_bonus             = 500,$/;"	e	enum:constants
 time_start	src/tetris.c	/^void time_start(struct timeval *tv1, struct timezone *tz)$/;"	f
@@ -266,4 +266,4 @@ x_shift	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;
 x_shift	include/constants.h	/^    signed char x_shift, y_decline;$/;"	m	struct:tag_struct_dude
 y_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_struct_piece
 y_decline	include/constants.h	/^    signed char x_shift, y_decline;$/;"	m	struct:tag_struct_dude
-zero	include/constants.h	/^        zero,           first      = 1000000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list
+zero	include/constants.h	/^        zero,           first      = 1000, second     = 793,  third     = 618,$/;"	e	enum:tag_speed_list

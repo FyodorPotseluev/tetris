@@ -571,9 +571,9 @@ void process_key(
     }
 }
 
-void process_input(
+void input_processed_and_dude_takes_step(
     enum_field (*field)[field_width], struct_piece *piece,
-    int level, bool *game_on
+    struct_dude *dude, int level, bool *game_on
 )
 {
     struct timeval tv1, tv2;
@@ -583,48 +583,47 @@ void process_input(
         sixth,    seventh,     eighth,      ninth,      tenth,     eleventh,
         twelfth,  thirteenth,  fourteenth,  fifteenth
     };
-    int key_pressed, delay = speed[level];
+    int key_pressed, time_passed, piece_delay = speed[level];
+    static int dude_delay;
+    if (dude_delay <=0)
+        dude_delay = speed[level];
     for (;;) {
         bool hard_drop = false;
-        timeout(delay);
+        timeout(1);
         time_start(&tv1, &tz);
         /* `getch()` also works as `refresh()` */
         key_pressed = getch();
         process_key(key_pressed, field, piece, &hard_drop, game_on);
-        if (
-            (key_pressed == ERR) || (key_pressed == KEY_DOWN) ||
-            (hard_drop) || (!*game_on)
-        )
-        {
+        if ((key_pressed == KEY_DOWN) || (hard_drop) || (!*game_on))
             break;
-        }
         /* new delay value calculation */
-        delay -= time_stop(&tv1, &tv2, &tz);
-        if (delay < 0)
+        time_passed = time_stop(&tv1, &tv2, &tz);
+        piece_delay -= time_passed;
+        dude_delay -= time_passed;
+        if (dude_delay < 0) {
+            dude_step(field, dude);
+            dude_delay = speed[level];
+        }
+        if (piece_delay < 0)
             break;
         else
             continue;
     }
 }
 
-void piece_falls(
+void piece_falls_and_dude_takes_step(
     enum_field (*field)[field_width], struct_piece *piece,
     struct_dude *dude, int level, bool *game_on
 )
 {
     while ((*game_on)) {
-        process_input(field, piece, level, game_on/*, time_left */);
-        /* stop here every now and then to check if `time_left < 0` and move
-        the dude in this case */
-        /* `time_left` should be static */
-
+        input_processed_and_dude_takes_step(field, piece, dude, level, game_on);
         if (piece_has_fallen(field, piece)) {
             /* game over - dude has been crushed - check */
             transform_field_array(field_absorbes_piece, field, piece);
             break;
         }
         piece_fall_step(field, piece);
-        dude_step(field, dude);
     }
 }
 
@@ -1108,7 +1107,7 @@ int main()
         piece_spawn(field, &piece);
         if (falling_piece_field_crossing_conflict(field, &piece))
             game_on = false;
-        piece_falls(field, &piece, &dude, level, &game_on);
+        piece_falls_and_dude_takes_step(field, &piece, &dude, level, &game_on);
         clear_completed_lines_update_score_and_level_up(field, &level, &score);
     }
     end_game(score);
