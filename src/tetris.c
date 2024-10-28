@@ -411,6 +411,16 @@ void choose_curr_dude_img_array(
     }
 }
 
+int get_screen_x(int x)
+{
+    return get_init_x() + (x * cell_width);
+}
+
+int get_screen_y(int y)
+{
+    return get_init_y() + (y * cell_height);
+}
+
 int get_dude_screen_x(const struct_dude *dude)
 {
     return get_init_x() + (dude->x_shift * cell_width);;
@@ -471,7 +481,25 @@ void piece_fall_step(
     refresh();
 }
 
-void dude_step(struct_dude *dude)
+void repair_broken_ghost_cells(
+    const enum_field (*field)[field_width], struct_dude *dude
+)
+{
+    int i, x, y = dude->y_decline;
+    if (dude->direction == forward)
+        x = dude->x_shift - 1;
+    else
+    if (dude->direction == backward)
+        x = dude->x_shift + 1;
+    if ((x < 0) || (x > field_width-1))
+        return;
+    for (i=0; i < dude_straight_height; i++, y--) {
+        if (field[y][x] == ghost)
+            print_cell_(ghost, get_screen_x(x), get_screen_y(y));
+    }
+}
+
+void dude_step(const enum_field (*field)[field_width], struct_dude *dude)
 {
     dude_(hide_dude, dude);
     /* turn around check */
@@ -485,6 +513,7 @@ void dude_step(struct_dude *dude)
         depending on the dude direction check the two cells that left behind him
         . If any of them / both were "ghost cells" - print ghost cells at their
         place again. */
+    repair_broken_ghost_cells(field, dude);
     dude_(print_dude, dude);
     curs_set(0);
     refresh();
@@ -595,7 +624,7 @@ void piece_falls(
             break;
         }
         piece_fall_step(field, piece);
-        dude_step(dude);
+        dude_step(field, dude);
     }
 }
 
