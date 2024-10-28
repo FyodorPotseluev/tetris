@@ -281,21 +281,24 @@ bool select_and_perform_transformation(
     bool leave = false;
     switch (action) {
         case field_absorbes_piece:
-            field[y + piece->y_decline][x + piece->x_shift]     = occupied;
+            field[y + piece->y_decline][x + piece->x_shift] = occupied;
             break;
         case record_falling_cells:
-            field[y + piece->y_decline][x + piece->x_shift]     = falling;
+            if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
+                field[y + piece->y_decline][x + piece->x_shift] = falling;
             break;
         case record_ghost_cells:
             if (field[y + piece->y_decline][x + piece->x_shift] == ghost)
                 return true;
-            field[y + piece->y_decline][x + piece->x_shift]     = ghost;
+            if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
+                field[y + piece->y_decline][x + piece->x_shift] = ghost;
             break;
         case erase_ghost_cells:
             field[y + piece->ghost_decline][x + piece->x_shift] = empty;
             break;
         case erase_falling_cells:
-            field[y + piece->y_decline][x + piece->x_shift]     = empty;
+            if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
+                field[y + piece->y_decline][x + piece->x_shift] = empty;
             break;
         default:
             fprintf(
@@ -1074,7 +1077,7 @@ int main()
         next_piece = get_random_piece(set_of_pieces);
         show_next_piece_preview(piece, next_piece);
         piece_spawn(field, &piece);
-        if (piece_field_crossing_conflict(field, &piece))
+        if (falling_piece_field_crossing_conflict(field, &piece))
             game_on = false;
         piece_falls(field, &piece, &dude, level, &game_on);
         clear_completed_lines_update_score_and_level_up(field, &level, &score);

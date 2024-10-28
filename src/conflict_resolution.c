@@ -201,7 +201,7 @@ static bool cell_occupied_by_(
     return (field[y+piece->y_decline][x+piece->x_shift] == 1);
 }
 
-static bool piece_field_conflict(
+static bool falling_piece_field_conflict(
     const enum_field (*field)[field_width], int x, int y,
     const struct_piece *piece
 )
@@ -212,14 +212,14 @@ static bool piece_field_conflict(
     return ((matrix[y][x] == 1) && (cell_occupied_by_(field, x, y, piece)));
 }
 
-bool piece_field_crossing_conflict(
+bool falling_piece_field_crossing_conflict(
     const enum_field (*field)[field_width], const struct_piece *piece
 )
 {
     int x, y;
     for (y=0; y < piece->size; y++) {
         for (x=0; x < piece->size; x++) {
-            if (piece_field_conflict(field, x, y, piece))
+            if (falling_piece_field_conflict(field, x, y, piece))
                 return true;
         }
     }
@@ -383,7 +383,7 @@ bool field_or_side_boundaries_conflict(
         for (x=0; x < piece->size; x++) {
             if (piece_left_boundary_conflict(x, y, piece) ||
                 piece_right_boundary_conflict(x, y, piece) ||
-                piece_field_conflict(field, x, y, piece))
+                falling_piece_field_conflict(field, x, y, piece))
             {
                 return true;
             }
@@ -596,6 +596,6 @@ void handle_rotation_conflicts(
         return;
     }
     piece_field_cell_crossing_check:
-    if (piece_field_crossing_conflict(field, piece))
+    if (falling_piece_field_crossing_conflict(field, piece))
         apply_backup(piece, backup_matrix, dx, dy);
 }

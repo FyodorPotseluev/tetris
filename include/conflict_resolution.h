@@ -38,7 +38,7 @@ RETURNES:
     - the boolean value indicating whether the conflict occurred.
 */
 
-bool piece_field_crossing_conflict(
+bool falling_piece_field_crossing_conflict(
     const enum_field (*field)[field_width], const struct_piece *piece
 );
 /*

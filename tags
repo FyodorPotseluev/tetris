@@ -72,6 +72,8 @@ enum_posture	include/constants.h	/^} enum_posture;$/;"	t	typeref:enum:tag_enum_p
 erase_falling_cells	src/tetris.c	/^    erase_ghost_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
 erase_ghost_cells	src/tetris.c	/^    erase_ghost_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
 falling	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling$/;"	e	enum:tag_enum_field
+falling_piece_field_conflict	src/conflict_resolution.c	/^static bool falling_piece_field_conflict($/;"	f	file:
+falling_piece_field_crossing_conflict	src/conflict_resolution.c	/^bool falling_piece_field_crossing_conflict($/;"	f
 field_absorbes_piece	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, record_ghost_cells,$/;"	e	enum:tag_transform_field_action	file:
 field_has_ended	src/tetris.c	/^bool field_has_ended(const struct_piece *piece, int y)$/;"	f
 field_height	include/constants.h	/^    field_height                        = 20,$/;"	e	enum:constants
@@ -158,8 +160,6 @@ piece_	src/tetris.c	/^void piece_(piece_action action, const struct_piece *piece
 piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
 piece_fall_step	src/tetris.c	/^void piece_fall_step($/;"	f
 piece_falls	src/tetris.c	/^void piece_falls($/;"	f
-piece_field_conflict	src/conflict_resolution.c	/^static bool piece_field_conflict($/;"	f	file:
-piece_field_crossing_conflict	src/conflict_resolution.c	/^bool piece_field_crossing_conflict($/;"	f
 piece_has_fallen	src/tetris.c	/^bool piece_has_fallen($/;"	f
 piece_left_boundary_conflict	src/conflict_resolution.c	/^static bool piece_left_boundary_conflict($/;"	f	file:
 piece_right_boundary_conflict	src/conflict_resolution.c	/^static bool piece_right_boundary_conflict($/;"	f	file:
