@@ -58,6 +58,7 @@ direction	include/constants.h	/^    enum_direction direction;$/;"	m	struct:tag_s
 dude_	src/tetris.c	/^void dude_(dude_action action, const struct_dude *dude)$/;"	f
 dude_action	src/tetris.c	/^} dude_action;$/;"	t	typeref:enum:tag_dude_action	file:
 dude_cell_height	src/tetris.c	/^int dude_cell_height(const struct_dude *dude)$/;"	f
+dude_piece_overlap	src/tetris.c	/^bool dude_piece_overlap($/;"	f
 dude_squat_height	include/constants.h	/^    dude_squat_height                   = 1,$/;"	e	enum:constants
 dude_step	src/tetris.c	/^void dude_step(const enum_field (*field)[field_width], struct_dude *dude)$/;"	f
 dude_straight_height	include/constants.h	/^    dude_straight_height                = 2,$/;"	e	enum:constants
@@ -159,14 +160,14 @@ out_of_bottom_field_boundary	src/conflict_resolution.c	/^static bool out_of_bott
 out_of_left_boundary	src/conflict_resolution.c	/^static bool out_of_left_boundary(const struct_piece *piece)$/;"	f	file:
 out_of_right_boundary	src/conflict_resolution.c	/^static bool out_of_right_boundary(const struct_piece *piece)$/;"	f	file:
 out_of_top_field_boundary	src/conflict_resolution.c	/^static bool out_of_top_field_boundary(const struct_piece *piece)$/;"	f	file:
-piece_	src/tetris.c	/^void piece_(piece_action action, const struct_piece *piece)$/;"	f
+piece_	src/tetris.c	/^void piece_($/;"	f
 piece_action	src/tetris.c	/^} piece_action;$/;"	t	typeref:enum:tag_piece_action	file:
 piece_fall_step	src/tetris.c	/^void piece_fall_step($/;"	f
 piece_falls_and_dude_takes_step	src/tetris.c	/^void piece_falls_and_dude_takes_step($/;"	f
 piece_has_fallen	src/tetris.c	/^bool piece_has_fallen($/;"	f
 piece_left_boundary_conflict	src/conflict_resolution.c	/^static bool piece_left_boundary_conflict($/;"	f	file:
 piece_right_boundary_conflict	src/conflict_resolution.c	/^static bool piece_right_boundary_conflict($/;"	f	file:
-piece_spawn	src/tetris.c	/^void piece_spawn(enum_field (*field)[field_width], struct_piece *piece)$/;"	f
+piece_spawn	src/tetris.c	/^void piece_spawn($/;"	f
 position	include/constants.h	/^} position;$/;"	t	typeref:enum:tag_position
 posture	include/constants.h	/^    enum_posture posture;$/;"	m	struct:tag_struct_dude
 prev_orientation	src/conflict_resolution.c	/^static void prev_orientation(struct_piece *piece)$/;"	f	file:
