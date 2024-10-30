@@ -82,7 +82,7 @@ typedef enum tag_enum_posture {
 } enum_posture;
 
 typedef enum tag_enum_field {
-    empty = 0, occupied = 1, ghost, falling
+    empty = 0, occupied = 1, ghost, falling, dude_cell
 } enum_field;
 
 typedef struct tag_struct_piece {

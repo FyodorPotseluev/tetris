@@ -12,8 +12,7 @@
 #include <unistd.h>
 
 typedef enum tag_transform_field_action {
-    field_absorbes_piece, record_falling_cells, record_ghost_cells,
-    erase_ghost_cells, erase_falling_cells
+    field_absorbes_piece, record_falling_cells, erase_falling_cells
 } transform_field_action;
 
 typedef enum tag_piece_action {
@@ -229,7 +228,7 @@ void piece_(
                 {
                     continue;
                 }
-                if (action == hide_ghost)
+                if ((action == print_ghost) || (action == hide_ghost))
                     take_(action, curr_x(piece, x), ghost_y(piece, y));
                 else
                     take_(action, curr_x(piece, x), curr_y(piece, y));
@@ -305,15 +304,6 @@ bool select_and_perform_transformation(
             if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
                 field[y + piece->y_decline][x + piece->x_shift] = falling;
             break;
-        case record_ghost_cells:
-            if (field[y + piece->y_decline][x + piece->x_shift] == ghost)
-                return true;
-            if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
-                field[y + piece->y_decline][x + piece->x_shift] = ghost;
-            break;
-        case erase_ghost_cells:
-            field[y + piece->ghost_decline][x + piece->x_shift] = empty;
-            break;
         case erase_falling_cells:
             if (field[y + piece->y_decline][x + piece->x_shift] != occupied)
                 field[y + piece->y_decline][x + piece->x_shift] = empty;
@@ -358,7 +348,6 @@ void cast_ghost(
         piece.y_decline++;
     piece.ghost_decline = piece.y_decline;
     *ghost_decline = piece.y_decline;
-    transform_field_array(record_ghost_cells, field, &piece);
     piece_(print_ghost, &piece, dude);
 }
 
@@ -381,7 +370,6 @@ void move_(
 )
 {
     int x_shift_backup = piece->x_shift;
-    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_ghost, piece, dude);
     transform_field_array(erase_falling_cells, field, piece);
     piece_(hide_piece, piece, NULL);
@@ -489,41 +477,23 @@ void dude_(dude_action action, const struct_dude *dude)
 }
 
 void piece_fall_step(
-    enum_field (*field)[field_width], struct_piece *piece,
-    const struct_dude *dude
+    enum_field (*field)[field_width], struct_piece *piece
 )
 {
-    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_piece, piece, NULL);
     transform_field_array(erase_falling_cells, field, piece);
     piece->y_decline++;
-    cast_ghost(field, *piece, &piece->ghost_decline, dude);
     transform_field_array(record_falling_cells, field, piece);
     piece_(print_piece, piece, NULL);
     curs_set(0);
     refresh();
 }
 
-void repair_broken_ghost_cells(
-    const enum_field (*field)[field_width], struct_dude *dude
+void dude_step(
+    enum_field (*field)[field_width], struct_piece *piece, struct_dude *dude
 )
 {
-    int i, x, y = dude->y_decline;
-    if (dude->direction == forward)
-        x = dude->x_shift - 1;
-    else
-    if (dude->direction == backward)
-        x = dude->x_shift + 1;
-    if ((x < 0) || (x > field_width-1))
-        return;
-    for (i=0; i < dude_straight_height; i++, y--) {
-        if (field[y][x] == ghost)
-            print_cell_(ghost, get_screen_x(x), get_screen_y(y));
-    }
-}
-
-void dude_step(const enum_field (*field)[field_width], struct_dude *dude)
-{
+    field[dude->y_decline][dude->x_shift] = empty;
     dude_(hide_dude, dude);
     /* turn around check */
     /* change the posture check */
@@ -536,8 +506,9 @@ void dude_step(const enum_field (*field)[field_width], struct_dude *dude)
         depending on the dude direction check the two cells that left behind him
         . If any of them / both were "ghost cells" - print ghost cells at their
         place again. */
-    repair_broken_ghost_cells(field, dude);
+    field[dude->y_decline][dude->x_shift] =  dude_cell;
     dude_(print_dude, dude);
+    piece_(print_ghost, piece, dude);
     curs_set(0);
     refresh();
 }
@@ -549,7 +520,6 @@ void handle_rotation(
 {
     bool backup_matrix[piece->size][piece->size];
     make_backup(backup_matrix, piece);
-    transform_field_array(erase_ghost_cells, field, piece);
     piece_(hide_ghost, piece, dude);
     transform_field_array(erase_falling_cells, field, piece);
     piece_(hide_piece, piece, NULL);
@@ -581,7 +551,7 @@ void process_key(
         /* hard drop */
         case ' ':
             while (!piece_has_fallen(field, piece))
-                piece_fall_step(field, piece, dude);
+                piece_fall_step(field, piece);
             /* game over - dude has been crushed - check */
             *hard_drop = true;
             break;
@@ -625,7 +595,7 @@ void input_processed_and_dude_takes_step(
         piece_delay -= time_passed;
         dude_delay -= time_passed;
         if (dude_delay < 0) {
-            dude_step(field, dude);
+            dude_step(field, piece, dude);
             dude_delay = speed[level];
         }
         if (piece_delay < 0)
@@ -647,7 +617,7 @@ void piece_falls_and_dude_takes_step(
             transform_field_array(field_absorbes_piece, field, piece);
             break;
         }
-        piece_fall_step(field, piece, dude);
+        piece_fall_step(field, piece);
     }
 }
 

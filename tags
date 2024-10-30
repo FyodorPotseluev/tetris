@@ -57,25 +57,25 @@ delete_completed_lines	src/tetris.c	/^void delete_completed_lines($/;"	f
 direction	include/constants.h	/^    enum_direction direction;$/;"	m	struct:tag_struct_dude
 dude_	src/tetris.c	/^void dude_(dude_action action, const struct_dude *dude)$/;"	f
 dude_action	src/tetris.c	/^} dude_action;$/;"	t	typeref:enum:tag_dude_action	file:
+dude_cell	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
 dude_cell_height	src/tetris.c	/^int dude_cell_height(const struct_dude *dude)$/;"	f
 dude_piece_overlap	src/tetris.c	/^bool dude_piece_overlap($/;"	f
 dude_squat_height	include/constants.h	/^    dude_squat_height                   = 1,$/;"	e	enum:constants
-dude_step	src/tetris.c	/^void dude_step(const enum_field (*field)[field_width], struct_dude *dude)$/;"	f
+dude_step	src/tetris.c	/^void dude_step($/;"	f
 dude_straight_height	include/constants.h	/^    dude_straight_height                = 2,$/;"	e	enum:constants
 dude_width	include/constants.h	/^    dude_width                          = 1,$/;"	e	enum:constants
 eighth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 eleventh	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
-empty	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling$/;"	e	enum:tag_enum_field
+empty	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
 end_game	src/tetris.c	/^void end_game(int score)$/;"	f
 enum_direction	include/constants.h	/^} enum_direction;$/;"	t	typeref:enum:tag_enum_direction
 enum_field	include/constants.h	/^} enum_field;$/;"	t	typeref:enum:tag_enum_field
 enum_posture	include/constants.h	/^} enum_posture;$/;"	t	typeref:enum:tag_enum_posture
-erase_falling_cells	src/tetris.c	/^    erase_ghost_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
-erase_ghost_cells	src/tetris.c	/^    erase_ghost_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
-falling	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling$/;"	e	enum:tag_enum_field
+erase_falling_cells	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
+falling	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
 falling_piece_field_conflict	src/conflict_resolution.c	/^static bool falling_piece_field_conflict($/;"	f	file:
 falling_piece_field_crossing_conflict	src/conflict_resolution.c	/^bool falling_piece_field_crossing_conflict($/;"	f
-field_absorbes_piece	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, record_ghost_cells,$/;"	e	enum:tag_transform_field_action	file:
+field_absorbes_piece	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
 field_has_ended	src/tetris.c	/^bool field_has_ended(const struct_piece *piece, int y)$/;"	f
 field_height	include/constants.h	/^    field_height                        = 20,$/;"	e	enum:constants
 field_matrix_rearrangement	src/tetris.c	/^void field_matrix_rearrangement($/;"	f
@@ -102,7 +102,7 @@ get_last_dude_y	src/tetris.c	/^int get_last_dude_y(const struct_dude *dude)$/;"	
 get_random_piece	src/tetris.c	/^struct_piece get_random_piece(const struct_piece *set_of_pieces)$/;"	f
 get_screen_x	src/tetris.c	/^int get_screen_x(int x)$/;"	f
 get_screen_y	src/tetris.c	/^int get_screen_y(int y)$/;"	f
-ghost	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling$/;"	e	enum:tag_enum_field
+ghost	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
 ghost_decline	include/constants.h	/^    signed char x_shift, y_decline, ghost_decline;$/;"	m	struct:tag_struct_piece
 ghost_y	src/tetris.c	/^int ghost_y(const struct_piece *piece, int y)$/;"	f
 handle_i_form_piece_rotation_conflict	src/conflict_resolution.c	/^static void handle_i_form_piece_rotation_conflict($/;"	f	file:
@@ -152,7 +152,7 @@ num_of_completed_lines_for_level_up	include/constants.h	/^    num_of_completed_l
 num_of_pieces	include/constants.h	/^    num_of_pieces                       = 7,$/;"	e	enum:constants
 num_of_resize_msg_lines	include/constants.h	/^    num_of_resize_msg_lines             = 6,$/;"	e	enum:constants
 o_piece	src/conflict_resolution.c	/^static bool o_piece(const struct_piece *piece)$/;"	f	file:
-occupied	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling$/;"	e	enum:tag_enum_field
+occupied	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
 one_line_score_bonus	include/constants.h	/^    one_line_score_bonus                = 100,$/;"	e	enum:constants
 orientation	include/constants.h	/^    position orientation;$/;"	m	struct:tag_struct_piece
 orientation_count	include/constants.h	/^    horizontal_1, vertical_1, horizontal_2, vertical_2, orientation_count$/;"	e	enum:tag_position
@@ -188,11 +188,9 @@ print_side_boundary	src/tetris.c	/^void print_side_boundary(int x, int y)$/;"	f
 process_completed_line	src/tetris.c	/^void process_completed_line($/;"	f
 process_key	src/tetris.c	/^void process_key($/;"	f
 process_uncompleted_line	src/tetris.c	/^void process_uncompleted_line($/;"	f
-record_falling_cells	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, record_ghost_cells,$/;"	e	enum:tag_transform_field_action	file:
-record_ghost_cells	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, record_ghost_cells,$/;"	e	enum:tag_transform_field_action	file:
+record_falling_cells	src/tetris.c	/^    field_absorbes_piece, record_falling_cells, erase_falling_cells$/;"	e	enum:tag_transform_field_action	file:
 regular_piece_rotation_conflict	src/conflict_resolution.c	/^static bool regular_piece_rotation_conflict($/;"	f	file:
 regular_piece_rotation_conflicts_handling	src/conflict_resolution.c	/^static void regular_piece_rotation_conflicts_handling($/;"	f	file:
-repair_broken_ghost_cells	src/tetris.c	/^void repair_broken_ghost_cells($/;"	f
 replace_upmost_not_empty_lines_with_empty_cells	src/tetris.c	/^void replace_upmost_not_empty_lines_with_empty_cells($/;"	f
 reverse_rows_callback	src/rotation.c	/^static void reverse_rows_callback(void *dst, void *src, int len, int x, int y)$/;"	f	file:
 reversion	src/rotation.c	/^static int reversion(int num, int arr_len)$/;"	f	file:
