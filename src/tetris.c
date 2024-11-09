@@ -668,6 +668,8 @@ void piece_falls_and_dude_takes_step(
     };
     while ((*game_on)) {
         input_processed_and_dude_takes_step(field, piece, dude, level, game_on);
+        if (!*game_on)
+            break;
         if (piece_has_fallen(field, piece)) {
             transform_field_array(field_absorbes_piece, field, piece);
             break;
@@ -913,8 +915,9 @@ bool there_are_completed_lines(
             );
         }
         if (empty_line ||
-            /* since we met 1st completed line we looked through the maximum
-            number of possibly completed lines and can break now */
+            /* since we started to check the block of completed lines and we
+            have already looked through the maximum number of possible
+            completed lines so we can break now */
             (*row_num_of_first_completed_line - y ==
             max_num_of_completed_lines - 1))
         {
@@ -941,6 +944,8 @@ void shift_down_upper_not_empty_lines_for_num_positions(
             field_x++, screen_x += cell_width)
         {
             field[*field_y][field_x] = field[*field_y-num][field_x];
+            if (field[*field_y-num][field_x] == dude_cell)
+                field[*field_y-num][field_x] = 0;
             if (field[*field_y][field_x] == 1) {
                 empty_line = false;
                 print_cell_(occupied, screen_x, *screen_y);
@@ -1060,8 +1065,29 @@ void level_up_if_necessary(int *level, int num_of_completed_lines)
     }
 }
 
+void dude_coordinates_adjustment(
+    const enum_field (*field)[field_width], struct_dude *dude
+)
+{
+    if (field[dude->y_decline][dude->x_shift] == dude_cell)
+        return;
+    int i;
+    for (i=0, dude->y_decline++;
+        i < max_num_of_completed_lines;
+        i++, dude->y_decline++)
+    {
+        if (field[dude->y_decline][dude->x_shift] == dude_cell)
+            return;
+    }
+    fprintf(
+        stderr, "%s:%d Failed to find the new \"dude cell\" value.\n",
+        __FILE__, __LINE__
+    );
+    exit(1);
+}
+
 void clear_completed_lines_update_score_and_level_up(
-    enum_field (*field)[field_width], int *level, int *score
+    enum_field (*field)[field_width], struct_dude *dude, int *level, int *score
 )
 {
     (void)score;
@@ -1075,9 +1101,12 @@ void clear_completed_lines_update_score_and_level_up(
         )
     )
     {
+        dude_(hide_dude, dude);
         field_matrix_rearrangement(
             field, row_num_of_first_completed_line, sequence_of_completed_lines
         );
+        dude_coordinates_adjustment(field, dude);
+        dude_(print_dude, dude);
         score_increase(score, *level, num_of_completed_lines);
         print_game_info(*score, score_row);
         level_up_if_necessary(level, num_of_completed_lines);
@@ -1157,15 +1186,17 @@ int main()
     dude_(print_dude, &dude);
     next_piece = get_random_piece(set_of_pieces);
     bool game_on = true;
-    while (game_on) {
+    while (true) {
         piece = next_piece;
         next_piece = get_random_piece(set_of_pieces);
         show_next_piece_preview(piece, next_piece);
         piece_spawn(field, &piece, &dude);
-        if (falling_piece_field_crossing_conflict(field, &piece))
-            game_on = false;
+        if (falling_piece_field_crossing_conflict(field, &piece)) break;
         piece_falls_and_dude_takes_step(field, &piece, &dude, level, &game_on);
-        clear_completed_lines_update_score_and_level_up(field, &level, &score);
+        if (!game_on) break;
+        clear_completed_lines_update_score_and_level_up(
+            field, &dude, &level, &score
+        );
     }
     end_game(score);
 }

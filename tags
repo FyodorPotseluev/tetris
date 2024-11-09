@@ -46,7 +46,6 @@ cast_ghost	src/tetris.c	/^void cast_ghost($/;"	f
 cell_height	include/frontend.h	/^    cell_height                         = 2,$/;"	e	enum:frontend_consts
 cell_occupied_by_	src/conflict_resolution.c	/^static bool cell_occupied_by_($/;"	f	file:
 cell_width	include/frontend.h	/^    cell_width                          = 3,$/;"	e	enum:frontend_consts
-checked_near_dude_cells	include/constants.h	/^    checked_near_dude_cells             = 5,$/;"	e	enum:constants
 choose_curr_dude_img_array	src/tetris.c	/^void choose_curr_dude_img_array($/;"	f
 clear_completed_lines_update_score_and_level_up	src/tetris.c	/^void clear_completed_lines_update_score_and_level_up($/;"	f
 conflict_resolution_after_dude_moved	src/conflict_resolution.c	/^static void conflict_resolution_after_dude_moved($/;"	f	file:
@@ -67,6 +66,7 @@ dude_cell_height	src/tetris.c	/^int dude_cell_height(const struct_dude *dude)$/;
 dude_check	src/conflict_resolution.c	/^bool dude_check($/;"	f
 dude_check_func	include/constants.h	/^typedef bool (*dude_check_func)($/;"	t
 dude_conflict_resolution_after_piece_move	src/conflict_resolution.c	/^void dude_conflict_resolution_after_piece_move($/;"	f
+dude_coordinates_adjustment	src/tetris.c	/^void dude_coordinates_adjustment($/;"	f
 dude_ghost_piece_overlap	src/tetris.c	/^bool dude_ghost_piece_overlap($/;"	f
 dude_out_of_field	src/conflict_resolution.c	/^static bool dude_out_of_field(const struct_dude *dude)$/;"	f	file:
 dude_squat_height	include/constants.h	/^    dude_squat_height                   = 1,$/;"	e	enum:constants
@@ -167,6 +167,7 @@ next_label_row	include/frontend.h	/^    next_label_row                      = 6,
 next_orientation	src/conflict_resolution.c	/^static void next_orientation(struct_piece *piece)$/;"	f	file:
 next_row	include/frontend.h	/^    next_row                            = 7,$/;"	e	enum:frontend_consts
 ninth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
+num_of_checked_cells_near_dude	include/constants.h	/^    num_of_checked_cells_near_dude      = 5,$/;"	e	enum:constants
 num_of_completed_lines_for_level_up	include/constants.h	/^    num_of_completed_lines_for_level_up = 10,$/;"	e	enum:constants
 num_of_pieces	include/constants.h	/^    num_of_pieces                       = 7,$/;"	e	enum:constants
 num_of_resize_msg_lines	include/constants.h	/^    num_of_resize_msg_lines             = 6,$/;"	e	enum:constants
