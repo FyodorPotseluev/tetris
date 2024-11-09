@@ -14,6 +14,9 @@ enum constants {
     dude_straight_height                = 2,
     dude_squat_height                   = 1,
     dude_width                          = 1,
+    /* the num of cells we need to check after the "dude" move: 2 of the "dude"
+    cells himself, 2 belong him and one above him */
+    num_of_checked_cells_near_dude      = 5,
     /* the number of pieces available in the game */
     num_of_pieces                       = 7,
     /* piece sizes */
@@ -78,7 +81,7 @@ typedef enum tag_enum_direction {
 } enum_direction;
 
 typedef enum tag_enum_posture {
-    straight, squat
+    straight = 1, squat
 } enum_posture;
 
 typedef enum tag_enum_field {
@@ -113,5 +116,10 @@ typedef struct tag_struct_dude {
     /* moving direction - either forward or backward */
     enum_direction direction;
 } struct_dude;
+
+/* the profile of the functions we use we use in the `dude_check` function */
+typedef bool (*dude_check_func)(
+    const enum_field (*field)[field_width], const struct_dude *dude, int num
+);
 
 #endif

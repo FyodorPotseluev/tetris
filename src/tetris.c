@@ -201,7 +201,7 @@ int curr_x(const struct_piece *piece, int x)
     return get_init_x() + (piece->x_shift + x) * cell_width;
 }
 
-bool dude_piece_overlap(
+bool dude_ghost_piece_overlap(
     const struct_dude *dude, const struct_piece *piece, int x, int y
 )
 {
@@ -212,8 +212,17 @@ bool dude_piece_overlap(
     );
 }
 
+bool piece_ghost_piece_overlap(
+    const enum_field (*field)[field_width],
+    const struct_piece *piece, int x, int y
+)
+{
+    return (field[y + piece->ghost_decline][x + piece->x_shift] == falling);
+}
+
 void piece_(
-    piece_action action, const struct_piece *piece, const struct_dude *dude
+    piece_action action, const enum_field (*field)[field_width],
+    const struct_piece *piece, const struct_dude *dude
 )
 {
     /* `piece->form.small` and `piece->form.big` share the same address,
@@ -224,7 +233,8 @@ void piece_(
         for (x=0; x < piece->size; x++) {
             if (matrix[y][x] == 1) {
                 if (((action == print_ghost) || (action == hide_ghost)) &&
-                    (dude_piece_overlap(dude, piece, x, y)))
+                    (dude_ghost_piece_overlap(dude, piece, x, y) ||
+                    piece_ghost_piece_overlap(field, piece, x, y)))
                 {
                     continue;
                 }
@@ -340,7 +350,7 @@ void transform_field_array(
 }
 
 void cast_ghost(
-    enum_field (*field)[field_width], struct_piece piece,
+    const enum_field (*field)[field_width], struct_piece piece,
     signed char *ghost_decline, const struct_dude *dude
 )
 {
@@ -348,7 +358,7 @@ void cast_ghost(
         piece.y_decline++;
     piece.ghost_decline = piece.y_decline;
     *ghost_decline = piece.y_decline;
-    piece_(print_ghost, &piece, dude);
+    piece_(print_ghost, field, &piece, dude);
 }
 
 void piece_spawn(
@@ -359,7 +369,7 @@ void piece_spawn(
     truncate_piece(piece);
     cast_ghost(field, *piece, &piece->ghost_decline, dude);
     transform_field_array(record_falling_cells, field, piece);
-    piece_(print_piece, piece, NULL);
+    piece_(print_piece, NULL, piece, NULL);
     curs_set(0);
     refresh();
 }
@@ -370,9 +380,9 @@ void move_(
 )
 {
     int x_shift_backup = piece->x_shift;
-    piece_(hide_ghost, piece, dude);
+    piece_(hide_ghost, field, piece, dude);
     transform_field_array(erase_falling_cells, field, piece);
-    piece_(hide_piece, piece, NULL);
+    piece_(hide_piece, NULL, piece, NULL);
     switch (direction) {
         case left:
             piece->x_shift--;
@@ -388,7 +398,7 @@ void move_(
         piece->x_shift = x_shift_backup;
     cast_ghost(field, *piece, &piece->ghost_decline, dude);
     transform_field_array(record_falling_cells, field, piece);
-    piece_(print_piece, piece, NULL);
+    piece_(print_piece, NULL, piece, NULL);
 }
 
 void choose_curr_dude_img_array(
@@ -480,11 +490,11 @@ void piece_fall_step(
     enum_field (*field)[field_width], struct_piece *piece
 )
 {
-    piece_(hide_piece, piece, NULL);
+    piece_(hide_piece, NULL, piece, NULL);
     transform_field_array(erase_falling_cells, field, piece);
     piece->y_decline++;
     transform_field_array(record_falling_cells, field, piece);
-    piece_(print_piece, piece, NULL);
+    piece_(print_piece, NULL, piece, NULL);
     curs_set(0);
     refresh();
 }
@@ -495,20 +505,14 @@ void dude_step(
 {
     field[dude->y_decline][dude->x_shift] = empty;
     dude_(hide_dude, dude);
-    /* turn around check */
-    /* change the posture check */
     if (dude->direction == forward)
         dude->x_shift++;
     else
         dude->x_shift--;
-    /* game over check */
-    /* fix broken "ghost cells":
-        depending on the dude direction check the two cells that left behind him
-        . If any of them / both were "ghost cells" - print ghost cells at their
-        place again. */
+    conflict_resolution_after_dude_took_a_step(field, dude);
     field[dude->y_decline][dude->x_shift] =  dude_cell;
     dude_(print_dude, dude);
-    piece_(print_ghost, piece, dude);
+    piece_(print_ghost, field, piece, dude);
     curs_set(0);
     refresh();
 }
@@ -520,42 +524,89 @@ void handle_rotation(
 {
     bool backup_matrix[piece->size][piece->size];
     make_backup(backup_matrix, piece);
-    piece_(hide_ghost, piece, dude);
+    piece_(hide_ghost, field, piece, dude);
     transform_field_array(erase_falling_cells, field, piece);
-    piece_(hide_piece, piece, NULL);
+    piece_(hide_piece, NULL, piece, NULL);
     /* `piece->form.small` and `piece->form.big` share the same address,
     so we handle both scenarios here */
     rotate(piece->form.small, piece->size);
     handle_rotation_conflicts(field, piece, backup_matrix);
     cast_ghost(field, *piece, &piece->ghost_decline, dude);
     transform_field_array(record_falling_cells, field, piece);
-    piece_(print_piece, piece, NULL);
+    piece_(print_piece, NULL, piece, NULL);
+}
+
+void resolve_dude_moving_piece_conflict_and_reprint(
+    const enum_field (*field)[field_width],
+    struct_dude *dude, bool *game_on
+)
+{
+    bool reprint = false;
+    dude_conflict_resolution_after_piece_move(field, dude, game_on, &reprint);
+    if (reprint)
+        dude_(print_dude, dude);
+}
+
+void process_rotation(
+    enum_field (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, bool *game_on
+)
+{
+    handle_rotation(field, piece, dude);
+    resolve_dude_moving_piece_conflict_and_reprint(field, dude, game_on);
+}
+
+void process_move_(
+    move_direction direction, enum_field (*field)[field_width],
+    struct_piece *piece, struct_dude *dude, bool *game_on
+)
+{
+    move_(direction, field, piece, dude);
+    resolve_dude_moving_piece_conflict_and_reprint(field, dude, game_on);
+}
+
+void process_hard_drop(
+    enum_field (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, bool *game_on
+)
+{
+    const dude_check_func dude_crushed_and_died[] = {
+        NULL, NULL, &is_falling, NULL, NULL
+    };
+    const dude_check_func dude_squat[] = {
+        NULL, &is_falling, NULL, NULL, NULL
+    };
+    while (!piece_has_fallen(field, piece))
+        piece_fall_step(field, piece);
+    if (dude_check(dude_crushed_and_died, field, dude, 0))
+        death_handling(game_on);
+    if (dude_check(dude_squat, field, dude, straight)) {
+        dude->posture = squat;
+        dude->height = dude_squat_height;
+        dude_(print_dude, dude);
+    }
 }
 
 void process_key(
     int key_pressed, enum_field (*field)[field_width], struct_piece *piece,
-    const struct_dude *dude, bool *hard_drop, bool *game_on
+    struct_dude *dude, bool *hard_drop, bool *game_on
 )
 {
     switch (key_pressed) {
         case KEY_LEFT:
-            move_(left, field, piece, dude);
+            process_move_(left, field, piece, dude, game_on);
             break;
         case KEY_RIGHT:
-            move_(right, field, piece, dude);
+            process_move_(right, field, piece, dude, game_on);
             break;
-        /* rotate */
         case KEY_UP:
-            handle_rotation(field, piece, dude);
+            process_rotation(field, piece, dude, game_on);
             break;
-        /* hard drop */
         case ' ':
-            while (!piece_has_fallen(field, piece))
-                piece_fall_step(field, piece);
-            /* game over - dude has been crushed - check */
+            process_hard_drop(field, piece, dude, game_on);
             *hard_drop = true;
             break;
-        /* exit the game (Esc) */
+        /* exit the game */
         case key_esc:
             *game_on = false;
             break;
@@ -590,7 +641,6 @@ void input_processed_and_dude_takes_step(
         process_key(key_pressed, field, piece, dude, &hard_drop, game_on);
         if ((key_pressed == KEY_DOWN) || (hard_drop) || (!*game_on))
             break;
-        /* new delay value calculation */
         time_passed = time_stop(&tv1, &tv2, &tz);
         piece_delay -= time_passed;
         dude_delay -= time_passed;
@@ -610,14 +660,27 @@ void piece_falls_and_dude_takes_step(
     struct_dude *dude, int level, bool *game_on
 )
 {
+    const dude_check_func dude_squat[] = {
+        NULL, &is_falling, NULL, NULL, NULL
+    };
+    const dude_check_func dude_crushed_and_died[] = {
+        NULL, NULL, &is_falling, NULL, NULL
+    };
     while ((*game_on)) {
         input_processed_and_dude_takes_step(field, piece, dude, level, game_on);
         if (piece_has_fallen(field, piece)) {
-            /* game over - dude has been crushed - check */
             transform_field_array(field_absorbes_piece, field, piece);
             break;
         }
         piece_fall_step(field, piece);
+        if (dude_check(dude_squat, field, dude, straight)) {
+            dude->posture = squat;
+            dude->height = dude_squat_height;
+            dude_(print_dude, dude);
+        }
+        if (dude_check(dude_crushed_and_died, field, dude, 0)) {
+            death_handling(game_on);
+        }
     }
 }
 
@@ -757,8 +820,8 @@ void show_next_piece_preview(struct_piece piece, struct_piece next_piece)
     next_piece.x_shift = field_width + game_info_gap;
     piece.y_decline = next_row;
     next_piece.y_decline = next_row;
-    piece_(hide_piece, &piece, NULL);
-    piece_(print_piece, &next_piece, NULL);
+    piece_(hide_piece, NULL, &piece, NULL);
+    piece_(print_piece, NULL, &next_piece, NULL);
     curs_set(0);
     refresh();
 }
@@ -973,7 +1036,7 @@ int score_bonus(int level, int num_of_completed_lines)
             return level * four_lines_score_bonus;
         default:
             fprintf(
-                stderr, "%s:%d: incorrect number of completed lines: %d\n", 
+                stderr, "%s:%d: incorrect number of completed lines: %d\n",
                 __FILE__, __LINE__, num_of_completed_lines
             );
             exit(1);
