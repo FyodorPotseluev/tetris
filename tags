@@ -10,13 +10,13 @@ BUILD_DIR	Makefile	/^BUILD_DIR := .\/build$/;"	m
 BUILD_DIRS	Makefile	/^BUILD_DIRS := $(OBJ_DIR) $(BIN_DIR)$/;"	m
 CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g3 -O0 -Iinclude -fsanitize=address,undefined$/;"	m
-CLOSE_WINDOW_MSG	include/constants.h	67;"	d
+CLOSE_WINDOW_MSG	include/constants.h	72;"	d
 CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
 CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
-CURR_TERMINAL_SIZE_MSG	include/constants.h	59;"	d
+CURR_TERMINAL_SIZE_MSG	include/constants.h	64;"	d
 EMPTY_CELL_ROW	include/frontend.h	54;"	d
 EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
-FINAL_SCORE_MSG	include/constants.h	71;"	d
+FINAL_SCORE_MSG	include/constants.h	76;"	d
 FRONTEND_H_INCLUDED	include/frontend.h	4;"	d
 GHOST_CELL_ROW	include/frontend.h	58;"	d
 INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
@@ -26,10 +26,10 @@ OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o,
 OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
 OCCUPIED_CELL_ROW	include/frontend.h	56;"	d
 PROJECT	Makefile	/^PROJECT := tetris$/;"	m
-REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	61;"	d
-RESIZE_REQUEST_MSG_1	include/constants.h	63;"	d
-RESIZE_REQUEST_MSG_2	include/constants.h	65;"	d
-RESIZE_WARNING_MSG	include/constants.h	57;"	d
+REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	66;"	d
+RESIZE_REQUEST_MSG_1	include/constants.h	68;"	d
+RESIZE_REQUEST_MSG_2	include/constants.h	70;"	d
+RESIZE_WARNING_MSG	include/constants.h	62;"	d
 ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
 SIDE_BOUNDARY	include/frontend.h	64;"	d
 SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
@@ -67,6 +67,9 @@ dude_check	src/conflict_resolution.c	/^bool dude_check($/;"	f
 dude_check_func	include/constants.h	/^typedef bool (*dude_check_func)($/;"	t
 dude_conflict_resolution_after_piece_move	src/conflict_resolution.c	/^void dude_conflict_resolution_after_piece_move($/;"	f
 dude_coordinates_adjustment	src/tetris.c	/^void dude_coordinates_adjustment($/;"	f
+dude_crash_handling	src/tetris.c	/^void dude_crash_handling(struct_dude *dude,  bool *game_on)$/;"	f
+dude_fall_speed_in_microseconds	include/constants.h	/^    dude_fall_speed_in_microseconds     = 5000000,$/;"	e	enum:constants
+dude_falls_if_empty_cell_under_him	src/tetris.c	/^void dude_falls_if_empty_cell_under_him($/;"	f
 dude_ghost_piece_overlap	src/tetris.c	/^bool dude_ghost_piece_overlap($/;"	f
 dude_out_of_field	src/conflict_resolution.c	/^static bool dude_out_of_field(const struct_dude *dude)$/;"	f	file:
 dude_squat_height	include/constants.h	/^    dude_squat_height                   = 1,$/;"	e	enum:constants
@@ -77,6 +80,7 @@ dude_width	include/constants.h	/^    dude_width                          = 1,$/;
 eighth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 eleventh	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 empty	include/constants.h	/^    empty = 0, occupied = 1, ghost, falling, dude_cell$/;"	e	enum:tag_enum_field
+empty_cell_under_dude	src/tetris.c	/^bool empty_cell_under_dude($/;"	f
 end_game	src/tetris.c	/^void end_game(int score)$/;"	f
 enum_direction	include/constants.h	/^} enum_direction;$/;"	t	typeref:enum:tag_enum_direction
 enum_field	include/constants.h	/^} enum_field;$/;"	t	typeref:enum:tag_enum_field
@@ -222,6 +226,7 @@ reversion	src/rotation.c	/^static int reversion(int num, int arr_len)$/;"	f	file
 right	include/constants.h	/^typedef enum tag_move_direction { left = 1, right } move_direction;$/;"	e	enum:tag_move_direction
 right_side	src/tetris.c	/^    bottom, top, left_side, right_side$/;"	e	enum:tag_boundary_side	file:
 rotate	src/rotation.c	/^void rotate(void *piece, int len)$/;"	f
+save_fall_height_for_dude	include/constants.h	/^    save_fall_height_for_dude           = 1,$/;"	e	enum:constants
 score_bonus	src/tetris.c	/^int score_bonus(int level, int num_of_completed_lines)$/;"	f
 score_increase	src/tetris.c	/^void score_increase(int *score, int level, int num_of_completed_lines)$/;"	f
 score_label_row	include/frontend.h	/^    score_label_row                     = 3,$/;"	e	enum:frontend_consts

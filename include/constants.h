@@ -14,9 +14,14 @@ enum constants {
     dude_straight_height                = 2,
     dude_squat_height                   = 1,
     dude_width                          = 1,
-    /* the num of cells we need to check after the "dude" move: 2 of the "dude"
-    cells himself, 2 belong him and one above him */
+    /* the number of cells we need to check after the "dude" move: 2 of the
+    "dude" cells himself, 2 belong him and one above him */
     num_of_checked_cells_near_dude      = 5,
+    /* the dude fall speed when we cleared a line under the dude and there are
+    empty cells under him now */
+    dude_fall_speed_in_microseconds     = 500000,
+    /* the number of cells the dude can fall through and survive */
+    save_fall_height_for_dude           = 1,
     /* the number of pieces available in the game */
     num_of_pieces                       = 7,
     /* piece sizes */
@@ -117,7 +122,8 @@ typedef struct tag_struct_dude {
     enum_direction direction;
 } struct_dude;
 
-/* the profile of the functions we use we use in the `dude_check` function */
+/* the profile of the functions we use we use in the
+`conflict_resolution.c:dude_check` function */
 typedef bool (*dude_check_func)(
     const enum_field (*field)[field_width], const struct_dude *dude, int num
 );

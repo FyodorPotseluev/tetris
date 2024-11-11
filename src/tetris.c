@@ -1086,8 +1086,53 @@ void dude_coordinates_adjustment(
     exit(1);
 }
 
+void dude_crash_handling(struct_dude *dude,  bool *game_on)
+{
+    usleep(dude_fall_speed_in_microseconds);
+    dude_(hide_dude, dude);
+    dude->posture = squat;
+    dude->height = 1;
+    dude_(print_dude, dude);
+    death_handling(game_on);
+}
+
+bool empty_cell_under_dude(
+    const enum_field (*field)[field_width], const struct_dude *dude
+)
+{
+    if (dude->y_decline == last_field_row_num)
+        return false;
+    if (field[dude->y_decline + 1][dude->x_shift] == empty)
+        return true;
+    return false;
+}
+
+void dude_falls_if_empty_cell_under_him(
+    enum_field (*field)[field_width], struct_dude *dude, bool *game_on
+)
+{
+    int num_of_cells_dude_flew_through = 0;
+    if (!empty_cell_under_dude(field, dude))
+        return;
+    dude_(print_dude, dude);
+    refresh();
+    while (empty_cell_under_dude(field, dude)) {
+        usleep(dude_fall_speed_in_microseconds);
+        dude_(hide_dude, dude);
+        field[dude->y_decline][dude->x_shift] = empty;
+        dude->y_decline++;
+        field[dude->y_decline][dude->x_shift] = dude_cell;
+        dude_(print_dude, dude);
+        refresh();
+        num_of_cells_dude_flew_through++;
+    }
+    if (num_of_cells_dude_flew_through > save_fall_height_for_dude)
+        dude_crash_handling(dude, game_on);
+}
+
 void clear_completed_lines_update_score_and_level_up(
-    enum_field (*field)[field_width], struct_dude *dude, int *level, int *score
+    enum_field (*field)[field_width], struct_dude *dude,
+    int *level, int *score, bool *game_on
 )
 {
     (void)score;
@@ -1106,6 +1151,9 @@ void clear_completed_lines_update_score_and_level_up(
             field, row_num_of_first_completed_line, sequence_of_completed_lines
         );
         dude_coordinates_adjustment(field, dude);
+        dude_falls_if_empty_cell_under_him(field, dude, game_on);
+        if (!game_on)
+            return;
         dude_(print_dude, dude);
         score_increase(score, *level, num_of_completed_lines);
         print_game_info(*score, score_row);
@@ -1186,7 +1234,7 @@ int main()
     dude_(print_dude, &dude);
     next_piece = get_random_piece(set_of_pieces);
     bool game_on = true;
-    while (true) {
+    for (;;) {
         piece = next_piece;
         next_piece = get_random_piece(set_of_pieces);
         show_next_piece_preview(piece, next_piece);
@@ -1195,7 +1243,7 @@ int main()
         piece_falls_and_dude_takes_step(field, &piece, &dude, level, &game_on);
         if (!game_on) break;
         clear_completed_lines_update_score_and_level_up(
-            field, &dude, &level, &score
+            field, &dude, &level, &score, &game_on
         );
     }
     end_game(score);
