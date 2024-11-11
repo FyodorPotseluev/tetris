@@ -143,6 +143,7 @@ int init_screen_x()
 
 void print_field(const enum_field (*field)[field_width])
 {
+    /* field is printed from top to bottom */
     int field_x, field_y, screen_x, screen_y;
     print_field_boundary(top, NULL, NULL);
     for (
@@ -151,7 +152,8 @@ void print_field(const enum_field (*field)[field_width])
         field_y++, screen_x = init_screen_x(), screen_y += cell_height
     )
     {
-        print_field_boundary(left_side, &screen_x, &screen_y);
+        if ((field_y != dude_exit_height - 1) && (field_y != dude_exit_height))
+            print_field_boundary(left_side, &screen_x, &screen_y);
         for (field_x=0; field_x < field_width; field_x++) {
             if (field[field_y][field_x] == 0)
                 print_cell_(empty, screen_x, screen_y);
@@ -160,7 +162,8 @@ void print_field(const enum_field (*field)[field_width])
             screen_x += cell_width;
             move(screen_y, screen_x);
         }
-        print_field_boundary(right_side, &screen_x, &screen_y);
+        if ((field_y != dude_exit_height - 1) && (field_y != dude_exit_height))
+            print_field_boundary(right_side, &screen_x, &screen_y);
     }
     print_field_boundary(bottom, NULL, NULL);
     curs_set(0);
@@ -499,16 +502,126 @@ void piece_fall_step(
     refresh();
 }
 
-void dude_step(
-    enum_field (*field)[field_width], struct_piece *piece, struct_dude *dude
+void clear_game_field(enum_field (*field)[field_width])
+{
+    int field_x, screen_x, field_y, screen_y;
+    for(field_y = 0, screen_y = get_init_y();
+        field_y < field_height;
+        field_y++, screen_y += cell_height)
+    {
+        for(field_x = 0, screen_x = get_init_x();
+            field_x < field_width;
+            field_x++, screen_x += cell_width)
+        {
+            field[field_y][field_x] = 0;
+            print_cell_(empty, screen_x, screen_y);
+        }
+    }
+}
+
+
+bool dude_escaped(const struct_dude *dude)
+{
+    return (
+        (dude->y_decline == dude_exit_height) &&
+        ((dude->x_shift == -1) || (dude->x_shift == field_width))
+    );
+}
+
+int mid_field_y()
+{
+    return (get_init_y() + (field_height * cell_height) / 2 - 1);
+}
+
+int dude_esc_msg_field_x()
+{
+    return (
+        get_init_x() +
+        (field_width * cell_width - strlen(DUDE_ESCAPED_MESSAGE)) / 2
+    );
+}
+
+void hide_escape_message()
+{
+    long unsigned int i;
+    move(mid_field_y(), dude_esc_msg_field_x());
+    for (i=0; i < strlen(DUDE_ESCAPED_MESSAGE); i++)
+        addch(' ');
+}
+
+void reset_dude_characteristics(struct_dude *dude)
+{
+        dude->x_shift = 0;
+        dude->y_decline = last_field_row_num;
+        dude->height = dude_straight_height;
+        dude->posture = straight;
+        dude->direction = forward;
+}
+
+void reset_piece_characteristics(struct_piece *piece)
+{
+        piece->x_shift = initial_piece_shift,
+        piece->y_decline = 0;
+        piece->ghost_decline = 0;
+}
+
+int game_info_y(int y)
+{
+    return get_init_y() + y * cell_height;
+}
+
+int game_info_x()
+{
+    return get_init_x() + (field_width + game_info_gap) * cell_width;
+}
+
+void print_game_info(int info, int position)
+{
+    mvprintw(game_info_y(position), game_info_x(), "%d", info);
+    curs_set(0);
+    refresh();
+}
+
+bool dude_escape_handling(
+    enum_field (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, int *score
 )
 {
+    if (dude_escaped(dude)) {
+        dude_(print_dude, dude);
+        clear_game_field(field);
+        mvprintw(
+            mid_field_y(), dude_esc_msg_field_x(), "%s", DUDE_ESCAPED_MESSAGE
+        );
+        refresh();
+        sleep(escape_message_delay_in_sec);
+        dude_(hide_dude, dude);
+        hide_escape_message();
+        reset_dude_characteristics(dude);
+        dude_(print_dude, dude);
+        reset_piece_characteristics(piece);
+        piece_spawn(field, piece, dude);
+        (*score) += 1000;
+        print_game_info(*score, score_row);
+    }
+    return false;
+}
+
+void dude_step(
+    enum_field (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, int *score
+)
+{
+    bool dude_escaped = false;
     field[dude->y_decline][dude->x_shift] = empty;
     dude_(hide_dude, dude);
     if (dude->direction == forward)
         dude->x_shift++;
     else
         dude->x_shift--;
+    dude_escaped = dude_escape_handling(field, piece, dude, score);
+    if (dude_escaped)
+        return;
     conflict_resolution_after_dude_took_a_step(field, dude);
     field[dude->y_decline][dude->x_shift] =  dude_cell;
     dude_(print_dude, dude);
@@ -618,7 +731,7 @@ void process_key(
 
 void input_processed_and_dude_takes_step(
     enum_field (*field)[field_width], struct_piece *piece,
-    struct_dude *dude, int level, bool *game_on
+    struct_dude *dude, int level, int *score, bool *game_on
 )
 {
     struct timeval tv1, tv2;
@@ -645,7 +758,7 @@ void input_processed_and_dude_takes_step(
         piece_delay -= time_passed;
         dude_delay -= time_passed;
         if (dude_delay < 0) {
-            dude_step(field, piece, dude);
+            dude_step(field, piece, dude, score);
             dude_delay = speed[level];
         }
         if (piece_delay < 0)
@@ -657,7 +770,7 @@ void input_processed_and_dude_takes_step(
 
 void piece_falls_and_dude_takes_step(
     enum_field (*field)[field_width], struct_piece *piece,
-    struct_dude *dude, int level, bool *game_on
+    struct_dude *dude, int level, int *score, bool *game_on
 )
 {
     const dude_check_func dude_squat[] = {
@@ -667,7 +780,8 @@ void piece_falls_and_dude_takes_step(
         NULL, NULL, &is_falling, NULL, NULL
     };
     while ((*game_on)) {
-        input_processed_and_dude_takes_step(field, piece, dude, level, game_on);
+        input_processed_and_dude_takes_step(
+            field, piece, dude, level, score, game_on);
         if (!*game_on)
             break;
         if (piece_has_fallen(field, piece)) {
@@ -790,28 +904,11 @@ struct_piece get_random_piece(const struct_piece *set_of_pieces)
     return set_of_pieces[i];
 }
 
-int game_info_y(int y)
-{
-    return get_init_y() + y * cell_height;
-}
-
-int game_info_x()
-{
-    return get_init_x() + (field_width + game_info_gap) * cell_width;
-}
-
 void print_labels()
 {
     mvprintw(game_info_y(level_label_row), game_info_x(), "LEVEL");
     mvprintw(game_info_y(score_label_row), game_info_x(), "SCORE");
     mvprintw(game_info_y(next_label_row)+cell_height-1, game_info_x(), "NEXT");
-    curs_set(0);
-    refresh();
-}
-
-void print_game_info(int info, int position)
-{
-    mvprintw(game_info_y(position), game_info_x(), "%d", info);
     curs_set(0);
     refresh();
 }
@@ -1240,7 +1337,8 @@ int main()
         show_next_piece_preview(piece, next_piece);
         piece_spawn(field, &piece, &dude);
         if (falling_piece_field_crossing_conflict(field, &piece)) break;
-        piece_falls_and_dude_takes_step(field, &piece, &dude, level, &game_on);
+        piece_falls_and_dude_takes_step(
+            field, &piece, &dude, level, &score, &game_on);
         if (!game_on) break;
         clear_completed_lines_update_score_and_level_up(
             field, &dude, &level, &score, &game_on

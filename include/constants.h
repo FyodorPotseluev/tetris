@@ -10,6 +10,7 @@ enum constants {
     field_height                        = 20,
     last_field_row_num                  = 19,
     field_width                         = 10,
+    dude_exit_height                    = 7,
     /* dude size */
     dude_straight_height                = 2,
     dude_squat_height                   = 1,
@@ -20,6 +21,8 @@ enum constants {
     /* the dude fall speed when we cleared a line under the dude and there are
     empty cells under him now */
     dude_fall_speed_in_microseconds     = 500000,
+    /* the number of seconds we see the DUDE_ESCAPED_MESSAGE */
+    escape_message_delay_in_sec         = 3,
     /* the number of cells the dude can fall through and survive */
     save_fall_height_for_dude           = 1,
     /* the number of pieces available in the game */
@@ -59,21 +62,25 @@ typedef enum tag_speed_list {
 
 /* the messages used when the player's terminal window is too small */
 
-#define RESIZE_WARNING_MSG         "YOUR TERMINAL WINDOW IS TOO SMALL!"
+#define RESIZE_WARNING_MSG          "YOUR TERMINAL WINDOW IS TOO SMALL!"
 
-#define CURR_TERMINAL_SIZE_MSG     "IT IS %dx%d CHARACTER CELLS NOW."
+#define CURR_TERMINAL_SIZE_MSG      "IT IS %dx%d CHARACTER CELLS NOW."
 
-#define REQUIRED_TERMINAL_SIZE_MSG "IT NEEDS TO BE AT LEAST %dx%d."
+#define REQUIRED_TERMINAL_SIZE_MSG  "IT NEEDS TO BE AT LEAST %dx%d."
 
-#define RESIZE_REQUEST_MSG_1       "PLEASE RESIZE YOUR TERMINAL"
+#define RESIZE_REQUEST_MSG_1        "PLEASE RESIZE YOUR TERMINAL"
 
-#define RESIZE_REQUEST_MSG_2       "AND TRY AGAIN."
+#define RESIZE_REQUEST_MSG_2        "AND TRY AGAIN."
 
-#define CLOSE_WINDOW_MSG           "PRESS `ESC` TO CLOSE THIS WINDOW."
+#define CLOSE_WINDOW_MSG            "PRESS `ESC` TO CLOSE THIS WINDOW."
+
+/* the message if the "dude" escaped through an exit */
+
+#define DUDE_ESCAPED_MESSAGE        "You've escaped :D"
 
 /* the message at the end of the game */
 
-#define FINAL_SCORE_MSG            "YOUR SCORE IS %d"
+#define FINAL_SCORE_MSG             "YOUR SCORE IS %d"
 
 typedef enum tag_move_direction { left = 1, right } move_direction;
 
