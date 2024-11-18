@@ -11,10 +11,12 @@ enum constants {
     last_field_row_num                  = 19,
     field_width                         = 10,
     dude_exit_height                    = 7,
-    /* dude size */
+    /* "dude" size */
     dude_straight_height                = 2,
     dude_squat_height                   = 1,
     dude_width                          = 1,
+    /* the number of "dude" lives at the start of the game */
+    init_num_of_dude_lives              = 3,
     /* the number of cells we need to check after the "dude" move: 2 of the
     "dude" cells himself, 2 belong him and one above him */
     num_of_checked_cells_near_dude      = 5,
@@ -23,6 +25,9 @@ enum constants {
     dude_fall_speed_in_microseconds     = 500000,
     /* the number of seconds we see the DUDE_ESCAPED_MESSAGE */
     escape_message_delay_in_sec         = 3,
+    /* the time after the "dude" death when we see the freeze frame and can see
+    what exactly happened */
+    dude_death_delay_in_sec             = 2,
     /* the number of cells the dude can fall through and survive */
     save_fall_height_for_dude           = 1,
     /* the number of pieces available in the game */
@@ -127,6 +132,8 @@ typedef struct tag_struct_dude {
     enum_posture posture;
     /* moving direction - either forward or backward */
     enum_direction direction;
+    /* the current number of the "dude"'s lives */
+    signed char lives;
 } struct_dude;
 
 /* the profile of the functions we use we use in the

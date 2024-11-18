@@ -629,22 +629,26 @@ static bool is_occupied(
             occupied;
 }
 
-static bool is_falling_or_occupied(
-    const enum_field (*field)[field_width], const struct_dude *dude, int num
-)
-{
-    return
-        (field[dude->y_decline + num - dude_straight_height][dude->x_shift] ==
-            falling)
-        ||
-        (field[dude->y_decline + num - dude_straight_height][dude->x_shift] ==
-            occupied);
-}
-
 static bool is_out_of_field(const struct_dude *dude, int num)
 {
     return (((dude->y_decline + num - dude_straight_height) < 0) ||
         ((dude->y_decline + num - dude_straight_height) >= field_height));
+}
+
+static bool is_falling_or_occupied(
+    const enum_field (*field)[field_width], const struct_dude *dude, int num
+)
+{
+    return(is_falling(field, dude, num) || is_occupied(field, dude, num));
+}
+
+static bool is_in_field_and_falling_or_occupied(
+    const enum_field (*field)[field_width], const struct_dude *dude, int num
+)
+{
+    if (is_out_of_field(dude, num))
+        return false;
+    return(is_falling(field, dude, num) || is_occupied(field, dude, num));
 }
 
 static bool is_in_field_and_empty(
@@ -688,14 +692,6 @@ static bool is_out_of_field_or_occupied_or_falling(
         return false;
 }
 
-void death_handling(bool *game_on)
-{
-    curs_set(0);
-    refresh();
-    sleep(1);
-    *game_on = false;
-}
-
 bool dude_check(
     const dude_check_func *arr_of_check_funcs,
     const enum_field (*field)[field_width],
@@ -714,11 +710,11 @@ bool dude_check(
 
 void dude_conflict_resolution_after_piece_move(
     const enum_field (*field)[field_width], struct_dude *dude,
-    bool *game_on, bool *reprint
+    bool *reprint, bool *life_lost
 )
 {
     const dude_check_func dude_straighten[] = {
-        NULL, &is_empty, &is_empty, NULL, NULL
+        NULL, &is_in_field_and_empty, &is_empty, NULL, NULL
     };
     if (dude_check(dude_straighten, field, dude, squat)) {
         dude->posture = straight;
@@ -730,11 +726,11 @@ void dude_conflict_resolution_after_piece_move(
         NULL, NULL, &is_falling, NULL, NULL
     };
     if (dude_check(dude_crushed_and_died, field, dude, 0)) {
-        death_handling(game_on);
+        *life_lost = true;
         return;
     }
     const dude_check_func dude_squat[] = {
-        NULL, &is_falling, NULL, NULL, NULL
+        NULL, &is_in_field_and_falling, NULL, NULL, NULL
     };
     if (dude_check(dude_squat, field, dude, straight)) {
         dude->posture = squat;
@@ -743,14 +739,29 @@ void dude_conflict_resolution_after_piece_move(
     }
 }
 
-static bool dude_turnes_around(
+static bool dude_turns_around(
     const enum_field (*field)[field_width], const struct_dude *dude
 )
 {
+    /* ---------------------------------------------------------------------- */
+    /* check "the dude is in the highest field row" scenario */
+    /* const dude_check_func squat_dude_ran_into_wall[] = {
+        NULL, NULL, &is_falling_or_occupied, NULL, NULL
+    };
+    if (dude_check(squat_dude_ran_into_wall, field, dude, squat))
+        return true; */
+
+    /* ---------------------------------------------------------------------- */
     const dude_check_func straight_dude_ran_into_wall[] = {
-        NULL, &is_falling_or_occupied, &is_falling_or_occupied, NULL, NULL
+        NULL, &is_in_field_and_falling_or_occupied,
+        &is_falling_or_occupied, NULL, NULL
     };
     if (dude_check(straight_dude_ran_into_wall, field, dude, straight))
+        return true;
+    const dude_check_func straight_dude_ran_into_falling_cell[] = {
+        NULL, NULL, &is_falling, NULL, NULL
+    };
+    if (dude_check(straight_dude_ran_into_falling_cell, field, dude, straight))
         return true;
     const dude_check_func squat_dude_ran_into_wall[] = {
         NULL, NULL, &is_falling_or_occupied, NULL, NULL
@@ -793,7 +804,7 @@ static void conflict_resolution_after_dude_moved(
 )
 {
     const dude_check_func dude_straighten[] = {
-        NULL, &is_empty, &is_empty, NULL, NULL
+        NULL, &is_in_field_and_empty, &is_empty, NULL, NULL
     };
     if (dude_check(dude_straighten, field, dude, squat)) {
         dude->posture = straight;
@@ -801,7 +812,7 @@ static void conflict_resolution_after_dude_moved(
         return;
     }
     const dude_check_func dude_stepped_up_and_straight[] = {
-        &is_in_field_and_empty, &is_empty, &is_occupied, NULL, NULL
+        &is_in_field_and_empty, &is_in_field_and_empty, &is_occupied, NULL, NULL
     };
     if (dude_check(dude_stepped_up_and_straight, field, dude, straight)) {
         dude->y_decline -= 1;
@@ -818,7 +829,7 @@ static void conflict_resolution_after_dude_moved(
         return;
     }
     const dude_check_func dude_squeezed_thruough[] = {
-        NULL, &is_falling_or_occupied, &is_empty, NULL, NULL
+        NULL, &is_in_field_and_falling_or_occupied, &is_empty, NULL, NULL
     };
     if (dude_check(dude_squeezed_thruough, field, dude, 0)) {
         dude->posture = squat;
@@ -827,7 +838,7 @@ static void conflict_resolution_after_dude_moved(
     }
     const dude_check_func dude_stepped_up_and_ducked[] = {
         &is_out_of_field_or_occupied_or_falling,
-        &is_empty, &is_occupied, NULL, NULL
+        &is_in_field_and_empty, &is_occupied, NULL, NULL
     };
     if (dude_check(dude_stepped_up_and_ducked, field, dude, straight)) {
         dude->y_decline -= 1;
@@ -837,13 +848,28 @@ static void conflict_resolution_after_dude_moved(
     }
 }
 
+void dude_turns_around_and_straightens_check(
+    const enum_field (*field)[field_width], struct_dude *dude
+)
+{
+    const dude_check_func dude_turns_around_and_straightens[] = {
+        NULL, &is_in_field_and_empty, NULL, NULL, NULL
+    };
+    if (dude_check(dude_turns_around_and_straightens, field, dude, squat)) {
+        dude->posture = straight;
+        dude->height = dude_straight_height;
+        return;
+    }
+}
+
 void conflict_resolution_after_dude_took_a_step(
     const enum_field (*field)[field_width], struct_dude *dude
 )
 {
-    if (dude_out_of_field(dude) || dude_turnes_around(field, dude)) {
+    if (dude_out_of_field(dude) || dude_turns_around(field, dude)) {
         cancel_last_dude_step(dude);
         swap_dude_direction(dude);
+        dude_turns_around_and_straightens_check(field, dude);
         return;
     }
     conflict_resolution_after_dude_moved(field, dude);

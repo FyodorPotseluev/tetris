@@ -18,9 +18,11 @@ enum frontend_consts {
     score_row                           = 4,
     next_label_row                      = 6,
     next_row                            = 7,
+    lives_label_row                     = 11,
+    lives_row                           = 12,
     /* how far the game info is from the playing field
     (the game info's x coordinate) */
-    game_info_gap                       = 2
+    side_panel_gap                      = 2
 };
 
 /* how the dude's characters cells look like: */
