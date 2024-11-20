@@ -46,8 +46,10 @@ enum constants {
     two_lines_score_bonus               = 300,
     three_lines_score_bonus             = 500,
     four_lines_score_bonus              = 800,
-    /* the number of lines you need to get level up */
+    /* the number of lines you need to complete to get level up */
     num_of_completed_lines_for_level_up = 10,
+    /* the number of dudes you need to free to get level up */
+    num_of_freed_dudes_for_level_up     = 5,
     /* the maximum game level after which you cannot level up any more */
     maximum_game_level                  = 15,
     /* the number of lines the resize request message consists of */

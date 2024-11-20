@@ -624,6 +624,39 @@ void clear_game_field(enum_field (*field)[field_width])
     }
 }
 
+void level_up(struct_game_info *game_info)
+{
+    game_info->level++;
+    if (game_info->level > maximum_game_level)
+        game_info->level = maximum_game_level;
+    print_side_panel(game_info->level, level_row);
+}
+
+void level_up_if_necessary(
+    struct_game_info *game_info, int num_of_completed_lines,
+    int num_of_freed_dudes
+)
+{
+    static int total_num_of_completed_lines;
+    static int total_num_of_freed_dudes;
+    total_num_of_completed_lines += num_of_completed_lines;
+    total_num_of_freed_dudes += num_of_freed_dudes;
+    if (total_num_of_freed_dudes >= num_of_freed_dudes_for_level_up) {
+        level_up(game_info);
+        total_num_of_freed_dudes = 0;
+    }
+    else
+    if (total_num_of_completed_lines >= num_of_completed_lines_for_level_up) {
+        level_up(game_info);
+        total_num_of_completed_lines = 0;
+    }
+}
+
+int dude_escape_score_bonus(int level)
+{
+    return level * four_lines_score_bonus;
+}
+
 bool dude_escape_handling(
     enum_field (*field)[field_width], struct_piece *piece,
     struct_dude *dude, struct_game_info *game_info
@@ -643,7 +676,8 @@ bool dude_escape_handling(
         dude_(print_dude, dude);
         reset_piece_characteristics(piece);
         piece_spawn(field, piece, dude);
-        game_info->score += 1000;
+        level_up_if_necessary(game_info, 0, 1);
+        game_info->score += dude_escape_score_bonus(game_info->level);
         print_side_panel(game_info->score, score_row);
     }
     return false;
@@ -1228,21 +1262,6 @@ void score_increase(struct_game_info *game_info, int num_of_completed_lines)
     game_info->score += score_bonus(game_info->level, num_of_completed_lines);
 }
 
-void level_up_if_necessary(
-    struct_game_info *game_info, int num_of_completed_lines
-)
-{
-    static int total_num_of_completed_lines;
-    total_num_of_completed_lines += num_of_completed_lines;
-    if (total_num_of_completed_lines >= num_of_completed_lines_for_level_up) {
-        game_info->level++;
-        if (game_info->level > maximum_game_level)
-            game_info->level = maximum_game_level;
-        print_side_panel(game_info->level, level_row);
-        total_num_of_completed_lines = 0;
-    }
-}
-
 void dude_coordinates_adjustment(
     const enum_field (*field)[field_width], struct_dude *dude
 )
@@ -1339,7 +1358,7 @@ void clear_completed_lines_update_game_info(
         dude_(print_dude, dude);
         score_increase(game_info, num_of_completed_lines);
         print_side_panel(game_info->score, score_row);
-        level_up_if_necessary(game_info, num_of_completed_lines);
+        level_up_if_necessary(game_info, num_of_completed_lines, 0);
     }
 }
 
@@ -1387,6 +1406,21 @@ void screen_size_check()
     }
 }
 
+void game_step(
+    enum_field (*field)[field_width], struct_piece *piece,
+    struct_dude *dude, struct_game_info *game_info
+)
+{
+    if (falling_piece_field_crossing_conflict(field, piece)) {
+        minus_dude_life(field, dude, game_info);
+        return;
+    }
+    piece_falls_and_dude_takes_step(field, piece, dude, game_info);
+    if (game_info->life_lost)
+        return;
+    clear_completed_lines_update_game_info(field, dude, game_info);
+}
+
 int main()
 {
     /* ncurses */
@@ -1423,11 +1457,7 @@ int main()
         next_piece = get_random_piece(set_of_pieces);
         show_next_piece_preview(&piece, &next_piece);
         piece_spawn(field, &piece, &dude);
-        if (falling_piece_field_crossing_conflict(field, &piece)) break;
-        piece_falls_and_dude_takes_step(field, &piece, &dude, &game_info);
-        if (!game_info.game_on) break;
-        if (game_info.life_lost) continue;
-        clear_completed_lines_update_game_info(field, &dude, &game_info);
+        game_step(field, &piece, &dude, &game_info);
     }
     end_game(game_info.score);
 }

@@ -10,14 +10,14 @@ BUILD_DIR	Makefile	/^BUILD_DIR := .\/build$/;"	m
 BUILD_DIRS	Makefile	/^BUILD_DIRS := $(OBJ_DIR) $(BIN_DIR)$/;"	m
 CC	Makefile	/^CC = gcc # using gcc compiler$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -g3 -O0 -Iinclude -fsanitize=address,undefined$/;"	m
-CLOSE_WINDOW_MSG	include/constants.h	80;"	d
+CLOSE_WINDOW_MSG	include/constants.h	82;"	d
 CONFLICT_RESOLUTION_H_INCLUDED	include/conflict_resolution.h	4;"	d
 CONSTANTS_H_INCLUDED	include/constants.h	4;"	d
-CURR_TERMINAL_SIZE_MSG	include/constants.h	72;"	d
-DUDE_ESCAPED_MESSAGE	include/constants.h	84;"	d
+CURR_TERMINAL_SIZE_MSG	include/constants.h	74;"	d
+DUDE_ESCAPED_MESSAGE	include/constants.h	86;"	d
 EMPTY_CELL_ROW	include/frontend.h	56;"	d
 EXECUTABLE	Makefile	/^EXECUTABLE := $(BIN_DIR)\/$(PROJECT)$/;"	m
-FINAL_SCORE_MSG	include/constants.h	88;"	d
+FINAL_SCORE_MSG	include/constants.h	90;"	d
 FRONTEND_H_INCLUDED	include/frontend.h	4;"	d
 GHOST_CELL_ROW	include/frontend.h	60;"	d
 INC_DIR	Makefile	/^INC_DIR := .\/include$/;"	m
@@ -27,10 +27,10 @@ OBJMODULES	Makefile	/^OBJMODULES := $(patsubst $(SRC_DIR)\/%.c, $(OBJ_DIR)\/%.o,
 OBJ_DIR	Makefile	/^OBJ_DIR := $(BUILD_DIR)\/obj$/;"	m
 OCCUPIED_CELL_ROW	include/frontend.h	58;"	d
 PROJECT	Makefile	/^PROJECT := tetris$/;"	m
-REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	74;"	d
-RESIZE_REQUEST_MSG_1	include/constants.h	76;"	d
-RESIZE_REQUEST_MSG_2	include/constants.h	78;"	d
-RESIZE_WARNING_MSG	include/constants.h	70;"	d
+REQUIRED_TERMINAL_SIZE_MSG	include/constants.h	76;"	d
+RESIZE_REQUEST_MSG_1	include/constants.h	78;"	d
+RESIZE_REQUEST_MSG_2	include/constants.h	80;"	d
+RESIZE_WARNING_MSG	include/constants.h	72;"	d
 ROTATION_DEMO_H_INCLUDED	include/rotation.h	4;"	d
 SIDE_BOUNDARY	include/frontend.h	66;"	d
 SRCMODULES	Makefile	/^SRCMODULES := $(wildcard $(SRC_DIR)\/*.c)$/;"	m
@@ -72,6 +72,7 @@ dude_crash_handling	src/tetris.c	/^void dude_crash_handling($/;"	f
 dude_death_delay_in_sec	include/constants.h	/^    dude_death_delay_in_sec             = 2,$/;"	e	enum:constants
 dude_esc_msg_field_x	src/tetris.c	/^int dude_esc_msg_field_x()$/;"	f
 dude_escape_handling	src/tetris.c	/^bool dude_escape_handling($/;"	f
+dude_escape_score_bonus	src/tetris.c	/^int dude_escape_score_bonus(int level)$/;"	f
 dude_escaped	src/tetris.c	/^bool dude_escaped(const struct_dude *dude)$/;"	f
 dude_exit_height	include/constants.h	/^    dude_exit_height                    = 7,$/;"	e	enum:constants
 dude_fall_speed_in_microseconds	include/constants.h	/^    dude_fall_speed_in_microseconds     = 500000,$/;"	e	enum:constants
@@ -117,6 +118,7 @@ fourteenth	include/constants.h	/^        twelfth = 28,   thirteenth = 18,   four
 fourth	include/constants.h	/^        fourth  = 473,  fifth      = 355,  sixth      = 262,  seventh   = 190,$/;"	e	enum:tag_speed_list
 frontend_consts	include/frontend.h	/^enum frontend_consts {$/;"	g
 game_on	src/tetris.c	/^    bool game_on;$/;"	m	struct:tag_struct_game_info	file:
+game_step	src/tetris.c	/^void game_step($/;"	f
 get_dude_screen_x	src/tetris.c	/^int get_dude_screen_x(const struct_dude *dude)$/;"	f
 get_dude_screen_y	src/tetris.c	/^int get_dude_screen_y(const struct_dude *dude)$/;"	f
 get_init_x	src/tetris.c	/^int get_init_x()$/;"	f
@@ -169,6 +171,7 @@ left_side	src/tetris.c	/^    bottom, top, left_side, right_side$/;"	e	enum:tag_b
 level	src/tetris.c	/^    int level;$/;"	m	struct:tag_struct_game_info	file:
 level_label_row	include/frontend.h	/^    level_label_row                     = 0,$/;"	e	enum:frontend_consts
 level_row	include/frontend.h	/^    level_row                           = 1,$/;"	e	enum:frontend_consts
+level_up	src/tetris.c	/^void level_up(struct_game_info *game_info)$/;"	f
 level_up_if_necessary	src/tetris.c	/^void level_up_if_necessary($/;"	f
 life_lost	src/tetris.c	/^    bool life_lost;$/;"	m	struct:tag_struct_game_info	file:
 lives	include/constants.h	/^    signed char lives;$/;"	m	struct:tag_struct_dude
@@ -193,6 +196,7 @@ next_row	include/frontend.h	/^    next_row                            = 7,$/;"	e
 ninth	include/constants.h	/^        eighth  = 135,  ninth      = 94,   tenth      = 64,   eleventh  = 43,$/;"	e	enum:tag_speed_list
 num_of_checked_cells_near_dude	include/constants.h	/^    num_of_checked_cells_near_dude      = 5,$/;"	e	enum:constants
 num_of_completed_lines_for_level_up	include/constants.h	/^    num_of_completed_lines_for_level_up = 10,$/;"	e	enum:constants
+num_of_freed_dudes_for_level_up	include/constants.h	/^    num_of_freed_dudes_for_level_up     = 5,$/;"	e	enum:constants
 num_of_pieces	include/constants.h	/^    num_of_pieces                       = 7,$/;"	e	enum:constants
 num_of_resize_msg_lines	include/constants.h	/^    num_of_resize_msg_lines             = 6,$/;"	e	enum:constants
 o_piece	src/conflict_resolution.c	/^static bool o_piece(const struct_piece *piece)$/;"	f	file:

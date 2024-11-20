@@ -743,15 +743,6 @@ static bool dude_turns_around(
     const enum_field (*field)[field_width], const struct_dude *dude
 )
 {
-    /* ---------------------------------------------------------------------- */
-    /* check "the dude is in the highest field row" scenario */
-    /* const dude_check_func squat_dude_ran_into_wall[] = {
-        NULL, NULL, &is_falling_or_occupied, NULL, NULL
-    };
-    if (dude_check(squat_dude_ran_into_wall, field, dude, squat))
-        return true; */
-
-    /* ---------------------------------------------------------------------- */
     const dude_check_func straight_dude_ran_into_wall[] = {
         NULL, &is_in_field_and_falling_or_occupied,
         &is_falling_or_occupied, NULL, NULL
