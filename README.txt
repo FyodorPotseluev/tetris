@@ -1,9 +1,9 @@
 
-                                  tetris
+                             tetris / tetriller
 
                                 Description
 
-    Yet another implementation of the famous Tetris game.
+    The project allows you to switch between the classic Tetris game and its Tetriller mode, where you try to place the blocks so that the man at the bottom of the play field can climb to one of the two exits.
 
                                 Prerequisites
 
@@ -32,7 +32,17 @@
 
                                 Installation
 
-    Run `make` in a terminal window in the project directory.
+    After cloning the repository, it will contain the Tetris game by default.
+
+    To switch to the Tetriller game, run
+    ```
+    git checkout tetriller
+    ```
+    To switch back to the Tetris game, run
+    ```
+    git checkout master
+    ```
+    Run `make` in a terminal window in the project directory to compile the game.
 
                                 Usage
 
