@@ -9,7 +9,7 @@
 
 # --------------------------------------------------------------------------- #
 
-PROJECT := tetris
+PROJECT := tetriller
 
 # Variables for paths of source, header, and test files
 INC_DIR := ./include

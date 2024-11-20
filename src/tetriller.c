@@ -1,4 +1,4 @@
-/* tetris.c */
+/* tetriller.c */
 
 #include "conflict_resolution.h"
 #include "constants.h"
